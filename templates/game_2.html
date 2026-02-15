@@ -5,6 +5,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Визуальная новелла — Диалог</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap');
+
+    :root {
+      --accent: #b08cff;
+      --accent-dark: #7a4fd9;
+      --accent-light: #d4b4ff;
+      --text-primary: #f0f0f5;
+      --text-secondary: #b0b0c0;
+      --bg-dark: #0a0a1f;
+      --bg-overlay: rgba(10, 10, 31, 0.85);
+      --border-color: rgba(176, 140, 255, 0.3);
+      --bubble-bg: rgba(255, 255, 255, 0.95);
+      --choice-bg: rgba(255, 255, 255, 0.92);
+      --glow: 0 0 25px rgba(176, 140, 255, 0.6);
+    }
+
     * {
       margin: 0;
       padding: 0;
@@ -12,12 +28,22 @@
     }
 
     body {
-      font-family: system-ui, -apple-system, sans-serif;
-      background: #000;
-      color: white;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--bg-dark);
+      color: var(--text-primary);
       min-height: 100vh;
       overflow: hidden;
-      background: linear-gradient(to bottom, #4b6cb7, #182848); /* запасной фон */
+      background: linear-gradient(135deg, #1a1a3d 0%, #0f0f2a 100%);
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      opacity: 0.35;
+      z-index: -1;
+      filter: blur(2px);
     }
 
     .scene {
@@ -27,224 +53,348 @@
       display: flex;
       flex-direction: column;
       justify-content: flex-end;
+      scroll-behavior: smooth;
     }
 
     .character {
       background-size: cover;
-      background-position: center;
+      background-position: center 20%;
       background-repeat: no-repeat;
       position: absolute;
       inset: 0;
       pointer-events: none;
       z-index: 1;
-      /* Если у тебя есть своя картинка персонажа — замени url выше */
+      transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+                  filter 0.4s ease;
+      filter: brightness(0.92) contrast(1.05);
+    }
+
+    .character:hover {
+      transform: scale(1.015);
     }
 
     .dialogue-container {
       z-index: 10;
-      padding: 0 16px 12vh;
-      background: linear-gradient(to top, rgba(0,0,0,0.92) 30%, transparent 100%);
+      padding: 0 24px 14vh;
+      background: linear-gradient(to top, var(--bg-overlay) 45%, transparent 100%);
+      position: relative;
     }
 
     .bubble {
-      backdrop-filter: blur(20px);
-      border: 2px solid #b08cff;
-      border-radius: 20px 20px 20px 4px;
-      padding: 20px 24px;
-      margin-bottom: 16px;
+      backdrop-filter: blur(28px);
+      border: 2px solid var(--accent);
+      border-radius: 28px 28px 28px 12px;
+      padding: 24px 28px 28px;
+      margin-bottom: 20px;
       position: relative;
-      backdrop-filter: blur(4px);
-      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-      background: white;
-      color: black;
+      box-shadow: var(--glow),
+                  0 20px 40px rgba(0, 0, 0, 0.45),
+                  inset 0 2px 0 rgba(255,255,255,0.6);
+      background: var(--bubble-bg);
+      color: #1a1a2e;
+      transition: all 0.25s cubic-bezier(0.4, 0.0, 0.2, 1);
+      opacity: 0;
+      transform: translateY(20px);
+      animation: bubblePop 0.4s forwards;
+    }
+
+    .bubble.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .bubble::after {
+      content: '';
+      position: absolute;
+      bottom: -12px;
+      left: 48px;
+      width: 24px;
+      height: 24px;
+      background: var(--bubble-bg);
+      border-bottom: 2px solid var(--accent);
+      border-right: 2px solid var(--accent);
+      border-radius: 0 0 8px 0;
+      transform: rotate(45deg);
+      z-index: -1;
     }
 
     .name {
       position: absolute;
-      top: -14px;
-      left: 24px;
-      background: #b08cff;
-      color: #0f001a;
-      font-weight: bold;
-      font-size: 1.1rem;
-      padding: 4px 14px;
-      border-radius: 30px;
-      box-shadow: 0 3px 10px rgba(176,140,255,0.4);
+      top: -18px;
+      left: 32px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+      color: white;
+      font-weight: 700;
+      font-size: 1.15rem;
+      padding: 6px 18px;
+      border-radius: 40px;
+      box-shadow: 0 4px 15px rgba(176,140,255,0.5),
+                  inset 0 -2px 0 rgba(255,255,255,0.3);
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+      font-family: 'Playfair Display', serif;
     }
 
     .text {
-      font-size: 1.05rem;
-      line-height: 1.45;
-      margin-top: 12px;
+      font-size: 1.08rem;
+      line-height: 1.55;
+      margin-top: 16px;
+      color: #1a1a2e;
+      font-weight: 500;
+      opacity: 0;
+      animation: textReveal 0.6s 0.15s forwards;
+    }
+
+    @keyframes bubblePop {
+      from {
+        opacity: 0;
+        transform: scale(0.92) translateY(25px);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    @keyframes textReveal {
+      from { opacity: 0; filter: blur(3px); }
+      to { opacity: 1; filter: blur(0); }
     }
 
     .choices {
       display: flex;
       flex-direction: column;
-      gap: 12px;
-      padding: 0 8px;
+      gap: 14px;
+      padding: 0 12px;
     }
 
     .choice {
-      backdrop-filter: blur(20px);
-      border: 2px solid #a080ff;
-      border-radius: 16px;
-      padding: 16px 20px;
-      font-size: 1.05rem;
+      backdrop-filter: blur(24px);
+      border: 2px solid var(--accent-light);
+      border-radius: 20px;
+      padding: 18px 24px;
+      font-size: 1.08rem;
+      font-weight: 600;
       text-align: center;
       cursor: pointer;
-      transition: all 0.18s;
-      backdrop-filter: blur(3px);
-      background: white;
-      color: black;
+      transition: all 0.22s cubic-bezier(0.4, 0.0, 0.2, 1);
+      background: var(--choice-bg);
+      color: #1a1a2e;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+    }
+
+    .choice::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      transform: translateX(-150%);
+      transition: transform 0.4s;
+    }
+
+    .choice:hover::before {
+      transform: translateX(150%);
     }
 
     .choice:hover {
-      background: rgba(140, 80, 220, 0.9);
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(160,100,255,0.4);
+      background: linear-gradient(135deg, #e8d4ff, #c8a8ff);
+      border-color: var(--accent);
+      transform: translateY(-4px) scale(1.02);
+      box-shadow: var(--glow), 0 16px 36px rgba(160, 100, 255, 0.45);
+      color: #0f0f1f;
+    }
+
+    .choice:active {
+      transform: scale(0.98);
+    }
+
+    .premium-mark {
+      color: #ffd700;
+      font-size: 1.2em;
+      vertical-align: middle;
+      margin-left: 6px;
     }
 
     @media (max-width: 500px) {
-      .bubble { padding: 16px 18px; }
-      .text { font-size: 1rem; }
-      .choice { font-size: 0.98rem; padding: 14px 16px; }
+      .bubble { padding: 20px 22px 24px; border-radius: 22px 22px 22px 10px; }
+      .text { font-size: 1.02rem; }
+      .choice { font-size: 1rem; padding: 16px 20px; border-radius: 18px; }
+      .name { font-size: 1.05rem; padding: 5px 16px; left: 24px; }
     }
 
     .top-bar {
       position: relative;
-      z-index: 20;
-      height: 60px;
+      z-index: 30;
+      height: 64px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 20px;
-      backdrop-filter: blur(20px);
+      padding: 0 24px;
+      backdrop-filter: blur(32px);
+      background: rgba(15, 15, 35, 0.88);
       border-bottom: 1px solid var(--border-color);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
     }
 
     .top-left {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-  }
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
 
-  .top-right {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
+    .top-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
 
-  .game-title {
-    font-size: 18px;
-    font-weight: 600;
-    color: var(--text-primary);
-  }
+    .game-title {
+      font-size: 19px;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.3px;
+      font-family: 'Playfair Display', serif;
+    }
 
-  .icon-btn {
-    width: 44px;
-    height: 44px;
-    background: var(--btn-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    touch-action: manipulation;
-  }
+    .icon-btn {
+      width: 48px;
+      height: 48px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(176, 140, 255, 0.25);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.4, 0.0, 0.2, 1);
+      touch-action: manipulation;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
 
-  .icon-btn:hover,
-  .icon-btn:active {
-    background: var(--btn-hover);
-    transform: scale(1.05);
-  }
+    .icon-btn:hover,
+    .icon-btn:active {
+      background: rgba(176, 140, 255, 0.2);
+      transform: scale(1.08) translateY(-1px);
+      box-shadow: var(--glow);
+    }
 
-  .icon {
-    width: 20px;
-    height: 20px;
-    stroke: white;
-    stroke-width: 2;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    fill: none;
-    transition: stroke 0.2s;
-  }
+    .icon {
+      width: 22px;
+      height: 22px;
+      stroke: #e0e0ff;
+      stroke-width: 2.4;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+      transition: stroke 0.25s ease;
+    }
 
-  .icon-btn:hover .icon {
-    stroke: yellow;
-  }
+    .icon-btn:hover .icon {
+      stroke: #fff;
+    }
 
     .game-menu {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 1000;
-  }
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
 
-  .menu-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.8);
-    backdrop-filter: blur(5px);
-  }
+    .game-menu.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
 
-  .menu-card {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: rgba(20, 20, 40, 0.9);
-    backdrop-filter: blur(20px);
-    border: 2px solid var(--border-color);
-    border-radius: 24px;
-    padding: 32px;
-    min-width: 300px;
-    z-index: 1001;
-    animation: slideUp 0.3s ease;
-  }
+    .menu-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(8, 8, 24, 0.92);
+      backdrop-filter: blur(18px);
+    }
 
-  .menu-card h3 {
-    font-size: 24px;
-    font-weight: 700;
-    margin-bottom: 24px;
-    text-align: center;
-    background: linear-gradient(90deg, var(--accent), var(--accent-dark));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
+    .menu-card {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.92);
+      background: rgba(22, 22, 44, 0.96);
+      backdrop-filter: blur(32px);
+      border: 2px solid var(--border-color);
+      border-radius: 28px;
+      padding: 40px 36px;
+      min-width: 340px;
+      max-width: 92%;
+      z-index: 1001;
+      box-shadow: 0 30px 70px rgba(0, 0, 0, 0.6),
+                  inset 0 1px 0 rgba(255,255,255,0.1);
+      transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
 
-  .menu-btn {
-    width: 100%;
-    padding: 16px 24px;
-    margin-bottom: 12px;
-    background: linear-gradient(135deg, var(--accent), var(--accent-dark));
-    border: none;
-    border-radius: 12px;
-    color: white;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
+    .game-menu.show .menu-card {
+      transform: translate(-50%, -50%) scale(1);
+    }
 
-  .menu-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
-  }
+    .menu-card h3 {
+      font-size: 26px;
+      font-weight: 800;
+      margin-bottom: 32px;
+      text-align: center;
+      background: linear-gradient(90deg, var(--accent-light), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-family: 'Playfair Display', serif;
+      letter-spacing: -0.5px;
+    }
 
+    .menu-btn {
+      width: 100%;
+      padding: 18px 28px;
+      margin-bottom: 14px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+      border: none;
+      border-radius: 18px;
+      color: white;
+      font-size: 1.05rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.4, 0.0, 0.2, 1);
+      box-shadow: 0 10px 25px rgba(176, 140, 255, 0.4);
+      letter-spacing: 0.3px;
+    }
+
+    .menu-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 14px 30px rgba(176, 140, 255, 0.55);
+      background: linear-gradient(135deg, #c8a8ff, var(--accent));
+    }
+
+    .menu-btn.secondary {
+      background: rgba(255,255,255,0.1);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-color);
+      box-shadow: none;
+    }
+
+    .menu-btn.secondary:hover {
+      background: rgba(255,255,255,0.18);
+      color: white;
+    }
   </style>
 </head>
 <body>
 
-<div class="game-menu" id="gameMenu" style="display: none;">
+<div class="game-menu" id="gameMenu">
     <div class="menu-overlay" onclick="hideMenu()"></div>
     <div class="menu-card">
       <h3>Меню игры</h3>
@@ -316,13 +466,17 @@
 
     // Обновить фон
     if (currentStory.background) {
-      document.body.style.background = `url('${currentStory.background}')`;
+      document.body.style.backgroundImage = `url('${currentStory.background}')`;
+      document.body.style.backgroundSize = 'cover';
+      document.body.style.backgroundPosition = 'center';
     }
 
     const characterImage = document.querySelector('.character');
     if (currentStory.character_image) {
-      characterImage.style.background = `url('${currentStory.character_image}') no-repeat center top`;
+      characterImage.style.backgroundImage = `url('${currentStory.character_image}')`;
       characterImage.style.opacity = '1';
+    } else {
+      characterImage.style.opacity = '0';
     }
 
     document.querySelector('.name').innerHTML = currentStory.character;
@@ -330,6 +484,15 @@
     const dialogueText = document.querySelector('.text');
     dialogueText.innerHTML = currentStory.dialogue;
     dialogueText.classList.remove('show');
+
+    const bubble = document.querySelector('.bubble');
+    bubble.classList.remove('show');
+
+    // Trigger animation
+    setTimeout(() => {
+      bubble.classList.add('show');
+      dialogueText.classList.add('show');
+    }, 50);
 
     renderChoices();
   }
@@ -339,7 +502,11 @@
     choicesContainer.innerHTML = '';
 
     if (!currentStory.choices || currentStory.choices.length === 0) {
-      choicesContainer.innerHTML = '<div class="choice" onclick="goToNextScene()">Продолжить</button>';
+      const continueBtn = document.createElement('div');
+      continueBtn.className = `choice`;
+      continueBtn.innerHTML = 'Продолжить';
+      continueBtn.onclick = () => goToNextScene();
+      choicesContainer.appendChild(continueBtn);
       return;
     }
 
@@ -372,12 +539,16 @@
         currentStory = data.story;
 
         // Анимация исчезновения
-        document.querySelector('.name').classList.remove('show');
-        document.querySelector('.text').classList.remove('show');
+        const bubble = document.querySelector('.bubble');
+        bubble.style.transition = 'opacity 0.2s, transform 0.2s';
+        bubble.style.opacity = '0';
+        bubble.style.transform = 'translateY(15px)';
 
         document.querySelector('.choices').innerHTML = '';
 
-        loadScene();
+        setTimeout(() => {
+          loadScene();
+        }, 220);
       } else {
         alert(data.error || 'Ошибка при совершении выбора');
       }
@@ -424,11 +595,13 @@
   }
 
   function showMenu() {
-    document.getElementById('gameMenu').style.display = 'block';
+    const menu = document.getElementById('gameMenu');
+    menu.classList.add('show');
   }
 
   function hideMenu() {
-    document.getElementById('gameMenu').style.display = 'none';
+    const menu = document.getElementById('gameMenu');
+    menu.classList.remove('show');
   }
 
   function resumeGame() {
