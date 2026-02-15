@@ -328,33 +328,10 @@
     document.querySelector('.name').innerHTML = currentStory.character;
 
     const dialogueText = document.querySelector('.text');
-    dialogueText.innerHTML = '';
+    dialogueText.innerHTML = currentStory.dialogue;
     dialogueText.classList.remove('show');
 
-    setTimeout(() => {
-      typeText(currentStory.dialogue, dialogueText, () => {
-        // Показать варианты выбора
-        renderChoices();
-      });
-    }, 300);
-  }
-
-  function typeText(text, element, callback) {
-    let i = 0;
-    const speed = 30;
-
-    function type() {
-      if (i < text.length) {
-        element.textContent += text.charAt(i);
-        i++;
-        setTimeout(type, speed);
-      } else {
-        element.classList.add('show');
-        if (callback) callback();
-      }
-    }
-
-    type();
+    renderChoices();
   }
 
   function renderChoices() {
