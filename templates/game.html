@@ -62,24 +62,6 @@
 </div>
 
 <style>
-  :root {
-    --bg-primary: #0a0a0f;
-    --bg-gradient-start: #0f0f1a;
-    --bg-gradient-end: #1a1a2e;
-    --accent: #6366f1;
-    --accent-dark: #4f46e5;
-    --text-primary: #f1f5f9;
-    --text-secondary: #cbd5e1;
-    --bubble-bg: rgba(20, 20, 40, 0.85);
-    --choice-bg: rgba(30, 30, 60, 0.75);
-    --top-bar-bg: rgba(15, 15, 35, 0.9);
-    --border-color: rgba(99, 102, 241, 0.3);
-    --btn-bg: rgba(99, 102, 241, 0.2);
-    --btn-hover: rgba(99, 102, 241, 0.4);
-    --diamond-bg: linear-gradient(135deg, #3b82f6, #8b5cf6);
-    --diamond-glow: rgba(59, 130, 246, 0.4);
-  }
-
   [data-theme="orange"] {
     --bg-primary: #080503;
     --bg-gradient-start: #0d0704;
@@ -252,7 +234,7 @@
   .character-img {
     position: absolute;
     left: 0;
-    top: 50%;
+    top: 30%;
     transform: translateY(-50%);
     height: 90%;
     max-height: 90%;
@@ -269,10 +251,12 @@
 
   .dialogue-container {
     position: absolute;
+    top: 20%;
     right: 20px;
     bottom: 20px;
     z-index: 10;
     width: 60%;
+    overflow-y: auto;
     max-width: 600px;
     transform: translateX(0);
   }
