@@ -1,0 +1,460 @@
+{% extends "base.html" %}
+
+{% block title %}Управление историями — Админка{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+  <!-- Верхняя панель -->
+  <div class="top-bar">
+    <div class="top-left">
+      <button class="icon-btn" onclick="window.location.href='/admin'">
+        <svg class="icon" viewBox="0 0 24 24">
+          <path d="M15 18l-6-6 6-6"/>
+        </svg>
+      </button>
+      <div class="page-title">Управление историями</div>
+    </div>
+    
+    <div class="top-right">
+      <button class="btn-primary" onclick="window.location.href='/admin/stories/create'">
+        <svg style="width:18px;height:18px;margin-right:8px;vertical-align:middle;" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z" />
+        </svg>
+        Создать историю
+      </button>
+    </div>
+  </div>
+  
+  <!-- Основной контент -->
+  <div class="main-content">
+    <div class="stories-grid" id="storiesGrid">
+      <!-- Истории будут загружены через JavaScript -->
+    </div>
+  </div>
+</div>
+
+<style>
+  :root {
+    --bg-primary: #0a0a0f;
+    --bg-gradient-start: #0f0f1a;
+    --bg-gradient-end: #1a1a2e;
+    --accent: #6366f1;
+    --accent-dark: #4f46e5;
+    --text-primary: #f1f5f9;
+    --text-secondary: #cbd5e1;
+    --card-bg: rgba(20, 20, 40, 0.7);
+    --card-border: rgba(99, 102, 241, 0.3);
+  }
+
+  [data-theme="orange"] {
+    --bg-primary: #080503;
+    --bg-gradient-start: #0d0704;
+    --bg-gradient-end: #1a1208;
+    --accent: #f97316;
+    --accent-dark: #ea580c;
+    --text-primary: #fef3c7;
+    --text-secondary: #fcd34d;
+    --card-bg: rgba(40, 20, 10, 0.7);
+    --card-border: rgba(249, 115, 22, 0.3);
+  }
+
+  [data-theme="purple"] {
+    --bg-primary: #0a0515;
+    --bg-gradient-start: #0d061a;
+    --bg-gradient-end: #1a082e;
+    --accent: #8b5cf6;
+    --accent-dark: #7c3aed;
+    --text-primary: #e0e7ff;
+    --text-secondary: #cbd5e1;
+    --card-bg: rgba(30, 15, 40, 0.7);
+    --card-border: rgba(139, 92, 246, 0.3);
+  }
+
+  [data-theme="dark-green"] {
+    --bg-primary: #050a06;
+    --bg-gradient-start: #070f0a;
+    --bg-gradient-end: #122014;
+    --accent: #10b981;
+    --accent-dark: #059669;
+    --text-primary: #d1fae5;
+    --text-secondary: #6ee7b7;
+    --card-bg: rgba(10, 40, 25, 0.7);
+    --card-border: rgba(16, 185, 129, 0.3);
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+  }
+
+  .admin-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  .top-bar {
+    height: 60px;
+    background: rgba(15, 15, 35, 0.9);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--card-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .top-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .page-title {
+    font-size: 20px;
+    font-weight: 600;
+  }
+
+  .top-right .btn-primary {
+    padding: 10px 20px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+  }
+
+  .top-right .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(99, 102, 241, 0.3);
+  }
+
+  .main-content {
+    padding: 24px;
+    overflow-y: auto;
+    flex: 1;
+  }
+
+  .stories-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 24px;
+  }
+
+  .story-card {
+    background: var(--card-bg);
+    backdrop-filter: blur(15px);
+    border: 2px solid var(--card-border);
+    border-radius: 20px;
+    padding: 24px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .story-card:hover {
+    transform: translateY(-8px);
+    border-color: var(--accent);
+    box-shadow: 0 12px 40px rgba(99, 102, 241, 0.3);
+  }
+
+  .story-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-dark));
+  }
+
+  .story-card.premium::before {
+    background: linear-gradient(90deg, #ff9e00, #ff5722);
+  }
+
+  .story-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 16px;
+  }
+
+  .story-title {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .story-badge {
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+
+  .story-badge.premium {
+    background: rgba(255, 158, 0, 0.2);
+    border: 1px solid rgba(255, 158, 0, 0.4);
+    color: #ff9e00;
+  }
+
+  .story-badge.free {
+    background: rgba(16, 185, 129, 0.2);
+    border: 1px solid rgba(16, 185, 129, 0.4);
+    color: #10b981;
+  }
+
+  .story-badge.draft {
+    background: rgba(100, 116, 139, 0.2);
+    border: 1px solid rgba(100, 116, 139, 0.4);
+    color: #64748b;
+  }
+
+  .story-description {
+    color: var(--text-secondary);
+    font-size: 14px;
+    line-height: 1.6;
+    margin-bottom: 16px;
+    min-height: 60px;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .story-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 16px;
+    border-top: 1px solid var(--card-border);
+    font-size: 13px;
+  }
+
+  .story-stats {
+    color: var(--text-secondary);
+    display: flex;
+    gap: 12px;
+  }
+
+  .story-stat {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .story-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  .story-btn {
+    width: 32px;
+    height: 32px;
+    background: rgba(99, 102, 241, 0.1);
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .story-btn:hover {
+    background: rgba(99, 102, 241, 0.2);
+    transform: scale(1.1);
+  }
+
+  .story-btn.delete {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: rgba(239, 68, 68, 0.3);
+  }
+
+  .story-btn.delete:hover {
+    background: rgba(239, 68, 68, 0.2);
+  }
+
+  .empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-secondary);
+  }
+
+  .empty-icon {
+    font-size: 64px;
+    margin-bottom: 20px;
+    opacity: 0.3;
+  }
+
+  @media (max-width: 768px) {
+    .stories-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .top-bar {
+      padding: 0 16px;
+      height: 56px;
+    }
+
+    .top-right .btn-primary {
+      padding: 8px 16px;
+      font-size: 14px;
+    }
+
+    .main-content {
+      padding: 16px;
+    }
+  }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  loadStories();
+});
+
+async function loadStories() {
+  try {
+    const response = await fetch('/api/stories');
+    const data = await response.json();
+    
+    if (data.success && data.stories) {
+      renderStories(data.stories);
+    }
+  } catch (error) {
+    console.error('Ошибка загрузки историй:', error);
+  }
+}
+
+function renderStories(stories) {
+  const storiesGrid = document.getElementById('storiesGrid');
+  storiesGrid.innerHTML = '';
+  
+  if (stories.length === 0) {
+    storiesGrid.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">📖</div>
+        <h3>Нет историй</h3>
+        <p>Создайте свою первую историю для визуальной новеллы</p>
+      </div>
+    `;
+    return;
+  }
+  
+  stories.forEach(story => {
+    const storyCard = document.createElement('div');
+    storyCard.className = `story-card ${story.premium ? 'premium' : ''} ${!story.is_published ? 'draft' : ''}`;
+    storyCard.onclick = (e) => {
+      if (!e.target.closest('.story-btn')) {
+        window.location.href = `/admin/stories/editor/${story.id}`;
+      }
+    };
+    
+    const badgeType = story.premium ? 'premium' : (story.is_published ? 'free' : 'draft');
+    const badgeText = story.premium ? 'Премиум' : (story.is_published ? 'Опубликовано' : 'Черновик');
+    
+    storyCard.innerHTML = `
+      <div class="story-card-header">
+        <div>
+          <div class="story-title">${story.title}</div>
+          <div class="story-badge ${badgeType}">${badgeText}</div>
+        </div>
+      </div>
+      <div class="story-description">${story.description || 'Без описания'}</div>
+      <div class="story-meta">
+        <div class="story-stats">
+          <div class="story-stat">챕теры: ${story.chapters_count || 0}</div>
+          <div class="story-stat">Сцены: ${story.scenes_count || 0}</div>
+        </div>
+        <div class="story-actions">
+          <button class="story-btn" onclick="exportStory(${story.id})" title="Экспортировать">
+            <svg style="width:18px;height:18px;" viewBox="0 0 24 24">
+              <path fill="currentColor" d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z" />
+            </svg>
+          </button>
+          <button class="story-btn delete" onclick="deleteStory(${story.id}, event)" title="Удалить">
+            <svg style="width:18px;height:18px;" viewBox="0 0 24 24">
+              <path fill="currentColor" d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    `;
+    
+    storiesGrid.appendChild(storyCard);
+  });
+}
+
+async function exportStory(storyId) {
+  try {
+    const response = await fetch(`/api/stories/${storyId}/export`);
+    const data = await response.json();
+    
+    if (data.success) {
+      // Скачать JSON файл
+      const blob = new Blob([JSON.stringify(data.story, null, 2)], {type: 'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `story_${storyId}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      
+      alert('История экспортирована!');
+    } else {
+      alert(data.error || 'Ошибка экспорта');
+    }
+  } catch (error) {
+    console.error('Ошибка:', error);
+    alert('Ошибка экспорта истории');
+  }
+}
+
+async function deleteStory(storyId, event) {
+  event.stopPropagation();
+  
+  if (!confirm('Вы уверены, что хотите удалить эту историю? Это действие нельзя отменить.')) {
+    return;
+  }
+  
+  try {
+    const response = await fetch(`/api/stories/${storyId}`, {
+      method: 'DELETE'
+    });
+    
+    const data = await response.json();
+    
+    if (response.ok && data.success) {
+      loadStories();
+    } else {
+      alert(data.error || 'Ошибка удаления');
+    }
+  } catch (error) {
+    console.error('Ошибка:', error);
+    alert('Ошибка удаления истории');
+  }
+}
+</script>
+{% endblock %}

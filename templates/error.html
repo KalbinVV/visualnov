@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+
+{% block title %}Ошибка {{ code }}{% endblock %}
+
+{% block content %}
+<div class="error-container">
+  <div class="error-content">
+    <div class="error-code">{{ code }}</div>
+    <div class="error-message">{{ message }}</div>
+    <a href="{{ url_for('dashboard') if session.user_id else url_for('login_page') }}" class="btn-primary">
+      Вернуться на главную
+    </a>
+  </div>
+</div>
+
+<style>
+  :root {
+    --bg-primary: #0a0a0f;
+    --bg-gradient-start: #0f0f1a;
+    --bg-gradient-end: #1a1a2e;
+    --accent: #6366f1;
+    --accent-dark: #4f46e5;
+    --text-primary: #f1f5f9;
+  }
+
+  [data-theme="orange"] {
+    --bg-primary: #080503;
+    --bg-gradient-start: #0d0704;
+    --bg-gradient-end: #1a1208;
+    --accent: #f97316;
+    --accent-dark: #ea580c;
+    --text-primary: #fef3c7;
+  }
+
+  [data-theme="purple"] {
+    --bg-primary: #0a0515;
+    --bg-gradient-start: #0d061a;
+    --bg-gradient-end: #1a082e;
+    --accent: #8b5cf6;
+    --accent-dark: #7c3aed;
+    --text-primary: #e0e7ff;
+  }
+
+  [data-theme="dark-green"] {
+    --bg-primary: #050a06;
+    --bg-gradient-start: #070f0a;
+    --bg-gradient-end: #122014;
+    --accent: #10b981;
+    --accent-dark: #059669;
+    --text-primary: #d1fae5;
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
+    color: var(--text-primary);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .error-container {
+    text-align: center;
+    max-width: 500px;
+  }
+
+  .error-content {
+    background: rgba(20, 20, 40, 0.7);
+    backdrop-filter: blur(20px);
+    border-radius: 28px;
+    padding: 60px 40px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(99, 102, 241, 0.3);
+  }
+
+  .error-code {
+    font-size: 120px;
+    font-weight: 800;
+    background: linear-gradient(90deg, var(--accent), var(--accent-dark));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 20px;
+    line-height: 1;
+  }
+
+  .error-message {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 32px;
+    color: var(--text-primary);
+  }
+
+  .btn-primary {
+    display: inline-block;
+    padding: 16px 40px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+    border: none;
+    border-radius: 16px;
+    color: white;
+    font-size: 18px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 24px rgba(99, 102, 241, 0.3);
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(99, 102, 241, 0.4);
+  }
+
+  @media (max-width: 600px) {
+    .error-content {
+      padding: 40px 24px;
+    }
+
+    .error-code {
+      font-size: 80px;
+    }
+
+    .error-message {
+      font-size: 20px;
+    }
+
+    .btn-primary {
+      padding: 14px 32px;
+      font-size: 16px;
+    }
+  }
+</style>
+{% endblock %}

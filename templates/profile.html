@@ -1,0 +1,463 @@
+{% extends "base.html" %}
+
+{% block title %}Профиль — Любовный симулятор{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+  <!-- Верхняя панель -->
+  <div class="top-bar">
+    <div class="top-left">
+      <button class="icon-btn" onclick="window.location.href='/dashboard'">
+        <svg class="icon" viewBox="0 0 24 24">
+          <path d="M15 18l-6-6 6-6"/>
+        </svg>
+      </button>
+      <div class="page-title">Профиль</div>
+    </div>
+    
+    <div class="top-right">
+      <div class="diamond-counter">
+        <span class="diamond-icon">💎</span>
+        <span class="diamond-amount">{{ user.diamonds }}</span>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Основной контент -->
+  <div class="main-content">
+    <!-- Карточка профиля -->
+    <div class="profile-card">
+      <div class="profile-header">
+        <div class="profile-avatar">
+          {% if user.avatar_url %}
+            <img src="{{ user.avatar_url }}" alt="{{ user.display_name }}">
+          {% else %}
+            <span>{{ user.display_name[0] }}</span>
+          {% endif %}
+        </div>
+        <div class="profile-info">
+          <h2>{{ user.display_name }}</h2>
+          <p class="username">@{{ user.username }}</p>
+          <p class="email">{{ user.email }}</p>
+          <div class="member-since">
+            На платформе с {{ user.created_at[:10] }}
+          </div>
+        </div>
+      </div>
+      
+      <div class="profile-stats">
+        <div class="stat-item">
+          <div class="stat-value">{{ stats|length if stats else 0 }}</div>
+          <div class="stat-label">Игр сыграно</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">{{ achievements|length }}</div>
+          <div class="stat-label">Достижений</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">{{ user.diamonds }}</div>
+          <div class="stat-label">Алмазов</div>
+        </div>
+      </div>
+      
+      <button class="btn-primary btn-edit" onclick="editProfile()">
+        Редактировать профиль
+      </button>
+    </div>
+    
+    <!-- Достижения -->
+    <div class="section">
+      <h3>🏆 Мои достижения</h3>
+      <div class="achievements-grid">
+        {% if achievements %}
+          {% for achievement in achievements %}
+            <div class="achievement-card">
+              <div class="achievement-icon">✨</div>
+              <div class="achievement-name">{{ achievement.achievement_name }}</div>
+              <div class="achievement-desc">{{ achievement.description }}</div>
+              <div class="achievement-date">
+                Разблокировано: {{ achievement.unlocked_at[:10] }}
+              </div>
+            </div>
+          {% endfor %}
+        {% else %}
+          <div class="empty-state">
+            <div class="empty-icon">🎮</div>
+            <p>У вас пока нет достижений</p>
+            <p class="empty-subtext">Начните играть, чтобы разблокировать первые достижения!</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+    
+    <!-- Статистика игр -->
+    <div class="section">
+      <h3>📊 Статистика игр</h3>
+      <div class="stats-list">
+        {% if stats %}
+          {% for stat in stats %}
+            <div class="stat-row">
+              <div class="stat-game">{{ stat.game_name }}</div>
+              <div class="stat-detail">Сыграно: {{ stat.games_played }} раз</div>
+              <div class="stat-detail">Завершено: {{ stat.completed_count }}</div>
+              <div class="stat-detail">Время: {{ (stat.total_time|float / 3600)|round(1) }} ч</div>
+            </div>
+          {% endfor %}
+        {% else %}
+          <div class="empty-state">
+            <p>Статистика пока пуста</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  :root {
+    --bg-primary: #0a0a0f;
+    --bg-gradient-start: #0f0f1a;
+    --bg-gradient-end: #1a1a2e;
+    --accent: #6366f1;
+    --accent-dark: #4f46e5;
+    --text-primary: #f1f5f9;
+    --text-secondary: #cbd5e1;
+    --card-bg: rgba(20, 20, 40, 0.7);
+    --card-border: rgba(99, 102, 241, 0.3);
+  }
+
+  [data-theme="orange"] {
+    --bg-primary: #080503;
+    --bg-gradient-start: #0d0704;
+    --bg-gradient-end: #1a1208;
+    --accent: #f97316;
+    --accent-dark: #ea580c;
+    --text-primary: #fef3c7;
+    --text-secondary: #fcd34d;
+    --card-bg: rgba(40, 20, 10, 0.7);
+    --card-border: rgba(249, 115, 22, 0.3);
+  }
+
+  [data-theme="purple"] {
+    --bg-primary: #0a0515;
+    --bg-gradient-start: #0d061a;
+    --bg-gradient-end: #1a082e;
+    --accent: #8b5cf6;
+    --accent-dark: #7c3aed;
+    --text-primary: #e0e7ff;
+    --text-secondary: #cbd5e1;
+    --card-bg: rgba(30, 15, 40, 0.7);
+    --card-border: rgba(139, 92, 246, 0.3);
+  }
+
+  [data-theme="dark-green"] {
+    --bg-primary: #050a06;
+    --bg-gradient-start: #070f0a;
+    --bg-gradient-end: #122014;
+    --accent: #10b981;
+    --accent-dark: #059669;
+    --text-primary: #d1fae5;
+    --text-secondary: #6ee7b7;
+    --card-bg: rgba(10, 40, 25, 0.7);
+    --card-border: rgba(16, 185, 129, 0.3);
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+  }
+
+  .profile-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  .top-bar {
+    height: 60px;
+    background: rgba(15, 15, 35, 0.9);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--card-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .top-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .page-title {
+    font-size: 20px;
+    font-weight: 600;
+  }
+
+  .top-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .diamond-counter {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 215, 0, 0.1);
+    border: 2px solid rgba(255, 215, 0, 0.3);
+    border-radius: 12px;
+    padding: 4px 12px;
+    font-weight: 600;
+    font-size: 14px;
+  }
+
+  .main-content {
+    padding: 24px;
+    overflow-y: auto;
+    flex: 1;
+  }
+
+  .profile-card {
+    background: var(--card-bg);
+    backdrop-filter: blur(15px);
+    border: 2px solid var(--card-border);
+    border-radius: 20px;
+    padding: 32px;
+    margin-bottom: 24px;
+  }
+
+  .profile-header {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    margin-bottom: 24px;
+  }
+
+  .profile-avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 40px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .profile-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+  }
+
+  .profile-info h2 {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .username {
+    color: var(--accent);
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .email {
+    color: var(--text-secondary);
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+
+  .member-since {
+    color: var(--text-secondary);
+    font-size: 13px;
+    opacity: 0.8;
+  }
+
+  .profile-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .stat-item {
+    text-align: center;
+    padding: 16px;
+    background: rgba(99, 102, 241, 0.05);
+    border-radius: 12px;
+    border: 1px solid var(--card-border);
+  }
+
+  .stat-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 4px;
+  }
+
+  .stat-label {
+    font-size: 13px;
+    color: var(--text-secondary);
+    opacity: 0.9;
+  }
+
+  .btn-primary {
+    padding: 14px 28px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    width: 100%;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+  }
+
+  .section {
+    background: var(--card-bg);
+    backdrop-filter: blur(15px);
+    border: 2px solid var(--card-border);
+    border-radius: 20px;
+    padding: 24px;
+    margin-bottom: 24px;
+  }
+
+  .section h3 {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: var(--accent);
+  }
+
+  .achievements-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+  }
+
+  .achievement-card {
+    background: rgba(99, 102, 241, 0.05);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    padding: 20px;
+    transition: all 0.2s;
+  }
+
+  .achievement-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--accent);
+    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.2);
+  }
+
+  .achievement-icon {
+    font-size: 32px;
+    margin-bottom: 12px;
+  }
+
+  .achievement-name {
+    font-weight: 600;
+    margin-bottom: 8px;
+    font-size: 15px;
+  }
+
+  .achievement-desc {
+    color: var(--text-secondary);
+    font-size: 13px;
+    margin-bottom: 12px;
+  }
+
+  .achievement-date {
+    color: var(--text-secondary);
+    font-size: 12px;
+    opacity: 0.8;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-secondary);
+  }
+
+  .empty-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+  }
+
+  .empty-subtext {
+    font-size: 14px;
+    margin-top: 8px;
+    opacity: 0.7;
+  }
+
+  .stats-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .stat-row {
+    background: rgba(99, 102, 241, 0.05);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 16px;
+  }
+
+  .stat-game {
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--accent);
+  }
+
+  .stat-detail {
+    color: var(--text-secondary);
+    font-size: 14px;
+    margin-bottom: 4px;
+  }
+
+  @media (max-width: 768px) {
+    .profile-header {
+      flex-direction: column;
+      text-align: center;
+    }
+
+    .profile-stats {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .achievements-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<script>
+function editProfile() {
+  // Здесь будет модальное окно для редактирования профиля
+  alert('Функция редактирования профиля будет добавлена позже');
+}
+</script>
+{% endblock %}

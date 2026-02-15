@@ -1,0 +1,718 @@
+{% extends "base.html" %}
+
+{% block title %}{{ game_info.title }} — Любовный симулятор{% endblock %}
+
+{% block content %}
+<div class="game-container">
+  <!-- Верхняя панель -->
+  <div class="top-bar">
+    <div class="top-left">
+      <button class="icon-btn" onclick="goBack()">
+        <svg class="icon" viewBox="0 0 24 24">
+          <path d="M15 18l-6-6 6-6"/>
+        </svg>
+      </button>
+      <div class="game-title">{{ game_info.title }}</div>
+    </div>
+    
+    <div class="top-right">
+      <button class="icon-btn" onclick="saveGame()">
+        <svg class="icon" viewBox="0 0 24 24">
+          <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2zM9 4H5v16h14V9h-5V4H9z"/>
+        </svg>
+      </button>
+      <button class="icon-btn" onclick="showMenu()">
+        <svg class="icon" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="1"/>
+          <circle cx="12" cy="5" r="1"/>
+          <circle cx="12" cy="19" r="1"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+  
+  <!-- Игровое поле -->
+  <div class="game-content">
+    <div class="background" id="gameBackground"></div>
+    <div class="overlay"></div>
+    
+    <!-- Персонаж -->
+    <img class="character-img" id="characterImage" src="" alt="">
+    
+    <!-- Диалог -->
+    <div class="dialogue-container">
+      <div class="character-name" id="characterName"></div>
+      <div class="dialogue-bubble" id="dialogueText"></div>
+      
+      <div class="choices-container" id="choicesContainer"></div>
+    </div>
+  </div>
+  
+  <!-- Меню игры -->
+  <div class="game-menu" id="gameMenu" style="display: none;">
+    <div class="menu-overlay" onclick="hideMenu()"></div>
+    <div class="menu-card">
+      <h3>Меню игры</h3>
+      <button class="menu-btn" onclick="resumeGame()">Продолжить</button>
+      <button class="menu-btn" onclick="saveGame()">Сохранить</button>
+      <button class="menu-btn" onclick="loadGame()">Загрузить</button>
+      <button class="menu-btn secondary" onclick="exitToDashboard()">Выйти в меню</button>
+    </div>
+  </div>
+</div>
+
+<style>
+  :root {
+    --bg-primary: #0a0a0f;
+    --bg-gradient-start: #0f0f1a;
+    --bg-gradient-end: #1a1a2e;
+    --accent: #6366f1;
+    --accent-dark: #4f46e5;
+    --text-primary: #f1f5f9;
+    --text-secondary: #cbd5e1;
+    --bubble-bg: rgba(20, 20, 40, 0.85);
+    --choice-bg: rgba(30, 30, 60, 0.75);
+    --top-bar-bg: rgba(15, 15, 35, 0.9);
+    --border-color: rgba(99, 102, 241, 0.3);
+    --btn-bg: rgba(99, 102, 241, 0.2);
+    --btn-hover: rgba(99, 102, 241, 0.4);
+    --diamond-bg: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    --diamond-glow: rgba(59, 130, 246, 0.4);
+  }
+
+  [data-theme="orange"] {
+    --bg-primary: #080503;
+    --bg-gradient-start: #0d0704;
+    --bg-gradient-end: #1a1208;
+    --accent: #f97316;
+    --accent-dark: #ea580c;
+    --text-primary: #fef3c7;
+    --text-secondary: #fcd34d;
+    --bubble-bg: rgba(40, 20, 10, 0.85);
+    --choice-bg: rgba(50, 25, 12, 0.75);
+    --top-bar-bg: rgba(25, 15, 5, 0.9);
+    --border-color: rgba(249, 115, 22, 0.3);
+    --btn-bg: rgba(249, 115, 22, 0.2);
+    --btn-hover: rgba(249, 115, 22, 0.4);
+    --diamond-bg: linear-gradient(135deg, #f59e0b, #f97316);
+    --diamond-glow: rgba(245, 158, 11, 0.4);
+  }
+
+  [data-theme="purple"] {
+    --bg-primary: #0a0515;
+    --bg-gradient-start: #0d061a;
+    --bg-gradient-end: #1a082e;
+    --accent: #8b5cf6;
+    --accent-dark: #7c3aed;
+    --text-primary: #e0e7ff;
+    --text-secondary: #cbd5e1;
+    --bubble-bg: rgba(30, 15, 40, 0.85);
+    --choice-bg: rgba(40, 20, 50, 0.75);
+    --top-bar-bg: rgba(20, 10, 30, 0.9);
+    --border-color: rgba(139, 92, 246, 0.3);
+    --btn-bg: rgba(139, 92, 246, 0.2);
+    --btn-hover: rgba(139, 92, 246, 0.4);
+    --diamond-bg: linear-gradient(135deg, #a78bfa, #8b5cf6);
+    --diamond-glow: rgba(167, 139, 250, 0.4);
+  }
+
+  [data-theme="dark-green"] {
+    --bg-primary: #050a06;
+    --bg-gradient-start: #070f0a;
+    --bg-gradient-end: #122014;
+    --accent: #10b981;
+    --accent-dark: #059669;
+    --text-primary: #d1fae5;
+    --text-secondary: #6ee7b7;
+    --bubble-bg: rgba(10, 40, 25, 0.85);
+    --choice-bg: rgba(12, 50, 30, 0.75);
+    --top-bar-bg: rgba(5, 35, 20, 0.9);
+    --border-color: rgba(16, 185, 129, 0.3);
+    --btn-bg: rgba(16, 185, 129, 0.2);
+    --btn-hover: rgba(16, 185, 129, 0.4);
+    --diamond-bg: linear-gradient(135deg, #34d399, #10b981);
+    --diamond-glow: rgba(52, 211, 153, 0.4);
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .game-container {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .top-bar {
+    position: relative;
+    z-index: 20;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    background: var(--top-bar-bg);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .top-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .top-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .game-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .icon-btn {
+    width: 44px;
+    height: 44px;
+    background: var(--btn-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    touch-action: manipulation;
+  }
+
+  .icon-btn:hover,
+  .icon-btn:active {
+    background: var(--btn-hover);
+    transform: scale(1.05);
+  }
+
+  .icon {
+    width: 20px;
+    height: 20px;
+    stroke: var(--text-secondary);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    fill: none;
+    transition: stroke 0.2s;
+  }
+
+  .icon-btn:hover .icon {
+    stroke: var(--text-primary);
+  }
+
+  .game-content {
+    position: relative;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  .background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    filter: brightness(0.7) contrast(1.1);
+    z-index: 1;
+    transition: background-image 0.5s ease;
+  }
+
+  .overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.8) 60%);
+    z-index: 2;
+  }
+
+  .character-img {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 90%;
+    max-height: 90%;
+    width: auto;
+    object-fit: contain;
+    z-index: 3;
+    filter: drop-shadow(0 10px 30px rgba(0,0,0,0.6));
+    border-radius: 16px;
+    max-width: 40%;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+
+  .dialogue-container {
+    position: absolute;
+    right: 20px;
+    bottom: 20px;
+    z-index: 10;
+    width: 60%;
+    max-width: 600px;
+    transform: translateX(0);
+  }
+
+  .character-name {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    padding: 0 16px 0 8px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-dark));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-align: right;
+    text-shadow: 0 0 10px rgba(99, 102, 241, 0.4);
+    position: relative;
+    display: inline-block;
+    white-space: nowrap;
+    opacity: 0;
+    transform: translateX(20px);
+    transition: all 0.4s ease;
+  }
+
+  .character-name.show {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  .character-name::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 100%;
+    width: 0;
+    height: 0;
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+    border-left: 15px solid var(--accent);
+    transform: translateY(-50%) translateX(5px);
+  }
+
+  .dialogue-bubble {
+    background: var(--bubble-bg);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    padding: 22px 28px;
+    margin-bottom: 22px;
+    font-size: 20px;
+    line-height: 1.7;
+    color: white;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+    position: relative;
+    border: 1px solid var(--border-color);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.5s ease;
+  }
+
+  .dialogue-bubble.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .choices-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .choice-btn {
+    width: 100%;
+    background: var(--choice-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 16px;
+    padding: 18px 28px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 18px;
+    font-weight: 500;
+    text-align: left;
+    color: var(--text-primary);
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+  }
+
+  .choice-btn:hover,
+  .choice-btn:active {
+    background: rgba(99, 102, 241, 0.4);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  }
+
+  .choice-btn::after {
+    content: '';
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0;
+    height: 0;
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+    border-left: 16px solid var(--accent);
+  }
+
+  .choice-btn.premium::after {
+    border-left-color: #ff9e00;
+  }
+
+  .premium-mark {
+    float: right;
+    font-weight: bold;
+    color: #ff9e00;
+    margin-top: -2px;
+  }
+
+  .game-menu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1000;
+  }
+
+  .menu-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(5px);
+  }
+
+  .menu-card {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(20, 20, 40, 0.9);
+    backdrop-filter: blur(20px);
+    border: 2px solid var(--border-color);
+    border-radius: 24px;
+    padding: 32px;
+    min-width: 300px;
+    z-index: 1001;
+    animation: slideUp 0.3s ease;
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translate(-50%, -40%);
+    }
+    to {
+      opacity: 1;
+      transform: translate(-50%, -50%);
+    }
+  }
+
+  .menu-card h3 {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 24px;
+    text-align: center;
+    background: linear-gradient(90deg, var(--accent), var(--accent-dark));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .menu-btn {
+    width: 100%;
+    padding: 16px 24px;
+    margin-bottom: 12px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .menu-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
+  }
+
+  .menu-btn.secondary {
+    background: rgba(99, 102, 241, 0.1);
+    color: var(--accent);
+    border: 2px solid var(--border-color);
+  }
+
+  .menu-btn.secondary:hover {
+    background: rgba(99, 102, 241, 0.2);
+    box-shadow: none;
+  }
+
+  @media (max-width: 900px) {
+    .character-img {
+      max-width: 45%;
+      height: auto;
+      max-height: 70%;
+    }
+
+    .dialogue-container {
+      width: 85%;
+      right: 15px;
+      bottom: 15px;
+    }
+
+    .character-name {
+      font-size: 20px;
+      white-space: normal;
+      text-align: center;
+      padding: 0;
+    }
+
+    .character-name::after {
+      display: none;
+    }
+
+    .dialogue-bubble {
+      padding: 18px 22px;
+      font-size: 18px;
+    }
+
+    .choice-btn {
+      padding: 16px 22px;
+      font-size: 16px;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .character-img {
+      max-width: 70%;
+      max-height: 60%;
+      transform: translateY(-50%) translateX(10px);
+    }
+
+    .dialogue-container {
+      width: 90%;
+      right: 10px;
+      bottom: 10px;
+    }
+
+    .character-name {
+      font-size: 18px;
+    }
+
+    .dialogue-bubble {
+      font-size: 16px;
+      line-height: 1.6;
+    }
+
+    .choice-btn {
+      padding: 14px 18px;
+      font-size: 15px;
+    }
+  }
+</style>
+
+<script>
+let gameState = {{ game_state|tojson }};
+let currentStory = {{ story|tojson }};
+let gameKey = '{{ game_key }}';
+
+document.addEventListener('DOMContentLoaded', function() {
+  loadScene();
+});
+
+function loadScene() {
+  if (!currentStory) {
+    document.getElementById('dialogueText').textContent = 'История закончилась или не найдена.';
+    return;
+  }
+
+  // Обновить фон
+  const background = document.getElementById('gameBackground');
+  if (currentStory.background) {
+    background.style.backgroundImage = `url('${currentStory.background}')`;
+  }
+
+  // Показать персонажа
+  const characterImage = document.getElementById('characterImage');
+  if (currentStory.character_image) {
+    characterImage.src = `${currentStory.character_image}`;
+    characterImage.style.opacity = '1';
+  }
+
+  // Показать диалог
+  document.getElementById('characterName').textContent = currentStory.character;
+  document.getElementById('characterName').classList.add('show');
+
+  // Анимация текста
+  const dialogueText = document.getElementById('dialogueText');
+  dialogueText.textContent = '';
+  dialogueText.classList.remove('show');
+
+  setTimeout(() => {
+    typeText(currentStory.dialogue, dialogueText, () => {
+      // Показать варианты выбора
+      renderChoices();
+    });
+  }, 300);
+}
+
+function typeText(text, element, callback) {
+  let i = 0;
+  const speed = 30;
+
+  function type() {
+    if (i < text.length) {
+      element.textContent += text.charAt(i);
+      i++;
+      setTimeout(type, speed);
+    } else {
+      element.classList.add('show');
+      if (callback) callback();
+    }
+  }
+
+  type();
+}
+
+function renderChoices() {
+  const choicesContainer = document.getElementById('choicesContainer');
+  choicesContainer.innerHTML = '';
+
+  if (!currentStory.choices || currentStory.choices.length === 0) {
+    choicesContainer.innerHTML = '<button class="choice-btn" onclick="goToNextScene()">Продолжить</button>';
+    return;
+  }
+
+  currentStory.choices.forEach(choice => {
+    const choiceBtn = document.createElement('button');
+    choiceBtn.className = `choice-btn ${choice.premium ? 'premium' : ''}`;
+    choiceBtn.innerHTML = choice.text + (choice.premium ? ' <span class="premium-mark">💎</span>' : '');
+    choiceBtn.onclick = () => makeChoice(choice.id);
+    choicesContainer.appendChild(choiceBtn);
+  });
+}
+
+async function makeChoice(choiceId) {
+  try {
+    const response = await fetch(`/api/games/${gameKey}/choice`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        choice_id: choiceId,
+        slot: 1
+      })
+    });
+
+    const data = await response.json();
+
+    if (response.ok && data.success) {
+      gameState = data.game_state;
+      currentStory = data.story;
+
+      // Анимация исчезновения
+      document.getElementById('characterName').classList.remove('show');
+      document.getElementById('dialogueText').classList.remove('show');
+
+      setTimeout(() => {
+        loadScene();
+      }, 300);
+    } else {
+      alert(data.error || 'Ошибка при совершении выбора');
+    }
+  } catch (error) {
+    console.error('Ошибка:', error);
+    alert('Ошибка подключения к серверу');
+  }
+}
+
+async function saveGame() {
+  try {
+    const response = await fetch(`/api/games/${gameKey}/save`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        game_state: gameState,
+        slot: 1
+      })
+    });
+
+    const data = await response.json();
+
+    if (response.ok && data.success) {
+      alert('Игра сохранена!');
+    } else {
+      alert(data.error || 'Ошибка сохранения');
+    }
+  } catch (error) {
+    console.error('Ошибка:', error);
+    alert('Ошибка подключения к серверу');
+  }
+}
+
+function goToNextScene() {
+  // Логика перехода к следующей сцене
+  gameState.scene = (gameState.scene || 1) + 1;
+  loadScene();
+}
+
+function goBack() {
+  window.location.href = '/dashboard';
+}
+
+function showMenu() {
+  document.getElementById('gameMenu').style.display = 'block';
+}
+
+function hideMenu() {
+  document.getElementById('gameMenu').style.display = 'none';
+}
+
+function resumeGame() {
+  hideMenu();
+}
+
+function loadGame() {
+  // Логика загрузки игры
+  hideMenu();
+  location.reload();
+}
+
+function exitToDashboard() {
+  window.location.href = '/dashboard';
+}
+</script>
+{% endblock %}
