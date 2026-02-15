@@ -75,7 +75,7 @@
 
     .dialogue-container {
       z-index: 10;
-      padding: 0 24px 28vh !important;
+      padding: 0 24px 35vh !important;
       background: linear-gradient(to top, var(--bg-overlay) 45%, transparent 100%);
       position: relative;
       transition: opacity 0.3s ease, transform 0.3s ease;
@@ -91,7 +91,7 @@
       backdrop-filter: blur(28px);
       border: 2px solid var(--accent);
       border-radius: 28px 28px 28px 12px;
-      padding: 24px 40vh 40vh;
+      padding: 24px 28px 28px;
       margin-bottom: 20px;
       position: relative;
       box-shadow: var(--glow),
@@ -107,6 +107,7 @@
 
     .bubble.show {
       opacity: 1;
+      transform: translateY(0);
     }
 
     .bubble::after {
@@ -174,10 +175,20 @@
 
     .choices {
       display: flex;
-      flex-direction: column;
+      flex-direction: row;
       gap: 14px;
-      padding: 0 12px;
+      padding: 0 12px 12px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
       overflow: hidden;
+    }
+
+    .choices::-webkit-scrollbar {
+      display: none;
     }
 
     .choice {
@@ -201,6 +212,10 @@
       -ms-hyphens: auto;
       word-break: break-word;
       white-space: normal;
+      flex: 0 0 40%;
+      min-width: 300px;
+      max-width: 40%;
+      scroll-snap-align: start;
     }
 
     .choice::before {
@@ -245,29 +260,14 @@
         font-size: 1.02rem;
         line-height: 1.5;
       }
-      .choices {
-        flex-direction: row;
-        overflow-x: auto;
-        overflow-y: hidden;
-        gap: 12px;
-        padding: 0 12px 12px;
-        scroll-snap-type: x mandatory;
-        -webkit-overflow-scrolling: touch;
-        scrollbar-width: none;
-        -ms-overflow-style: none;
-      }
-      .choices::-webkit-scrollbar {
-        display: none;
-      }
       .choice {
         font-size: 1rem;
         padding: 16px 20px;
         border-radius: 18px;
         flex: 0 0 85%;
-        max-width: 85%;
         min-width: 280px;
+        max-width: 85%;
         scroll-snap-align: start;
-        white-space: normal;
       }
       .name {
         font-size: 1.05rem;
@@ -445,9 +445,65 @@
       background: rgba(255,255,255,0.18);
       color: white;
     }
+
+    /* Mobile-only warning */
+    .mobile-warning {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100vh;
+      background: var(--bg-dark);
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 20px;
+      z-index: 2000;
+      backdrop-filter: blur(10px);
+    }
+
+    .mobile-warning.show {
+      display: flex;
+    }
+
+    .mobile-warning h2 {
+      font-size: 2rem;
+      margin-bottom: 20px;
+      color: var(--accent);
+      font-family: 'Playfair Display', serif;
+    }
+
+    .mobile-warning p {
+      font-size: 1.2rem;
+      line-height: 1.6;
+      margin-bottom: 40px;
+      max-width: 600px;
+    }
+
+    .mobile-warning .icon {
+      font-size: 4rem;
+      margin-bottom: 20px;
+    }
+
+    .app-content {
+      transition: opacity 0.3s ease;
+    }
+
+    .app-content.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
   </style>
 </head>
 <body>
+
+<div class="mobile-warning" id="mobileWarning">
+  <div class="icon">📱</div>
+  <h2>Мобильное устройство требуется</h2>
+  <p>Это приложение предназначено только для мобильных устройств. Пожалуйста, откройте его на смартфоне или планшете для оптимального опыта. На ПК работа может быть некорректной.</p>
+</div>
 
 <div class="game-menu" id="gameMenu">
     <div class="menu-overlay" onclick="hideMenu()"></div>
@@ -460,52 +516,54 @@
     </div>
 </div>
 
-<div class="top-bar">
-    <div class="top-left">
-      <button class="icon-btn" onclick="goBack()">
-        <svg class="icon" viewBox="0 0 24 24">
-          <path d="M15 18l-6-6 6-6"/>
-        </svg>
-      </button>
-      <div class="game-title">{{ game_info.title }}</div>
-    </div>
-
-    <div class="top-right">
-      <button class="icon-btn" onclick="toggleDialogues()" title="Скрыть/показать диалоги">
-        <svg class="icon" viewBox="0 0 24 24">
-          <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
-        </svg>
-      </button>
-      <button class="icon-btn" onclick="saveGame()">
-        <svg class="icon" viewBox="0 0 24 24">
-          <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2zM9 4H5v16h14V9h-5V4H9z"/>
-        </svg>
-      </button>
-      <button class="icon-btn" onclick="showMenu()">
-        <svg class="icon" viewBox="0 0 24 24">
-          <circle cx="12" cy="12" r="1"/>
-          <circle cx="12" cy="5" r="1"/>
-          <circle cx="12" cy="19" r="1"/>
-        </svg>
-      </button>
-    </div>
-</div>
-
-<div class="scene">
-  <div class="character"></div>
-
-  <div class="dialogue-container">
-
-    <div class="bubble">
-      <div class="name">Джейни</div>
-      <div class="text">
-        Так, он реагирует. Обычно кошки воспринимают прямой зрительный контакт как угрозу, и, чтобы показать им свои мирные намерения, нужно отвести взгляд и моргнуть.
+<div class="app-content" id="appContent">
+  <div class="top-bar">
+      <div class="top-left">
+        <button class="icon-btn" onclick="goBack()">
+          <svg class="icon" viewBox="0 0 24 24">
+            <path d="M15 18l-6-6 6-6"/>
+          </svg>
+        </button>
+        <div class="game-title">{{ game_info.title }}</div>
       </div>
-    </div>
 
-    <div class="choices">
-    </div>
+      <div class="top-right">
+        <button class="icon-btn" onclick="toggleDialogues()" title="Скрыть/показать диалоги">
+          <svg class="icon" viewBox="0 0 24 24">
+            <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+          </svg>
+        </button>
+        <button class="icon-btn" onclick="saveGame()">
+          <svg class="icon" viewBox="0 0 24 24">
+            <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2zM9 4H5v16h14V9h-5V4H9z"/>
+          </svg>
+        </button>
+        <button class="icon-btn" onclick="showMenu()">
+          <svg class="icon" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="1"/>
+            <circle cx="12" cy="5" r="1"/>
+            <circle cx="12" cy="19" r="1"/>
+          </svg>
+        </button>
+      </div>
+  </div>
 
+  <div class="scene">
+    <div class="character"></div>
+
+    <div class="dialogue-container">
+
+      <div class="bubble">
+        <div class="name">Джейни</div>
+        <div class="text">
+          Так, он реагирует. Обычно кошки воспринимают прямой зрительный контакт как угрозу, и, чтобы показать им свои мирные намерения, нужно отвести взгляд и моргнуть.
+        </div>
+      </div>
+
+      <div class="choices">
+      </div>
+
+    </div>
   </div>
 </div>
 
@@ -514,7 +572,17 @@
   let currentStory = {{ story|tojson }};
   let gameKey = '{{ game_key }}';
 
+  // Проверка на мобильное устройство
+  function isMobile() {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
+  }
+
   document.addEventListener('DOMContentLoaded', function() {
+    if (!isMobile()) {
+      document.getElementById('mobileWarning').classList.add('show');
+      document.getElementById('appContent').classList.add('hidden');
+      return;
+    }
     loadScene();
   });
 
