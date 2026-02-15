@@ -573,7 +573,7 @@ def game_page(game_key):
             return render_template('error.html', message='Сцена не найдена', code=404), 404
 
     return render_template(
-        'game.html',
+        'game_2.html',
         user=user,
         game_key=game_key,
         game_info=game_info,
