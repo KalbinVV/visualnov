@@ -4,97 +4,118 @@
 
 {% block content %}
 <div class="admin-container">
-  <!-- Верхняя панель -->
   <div class="top-bar">
     <div class="top-left">
-      <button class="icon-btn" onclick="window.location.href='/admin/stories'">
-        <svg class="icon" viewBox="0 0 24 24">
-          <path d="M15 18l-6-6 6-6"/>
+      <button class="icon-btn back-btn" onclick="window.location.href='/admin/stories'">
+        <svg viewBox="0 0 24 24" width="24" height="24">
+          <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" fill="none"/>
         </svg>
       </button>
-      <div class="page-title">Создать новую историю</div>
+      <h1 class="page-title">Создать новую историю</h1>
     </div>
   </div>
-  
-  <!-- Основной контент -->
+
   <div class="main-content">
     <div class="create-form-container">
-      <form id="createForm" class="create-form">
-        <div class="form-section">
+      <form id="createStoryForm" class="create-form">
+
+        <!-- Основная информация -->
+        <section class="form-section">
           <h3>Основная информация</h3>
-          
+
           <div class="form-group">
-            <label for="storyKey">Ключ истории *</label>
-            <input type="text" id="storyKey" name="storyKey" required 
-                   placeholder="Например: first_kiss, midnight_encounter">
-            <small class="form-hint">Используйте только латинские буквы, цифры и подчеркивания</small>
+            <label for="storyKey">Ключ истории <span class="required">*</span></label>
+            <input type="text" id="storyKey" name="story_key" required
+                   pattern="[a-zA-Z0-9_]+" title="Только латинские буквы, цифры и _"
+                   placeholder="first_kiss, summer_nights_2025">
+            <small>Уникальный идентификатор (используется в URL)</small>
           </div>
-          
+
           <div class="form-group">
-            <label for="title">Название *</label>
-            <input type="text" id="title" name="title" required 
-                   placeholder="Например: Первая встреча, Запретная ночь">
+            <label for="title">Название <span class="required">*</span></label>
+            <input type="text" id="title" name="title" required
+                   placeholder="Первая искра • Запретное желание">
           </div>
-          
+
           <div class="form-group">
-            <label for="description">Описание</label>
+            <label for="description">Описание сюжета</label>
             <textarea id="description" name="description" rows="4"
-                      placeholder="Краткое описание сюжета..."></textarea>
+                      placeholder="Коротко о чём история, кто главные герои, настроение..."></textarea>
           </div>
-        </div>
-        
-        <div class="form-section">
-          <h3>Медиа</h3>
-          
-          <div class="form-group">
-            <label for="coverImage">Обложка</label>
-            <input type="text" id="coverImage" name="coverImage" 
-                   placeholder="URL изображения или путь к файлу">
-            <small class="form-hint">Изображение для отображения в списке игр</small>
+        </section>
+
+        <!-- Обложка и фон -->
+        <section class="form-section media-section">
+          <h3>Визуальное оформление</h3>
+
+          <div class="media-grid">
+            <!-- Обложка -->
+            <div class="media-upload">
+              <label>Обложка истории</label>
+              <div class="dropzone" id="coverDropzone">
+                <input type="file" id="coverFile" accept="image/*" hidden>
+                <div class="dropzone-content">
+                  <div class="preview" id="coverPreview"></div>
+                  <p>Перетащите обложку сюда или</p>
+                  <button type="button" class="btn-select">Выбрать файл</button>
+                </div>
+              </div>
+              <input type="hidden" id="coverImage" name="cover_image">
+              <small>Рекомендуемый размер: 400×600</small>
+            </div>
+
+            <!-- Фон -->
+            <div class="media-upload">
+              <label>Фоновое изображение</label>
+              <div class="dropzone" id="bgDropzone">
+                <input type="file" id="bgFile" accept="image/*" hidden>
+                <div class="dropzone-content">
+                  <div class="preview" id="bgPreview"></div>
+                  <p>Перетащите фон сюда или</p>
+                  <button type="button" class="btn-select">Выбрать файл</button>
+                </div>
+              </div>
+              <input type="hidden" id="backgroundImage" name="background_image">
+              <small>Рекомендуемый размер: 1920×1080 или шире</small>
+            </div>
           </div>
-          
-          <div class="form-group">
-            <label for="backgroundImage">Фоновое изображение</label>
-            <input type="text" id="backgroundImage" name="backgroundImage" 
-                   placeholder="URL изображения или путь к файлу">
-            <small class="form-hint">Фон для сцен этой истории</small>
-          </div>
-        </div>
-        
-        <div class="form-section">
-          <h3>Настройки</h3>
-          
+        </section>
+
+        <!-- Монетизация и статус -->
+        <section class="form-section settings-section">
+          <h3>Настройки доступа</h3>
+
           <div class="form-row">
-            <div class="form-group-inline">
-              <label for="premium">Премиум история</label>
+            <div class="form-group toggle-group">
+              <label>Премиум-история</label>
               <label class="switch">
                 <input type="checkbox" id="premium" name="premium">
-                <span class="slider"></span>
+                <span class="slider round"></span>
               </label>
             </div>
-            
-            <div class="form-group-inline">
-              <label for="diamondsCost">Стоимость (алмазы)</label>
-              <input type="number" id="diamondsCost" name="diamondsCost" 
-                     value="0" min="0" step="10">
+
+            <div class="form-group">
+              <label for="diamondsCost">Стоимость в алмазах</label>
+              <input type="number" id="diamondsCost" name="diamonds_cost"
+                     min="0" step="10" value="0">
             </div>
           </div>
-          
-          <div class="form-group-inline">
-            <label for="published">Опубликовать</label>
+
+          <div class="form-group toggle-group">
+            <label>Сразу опубликовать</label>
             <label class="switch">
-              <input type="checkbox" id="published" name="published">
-              <span class="slider"></span>
+              <input type="checkbox" id="published" name="is_published">
+              <span class="slider round"></span>
             </label>
-            <small class="form-hint">Если не отмечено, история будет в черновиках</small>
+            <small>Если не включено — останется в черновиках</small>
           </div>
-        </div>
-        
+        </section>
+
         <div class="form-actions">
-          <button type="button" class="btn-secondary" onclick="window.location.href='/admin/stories'">
+          <button type="button" class="btn btn-secondary" onclick="history.back()">
             Отмена
           </button>
-          <button type="submit" class="btn-primary">
+          <button type="submit" class="btn btn-primary" id="submitBtn">
             Создать историю
           </button>
         </div>
@@ -105,374 +126,258 @@
 
 <style>
   :root {
-    --bg-primary: #0a0a0f;
-    --bg-gradient-start: #0f0f1a;
-    --bg-gradient-end: #1a1a2e;
     --accent: #6366f1;
     --accent-dark: #4f46e5;
-    --text-primary: #f1f5f9;
-    --text-secondary: #cbd5e1;
-    --card-bg: rgba(20, 20, 40, 0.7);
-    --card-border: rgba(99, 102, 241, 0.3);
-    --input-bg: rgba(30, 30, 50, 0.6);
-    --input-border: rgba(99, 102, 241, 0.3);
+    --danger: #ef4444;
+    --success: #10b981;
   }
 
-  [data-theme="orange"] {
-    --bg-primary: #080503;
-    --bg-gradient-start: #0d0704;
-    --bg-gradient-end: #1a1208;
-    --accent: #f97316;
-    --accent-dark: #ea580c;
-    --text-primary: #fef3c7;
-    --text-secondary: #fcd34d;
-    --card-bg: rgba(40, 20, 10, 0.7);
-    --card-border: rgba(249, 115, 22, 0.3);
-    --input-bg: rgba(50, 30, 15, 0.6);
-    --input-border: rgba(249, 115, 22, 0.3);
+  .required { color: var(--danger); }
+
+  .media-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
   }
 
-  [data-theme="purple"] {
-    --bg-primary: #0a0515;
-    --bg-gradient-start: #0d061a;
-    --bg-gradient-end: #1a082e;
-    --accent: #8b5cf6;
-    --accent-dark: #7c3aed;
-    --text-primary: #e0e7ff;
-    --text-secondary: #cbd5e1;
-    --card-bg: rgba(30, 15, 40, 0.7);
-    --card-border: rgba(139, 92, 246, 0.3);
-    --input-bg: rgba(40, 25, 50, 0.6);
-    --input-border: rgba(139, 92, 246, 0.3);
-  }
-
-  [data-theme="dark-green"] {
-    --bg-primary: #050a06;
-    --bg-gradient-start: #070f0a;
-    --bg-gradient-end: #122014;
-    --accent: #10b981;
-    --accent-dark: #059669;
-    --text-primary: #d1fae5;
-    --text-secondary: #6ee7b7;
-    --card-bg: rgba(10, 40, 25, 0.7);
-    --card-border: rgba(16, 185, 129, 0.3);
-    --input-bg: rgba(15, 50, 35, 0.6);
-    --input-border: rgba(16, 185, 129, 0.3);
-  }
-
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
-
-  body {
-    font-family: 'Inter', sans-serif;
-    background: var(--bg-primary);
-    color: var(--text-primary);
-    min-height: 100vh;
-  }
-
-  .admin-container {
+  .media-upload {
     display: flex;
     flex-direction: column;
-    min-height: 100vh;
+    gap: 8px;
   }
 
-  .top-bar {
-    height: 60px;
-    background: rgba(15, 15, 35, 0.9);
-    backdrop-filter: blur(20px);
-    border-bottom: 1px solid var(--card-border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 20px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
-
-  .top-left {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-  }
-
-  .page-title {
-    font-size: 20px;
-    font-weight: 600;
-  }
-
-  .main-content {
-    padding: 24px;
-    overflow-y: auto;
-    flex: 1;
-  }
-
-  .create-form-container {
-    max-width: 800px;
-    margin: 0 auto;
-  }
-
-  .create-form {
-    background: var(--card-bg);
-    backdrop-filter: blur(15px);
-    border: 2px solid var(--card-border);
-    border-radius: 20px;
-    padding: 32px;
-  }
-
-  .form-section {
-    margin-bottom: 32px;
-    padding-bottom: 24px;
-    border-bottom: 1px solid var(--card-border);
-  }
-
-  .form-section:last-child {
-    border-bottom: none;
-    margin-bottom: 0;
-    padding-bottom: 0;
-  }
-
-  .form-section h3 {
-    font-size: 18px;
-    font-weight: 700;
-    margin-bottom: 20px;
-    color: var(--accent);
-  }
-
-  .form-group {
-    margin-bottom: 20px;
-  }
-
-  .form-group label {
-    display: block;
-    font-size: 14px;
-    font-weight: 600;
-    margin-bottom: 8px;
-    color: var(--text-primary);
-  }
-
-  .form-group input[type="text"],
-  .form-group input[type="number"],
-  .form-group textarea {
-    width: 100%;
-    padding: 14px 16px;
-    background: var(--input-bg);
-    border: 2px solid var(--input-border);
-    border-radius: 12px;
-    color: var(--text-primary);
-    font-size: 15px;
-    font-family: 'Inter', sans-serif;
+  .dropzone {
+    height: 220px;
+    border: 2px dashed var(--input-border);
+    border-radius: 16px;
+    background: rgba(30,30,50,0.4);
     transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
   }
 
-  .form-group input:focus,
-  .form-group textarea:focus {
-    outline: none;
+  .dropzone:hover,
+  .dropzone.dragover {
     border-color: var(--accent);
-    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+    background: rgba(99,102,241,0.08);
   }
 
-  .form-group textarea {
-    resize: vertical;
-    min-height: 100px;
-  }
-
-  .form-hint {
-    display: block;
-    margin-top: 6px;
-    font-size: 12px;
+  .dropzone-content {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
     color: var(--text-secondary);
-    opacity: 0.8;
+    padding: 20px;
+  }
+
+  .preview {
+    width: 100%;
+    height: 140px;
+    object-fit: cover;
+    border-radius: 12px;
+    background: #111;
+    margin-bottom: 12px;
+    display: none;
+  }
+
+  .preview.has-image {
+    display: block;
+  }
+
+  .btn-select {
+    margin-top: 8px;
+    padding: 8px 16px;
+    background: rgba(99,102,241,0.15);
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    color: var(--accent);
+    cursor: pointer;
+  }
+
+  .toggle-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
   }
 
   .form-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 20px;
+    gap: 24px;
   }
 
-  .form-group-inline {
-    margin-bottom: 16px;
-  }
-
-  .form-group-inline label:first-child {
-    display: block;
-    font-size: 14px;
-    font-weight: 600;
-    margin-bottom: 8px;
-    color: var(--text-primary);
-  }
-
-  .switch {
-    position: relative;
-    display: inline-block;
-    width: 52px;
-    height: 28px;
-    vertical-align: middle;
-  }
-
-  .switch input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-  }
-
-  .slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: var(--input-border);
-    transition: .4s;
-    border-radius: 34px;
-  }
-
-  .slider:before {
-    position: absolute;
-    content: "";
-    height: 20px;
-    width: 20px;
-    left: 4px;
-    bottom: 4px;
-    background-color: white;
-    transition: .4s;
-    border-radius: 50%;
-  }
-
-  input:checked + .slider {
-    background-color: var(--accent);
-  }
-
-  input:checked + .slider:before {
-    transform: translateX(24px);
-  }
-
-  .form-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 12px;
-    margin-top: 24px;
-    padding-top: 24px;
-    border-top: 1px solid var(--card-border);
-  }
-
-  .btn-primary,
-  .btn-secondary {
-    padding: 12px 32px;
-    border-radius: 12px;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-    border: none;
-  }
-
-  .btn-primary {
-    background: linear-gradient(135deg, var(--accent), var(--accent-dark));
-    color: white;
-  }
-
-  .btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
-  }
-
-  .btn-secondary {
-    background: rgba(99, 102, 241, 0.1);
-    color: var(--accent);
-    border: 2px solid var(--input-border);
-  }
-
-  .btn-secondary:hover {
-    background: rgba(99, 102, 241, 0.15);
-  }
-
-  @media (max-width: 768px) {
+  @media (max-width: 900px) {
+    .media-grid,
     .form-row {
       grid-template-columns: 1fr;
     }
+  }
 
-    .create-form {
-      padding: 24px;
-    }
+  .form-actions {
+    margin-top: 40px;
+    display: flex;
+    gap: 16px;
+    justify-content: flex-end;
+  }
 
-    .form-actions {
-      flex-direction: column-reverse;
-    }
+  .btn {
+    padding: 12px 28px;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+  }
 
-    .btn-primary,
-    .btn-secondary {
-      width: 100%;
-    }
+  .btn-primary {
+    background: var(--accent);
+    color: white;
+    border: none;
+  }
+
+  .btn-primary:hover { background: var(--accent-dark); }
+  .btn-secondary {
+    background: transparent;
+    border: 1px solid var(--text-secondary);
+    color: var(--text-primary);
   }
 </style>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-  const createForm = document.getElementById('createForm');
-  
-  createForm.addEventListener('submit', async function(e) {
-    e.preventDefault();
-    
-    const storyKey = document.getElementById('storyKey').value.trim();
-    const title = document.getElementById('title').value.trim();
-    const description = document.getElementById('description').value.trim();
-    const coverImage = document.getElementById('coverImage').value.trim();
-    const backgroundImage = document.getElementById('backgroundImage').value.trim();
-    const premium = document.getElementById('premium').checked;
-    const diamondsCost = parseInt(document.getElementById('diamondsCost').value) || 0;
-    const published = document.getElementById('published').checked;
-    
-    // Валидация
-    if (!storyKey || !title) {
-      alert('Пожалуйста, заполните обязательные поля');
-      return;
+// --------------------------------------------------
+// Загрузка изображений
+// --------------------------------------------------
+async function uploadImage(file) {
+  if (!file) return null;
+
+  const formData = new FormData();
+  formData.append('image', file);
+
+  try {
+    const res = await fetch('/api/upload/image', {
+      method: 'POST',
+      body: formData
+    });
+
+    const data = await res.json();
+    if (data.success && data.url) {
+      return data.url;
+    } else {
+      alert('Не удалось загрузить изображение: ' + (data.error || 'неизвестная ошибка'));
+      return null;
     }
-    
-    if (!/^[a-zA-Z0-9_]+$/.test(storyKey)) {
-      alert('Ключ истории может содержать только латинские буквы, цифры и подчеркивания');
-      return;
+  } catch (err) {
+    console.error(err);
+    alert('Ошибка при загрузке изображения');
+    return null;
+  }
+}
+
+function setupDropzone(dropzoneId, fileInputId, previewId, hiddenInputId) {
+  const dropzone = document.getElementById(dropzoneId);
+  const fileInput = document.getElementById(fileInputId);
+  const preview = document.getElementById(previewId);
+  const hidden = document.getElementById(hiddenInputId);
+
+  // Клик по зоне → открываем выбор файла
+  dropzone.addEventListener('click', () => fileInput.click());
+
+  // Выбор файла через кнопку / input
+  fileInput.addEventListener('change', async e => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const url = await uploadImage(file);
+    if (url) {
+      preview.src = url;
+      preview.classList.add('has-image');
+      hidden.value = url;
     }
-    
-    const submitBtn = createForm.querySelector('.btn-primary');
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Создание...';
-    
-    try {
-      const response = await fetch('/api/stories', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          story_key: storyKey,
-          title: title,
-          description: description || null,
-          cover_image: coverImage || null,
-          background_image: backgroundImage || null,
-          premium: premium,
-          diamonds_cost: diamondsCost,
-          is_published: published
-        })
-      });
-      
-      const data = await response.json();
-      
-      if (response.ok && data.success) {
-        window.location.href = `/admin/stories/editor/${data.story.id}`;
-      } else {
-        alert(data.error || 'Ошибка создания истории');
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Создать историю';
+  });
+
+  // Drag & Drop
+  ['dragover', 'dragenter'].forEach(event => {
+    dropzone.addEventListener(event, e => {
+      e.preventDefault();
+      dropzone.classList.add('dragover');
+    });
+  });
+
+  ['dragleave', 'drop'].forEach(event => {
+    dropzone.addEventListener(event, e => {
+      e.preventDefault();
+      dropzone.classList.remove('dragover');
+    });
+  });
+
+  dropzone.addEventListener('drop', async e => {
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) {
+      const url = await uploadImage(file);
+      if (url) {
+        preview.src = url;
+        preview.classList.add('has-image');
+        hidden.value = url;
       }
-    } catch (error) {
-      console.error('Ошибка:', error);
-      alert('Ошибка подключения к серверу');
+    }
+  });
+}
+
+// Инициализация
+document.addEventListener('DOMContentLoaded', () => {
+  setupDropzone('coverDropzone', 'coverFile', 'coverPreview', 'coverImage');
+  setupDropzone('bgDropzone',   'bgFile',   'bgPreview',   'backgroundImage');
+
+  // Отправка формы
+  const form = document.getElementById('createStoryForm');
+  const submitBtn = document.getElementById('submitBtn');
+
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+
+    const data = {
+      story_key:      document.getElementById('storyKey').value.trim(),
+      title:          document.getElementById('title').value.trim(),
+      description:    document.getElementById('description').value.trim() || null,
+      cover_image:    document.getElementById('coverImage').value.trim() || null,
+      background_image: document.getElementById('backgroundImage').value.trim() || null,
+      premium:        document.getElementById('premium').checked,
+      diamonds_cost:  parseInt(document.getElementById('diamondsCost').value) || 0,
+      is_published:   document.getElementById('published').checked
+    };
+
+    if (!data.story_key || !data.title) {
+      alert('Заполните обязательные поля: ключ и название');
+      return;
+    }
+
+    if (!/^[a-zA-Z0-9_]+$/.test(data.story_key)) {
+      alert('Ключ может содержать только латинские буквы, цифры и нижнее подчёркивание');
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Создаём...';
+
+    try {
+      const res = await fetch('/api/stories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+
+      const json = await res.json();
+
+      if (res.ok && json.success) {
+        window.location.href = `/admin/stories/editor/${json.story.id}`;
+      } else {
+        alert(json.error || 'Не удалось создать историю');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Ошибка соединения с сервером');
+    } finally {
       submitBtn.disabled = false;
       submitBtn.textContent = 'Создать историю';
     }
