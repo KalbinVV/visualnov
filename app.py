@@ -1015,7 +1015,13 @@ def api_get_choices(scene_id):
 
         return jsonify({
             'success': True,
-            'choices': choices
+            'choices': [{'length': 999,
+                         'choice_number': choice.choice_number,
+                         'id': choice.id,
+                         'affection_change': choice.affection_change,
+                         'trust_change': choice.trust_change,
+                         'passion_change': choice.passion_change,
+                         'premium': choice.premium} for choice in choices]
         }), 200
 
     except Exception as e:
