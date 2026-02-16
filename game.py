@@ -53,33 +53,18 @@ class GameService:
         return None
 
     def get_available_games(self, user_id: int) -> List[Dict[str, Any]]:
-        """
-        Получить список доступных игр
-
-        Args:
-            user_id: ID пользователя
-
-        Returns:
-            Список игр с информацией о доступности
-        """
         games_list = []
 
-        # Получаем опубликованные истории из базы данных
         stories = self.story_service.get_all_stories(published_only=True)
 
         for story in stories:
-            # Проверка, есть ли сохранение
-            saves = self.db.get_user_saves(user_id, story['story_key'])
-
             games_list.append({
-                'key': story['story_key'],
-                'title': story['title'],
-                'description': story['description'] or 'Интерактивная история',
-                'chapters': story['chapters_count'],
-                'premium': bool(story['premium']),
-                'diamonds_cost': story['diamonds_cost'],
-                'has_save': len(saves) > 0,
-                'saves': saves
+                'key': story.story_key,
+                'title': story.title,
+                'description': story.description,
+                'chapters': story.chapters_count,
+                'premium': story.premium,
+                'diamonds_cost': story.diamonds_cost,
             })
 
         return games_list

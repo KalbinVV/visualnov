@@ -268,7 +268,6 @@ def api_update_profile():
 @app.route('/api/games', methods=['GET'])
 @api_login_required
 def api_get_games():
-    """API получения списка игр"""
     try:
         games = game_service.get_available_games(session['user_id'])
 
@@ -716,12 +715,7 @@ def api_update_story(story_id):
         if not data:
             return jsonify({'error': 'Нет данных'}), 400
 
-        success = story_service.update_story(story_id, **data)
-
-        if not success:
-            return jsonify({'error': 'Ошибка обновления истории'}), 500
-
-        story = story_service.get_story_by_id(story_id)
+        story_service.update_story(story_id, **data)
 
         return jsonify({
             'success': True,
