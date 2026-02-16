@@ -1082,7 +1082,7 @@ def api_update_choice(choice_id):
             return jsonify({'error': 'Ошибка обновления варианта'}), 500
 
         with db.get_connection() as conn:
-            cursor = conn.cursor()
+            cursor = conn.connection.cursor()
             cursor.execute('SELECT * FROM choices WHERE id = ?', (choice_id,))
             choice = dict(cursor.fetchone())
 
