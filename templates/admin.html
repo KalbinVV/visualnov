@@ -54,6 +54,7 @@
               <th>Дата регистрации</th>
               <th>Алмазов</th>
               <th>Админ</th>
+              <th>Лидер</th>
             </tr>
           </thead>
           <tbody>
@@ -66,6 +67,7 @@
                 <td>{{ user.created_at[:10] }}</td>
                 <td>{{ user.diamonds }}</td>
                 <td>{% if user.is_admin %}✅{% else %}❌{% endif %}</td>
+                <td>{% if user.is_leader %}✅{% else %}❌{% endif %}</td>
                 <td>
                   <button class="btn-reset-progress" onclick="resetProgress({{ user.id }})">
                     Сбросить прогресс

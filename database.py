@@ -1,761 +1,475 @@
 # -*- coding: utf-8 -*-
 """
-Модуль работы с базой данных
+Модуль работы с базой данных (SQLAlchemy ORM)
 Любовный симулятор
 """
 
-import sqlite3
+from datetime import datetime
+from typing import Optional, List, Dict, Any
 import json
-from datetime import datetime, timedelta
-from typing import Optional, Dict, List, Any
+
+from flask import session
+from sqlalchemy import (
+    create_engine,
+    String,
+    Text,
+    Boolean,
+    Integer,
+    ForeignKey,
+    DateTime,
+    Float,
+    func,
+    select,
+    update,
+    delete,
+    UniqueConstraint,
+)
+from sqlalchemy.orm import (
+    DeclarativeBase,
+    Mapped,
+    mapped_column,
+    relationship,
+    Session,
+    sessionmaker,
+    joinedload,
+)
+from sqlalchemy.exc import IntegrityError
 from contextlib import contextmanager
 
 
+class Base(DeclarativeBase):
+    pass
+
+class User(Base):
+    __tablename__ = "users"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    username: Mapped[str] = mapped_column(String(80), unique=True, nullable=False)
+    email: Mapped[str] = mapped_column(String(120), unique=True, nullable=False)
+    password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
+    password_salt: Mapped[str] = mapped_column(String(128), nullable=False)
+    display_name: Mapped[Optional[str]] = mapped_column(String(100))
+    avatar_url: Mapped[Optional[str]] = mapped_column(String(255))
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    last_login: Mapped[Optional[datetime]] = mapped_column(DateTime)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    is_admin: Mapped[bool] = mapped_column(Boolean, default=False)
+    failed_login_attempts: Mapped[int] = mapped_column(default=0)
+    locked_until: Mapped[Optional[datetime]] = mapped_column(DateTime)
+    diamonds: Mapped[int] = mapped_column(default=0)
+    is_leader: Mapped[bool] = mapped_column(Boolean, default=False)
+    theme: Mapped[str] = mapped_column(String(50), default="orange")
+    settings: Mapped[str] = mapped_column(Text, default="{}")  # JSON
+
+    user_sessions: Mapped[List["UserSession"]] = relationship(
+        "UserSession", back_populates="user", cascade="all, delete-orphan"
+    )
+    game_saves: Mapped[List["GameSave"]] = relationship(
+        "GameSave", back_populates="user", cascade="all, delete-orphan"
+    )
+    game_stats: Mapped[List["GameStat"]] = relationship(
+        "GameStat", back_populates="user", cascade="all, delete-orphan"
+    )
+    achievements: Mapped[List["Achievement"]] = relationship(
+        "Achievement", back_populates="user", cascade="all, delete-orphan"
+    )
+    authored_stories: Mapped[List["Story"]] = relationship(
+        "Story", back_populates="author", foreign_keys="[Story.author_id]"
+    )
+
+
+class UserSession(Base):
+    __tablename__ = "sessions"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    session_token: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    expires_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    ip_address: Mapped[Optional[str]] = mapped_column(String(45))
+    user_agent: Mapped[Optional[str]] = mapped_column(Text)
+
+    user: Mapped["User"] = relationship("User", back_populates="user_sessions")
+
+
+class GameSave(Base):
+    __tablename__ = "game_saves"
+    __table_args__ = (UniqueConstraint("user_id", "game_name", "save_slot", name="uq_game_save"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    game_name: Mapped[str] = mapped_column(String(100), nullable=False)
+    save_slot: Mapped[int] = mapped_column(nullable=False)
+    save_data: Mapped[str] = mapped_column(Text, nullable=False)  # JSON
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now())
+
+    user: Mapped["User"] = relationship("User", back_populates="game_saves")
+
+
+class GameStat(Base):
+    __tablename__ = "game_stats"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    game_name: Mapped[str] = mapped_column(String(100), nullable=False)
+    play_time: Mapped[int] = mapped_column(default=0)
+    completed: Mapped[bool] = mapped_column(default=False)
+    rating: Mapped[Optional[int]] = mapped_column()
+    choices_made: Mapped[int] = mapped_column(default=0)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+
+    user: Mapped["User"] = relationship("User", back_populates="game_stats")
+
+
+class Achievement(Base):
+    __tablename__ = "achievements"
+    __table_args__ = (UniqueConstraint("user_id", "achievement_name", name="uq_achievement"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    achievement_name: Mapped[str] = mapped_column(String(100), nullable=False)
+    description: Mapped[Optional[str]] = mapped_column(Text)
+    unlocked_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+
+    user: Mapped["User"] = relationship("User", back_populates="achievements")
+
+
+class Story(Base):
+    __tablename__ = "stories"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    story_key: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
+    title: Mapped[str] = mapped_column(String(200), nullable=False)
+    description: Mapped[Optional[str]] = mapped_column(Text)
+    cover_image: Mapped[Optional[str]] = mapped_column(String(255))
+    background_image: Mapped[Optional[str]] = mapped_column(String(255))
+    premium: Mapped[bool] = mapped_column(default=False)
+    diamonds_cost: Mapped[int] = mapped_column(default=0)
+    chapters_count: Mapped[int] = mapped_column(default=0)
+    scenes_count: Mapped[int] = mapped_column(default=0)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now())
+    is_published: Mapped[bool] = mapped_column(default=False)
+    author_id: Mapped[Optional[int]] = mapped_column(ForeignKey("users.id"))
+
+    author: Mapped[Optional["User"]] = relationship("User", back_populates="authored_stories")
+    chapters: Mapped[List["Chapter"]] = relationship("Chapter", back_populates="story", cascade="all, delete-orphan")
+    story_characters: Mapped[List["StoryCharacter"]] = relationship("StoryCharacter", back_populates="story", cascade="all, delete-orphan")
+
+
+class Chapter(Base):
+    __tablename__ = "chapters"
+    __table_args__ = (UniqueConstraint("story_id", "chapter_number", name="uq_chapter"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    story_id: Mapped[int] = mapped_column(ForeignKey("stories.id", ondelete="CASCADE"), nullable=False)
+    chapter_number: Mapped[int] = mapped_column(nullable=False)
+    title: Mapped[Optional[str]] = mapped_column(String(200))
+    description: Mapped[Optional[str]] = mapped_column(Text)
+    background_image: Mapped[Optional[str]] = mapped_column(String(255))
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+
+    story: Mapped["Story"] = relationship("Story", back_populates="chapters")
+    scenes: Mapped[List["Scene"]] = relationship("Scene", back_populates="chapter", cascade="all, delete-orphan")
+
+
+class Scene(Base):
+    __tablename__ = "scenes"
+    __table_args__ = (UniqueConstraint("chapter_id", "scene_number", name="uq_scene"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    chapter_id: Mapped[int] = mapped_column(ForeignKey("chapters.id", ondelete="CASCADE"), nullable=False)
+    scene_number: Mapped[int] = mapped_column(nullable=False)
+    character_name: Mapped[str] = mapped_column(String(100), nullable=False)
+    character_image: Mapped[Optional[str]] = mapped_column(String(255))
+    dialogue_text: Mapped[str] = mapped_column(Text, nullable=False)
+    background_image: Mapped[Optional[str]] = mapped_column(String(255))
+    music_track: Mapped[Optional[str]] = mapped_column(String(255))
+    effects: Mapped[Optional[str]] = mapped_column(Text)  # JSON
+    position_x: Mapped[int] = mapped_column(default=0)
+    position_y: Mapped[int] = mapped_column(default=0)
+    scale: Mapped[float] = mapped_column(Float, default=1.0)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+
+    chapter: Mapped["Chapter"] = relationship("Chapter", back_populates="scenes")
+
+    choices: Mapped[List["Choice"]] = relationship(
+        "Choice",
+        back_populates="scene",
+        cascade="all, delete-orphan",
+        foreign_keys="Choice.scene_id",           # ← исправление неоднозначности
+    )
+
+
+class Choice(Base):
+    __tablename__ = "choices"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    scene_id: Mapped[int] = mapped_column(ForeignKey("scenes.id", ondelete="CASCADE"), nullable=False)
+    choice_number: Mapped[int] = mapped_column(nullable=False)
+    choice_text: Mapped[str] = mapped_column(String(255), nullable=False)
+    next_scene_id: Mapped[Optional[int]] = mapped_column(ForeignKey("scenes.id"))
+    next_chapter_id: Mapped[Optional[int]] = mapped_column(ForeignKey("chapters.id"))
+    effect_type: Mapped[Optional[str]] = mapped_column(String(50))
+    effect_data: Mapped[Optional[str]] = mapped_column(Text)  # JSON
+    premium: Mapped[bool] = mapped_column(default=False)
+    diamonds_cost: Mapped[int] = mapped_column(default=0)
+    affection_change: Mapped[int] = mapped_column(default=0)
+    trust_change: Mapped[int] = mapped_column(default=0)
+    passion_change: Mapped[int] = mapped_column(default=0)
+    unlock_condition: Mapped[Optional[str]] = mapped_column(String(255))
+    only_leader: Mapped[Optional[bool]] = mapped_column(Boolean)
+    is_locked: Mapped[bool] = mapped_column(default=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+
+    scene: Mapped["Scene"] = relationship(
+        "Scene",
+        back_populates="choices",
+        foreign_keys=[scene_id],                  # ← для ясности (рекомендуется)
+    )
+
+
+class Character(Base):
+    __tablename__ = "characters"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    name: Mapped[str] = mapped_column(String(100), nullable=False)
+    description: Mapped[Optional[str]] = mapped_column(Text)
+    avatar_image: Mapped[Optional[str]] = mapped_column(String(255))
+    portrait_image: Mapped[Optional[str]] = mapped_column(String(255))
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+
+    story_characters: Mapped[List["StoryCharacter"]] = relationship(
+        "StoryCharacter", back_populates="character", cascade="all, delete-orphan"
+    )
+
+
+class StoryCharacter(Base):
+    __tablename__ = "story_characters"
+    __table_args__ = (UniqueConstraint("story_id", "character_id", name="uq_story_character"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    story_id: Mapped[int] = mapped_column(ForeignKey("stories.id", ondelete="CASCADE"), nullable=False)
+    character_id: Mapped[int] = mapped_column(ForeignKey("characters.id", ondelete="CASCADE"), nullable=False)
+    role: Mapped[Optional[str]] = mapped_column(String(50))
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+
+    story: Mapped["Story"] = relationship("Story", back_populates="story_characters")
+    character: Mapped["Character"] = relationship("Character", back_populates="story_characters")
+
+
 class Database:
-    """Класс для работы с SQLite базой данных"""
+    def __init__(self, db_url: str):
+        self.db_url = db_url
+        print(f"Используется база: {self.db_url}")
 
-    def __init__(self, db_path: str = 'love_simulator.db'):
-        """
-        Инициализация базы данных
+        self.engine = create_engine(
+            self.db_url,
+            echo=True,
+        )
 
-        Args:
-            db_path: Путь к файлу базы данных
-        """
-        self.db_path = db_path
+        self.SessionLocal = sessionmaker(
+            bind=self.engine,
+            class_=Session,
+            expire_on_commit=False
+        )
+
         self.init_database()
 
-    @contextmanager
-    def get_connection(self):
-        """
-        Контекстный менеджер для подключения к БД
+    def init_database(self):
+        Base.metadata.create_all(self.engine)
+        print("✓ Все таблицы созданы")
 
-        Yields:
-            sqlite3.Connection: Подключение к базе данных
-        """
-        conn = sqlite3.connect(self.db_path)
-        conn.row_factory = sqlite3.Row
+    @contextmanager
+    def get_session(self):
+        session = self.SessionLocal()
         try:
-            yield conn
-            conn.commit()
+            yield session
+            session.commit()
         except Exception:
-            conn.rollback()
+            session.rollback()
             raise
         finally:
-            conn.close()
+            session.close()
 
-    def init_database(self):
-        """Инициализация базы данных (создание таблиц)"""
-        with self.get_connection() as conn:
-            cursor = conn.cursor()
+    def get_user_by_id(self, user_id: int) -> Optional[User]:
+        with self.get_session() as s:
+            return s.get(User, user_id)
 
-            # Таблица пользователей
-            cursor.execute('''
-                CREATE TABLE IF NOT EXISTS users (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    username TEXT UNIQUE NOT NULL,
-                    email TEXT UNIQUE NOT NULL,
-                    password_hash TEXT NOT NULL,
-                    password_salt TEXT NOT NULL,
-                    display_name TEXT,
-                    avatar_url TEXT,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    last_login TIMESTAMP,
-                    is_active BOOLEAN DEFAULT 1,
-                    is_admin BOOLEAN DEFAULT 0,
-                    failed_login_attempts INTEGER DEFAULT 0,
-                    locked_until TIMESTAMP,
-                    diamonds INTEGER DEFAULT 0,
-                    theme TEXT DEFAULT 'orange',
-                    settings TEXT DEFAULT '{}'
-                )
-            ''')
+    def get_user_by_username(self, username: str) -> Optional[User]:
+        with self.get_session() as s:
+            return s.scalar(select(User).where(User.username == username))
 
-            # Таблица сессий
-            cursor.execute('''
-                CREATE TABLE IF NOT EXISTS sessions (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    user_id INTEGER NOT NULL,
-                    session_token TEXT UNIQUE NOT NULL,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    expires_at TIMESTAMP NOT NULL,
-                    ip_address TEXT,
-                    user_agent TEXT,
-                    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
-                )
-            ''')
+    def get_user_by_email(self, email: str) -> Optional[User]:
+        with self.get_session() as s:
+            return s.scalar(select(User).where(User.email == email))
 
-            # Таблица статистики игр
-            cursor.execute('''
-                CREATE TABLE IF NOT EXISTS game_stats (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    user_id INTEGER NOT NULL,
-                    game_name TEXT NOT NULL,
-                    play_time INTEGER DEFAULT 0,
-                    completed BOOLEAN DEFAULT 0,
-                    rating INTEGER,
-                    choices_made INTEGER DEFAULT 0,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
-                )
-            ''')
-
-            # Таблица сохранений игр
-            cursor.execute('''
-                CREATE TABLE IF NOT EXISTS game_saves (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    user_id INTEGER NOT NULL,
-                    game_name TEXT NOT NULL,
-                    save_slot INTEGER NOT NULL,
-                    save_data TEXT NOT NULL,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    UNIQUE(user_id, game_name, save_slot),
-                    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
-                )
-            ''')
-
-            # Таблица достижений
-            cursor.execute('''
-                CREATE TABLE IF NOT EXISTS achievements (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    user_id INTEGER NOT NULL,
-                    achievement_name TEXT NOT NULL,
-                    description TEXT,
-                    unlocked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    UNIQUE(user_id, achievement_name),
-                    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
-                )
-            ''')
-
-            cursor.execute('''
-                CREATE TABLE IF NOT EXISTS stories (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    story_key TEXT UNIQUE NOT NULL,
-                    title TEXT NOT NULL,
-                    description TEXT,
-                    cover_image TEXT,
-                    background_image TEXT,
-                    premium BOOLEAN DEFAULT 0,
-                    diamonds_cost INTEGER DEFAULT 0,
-                    chapters_count INTEGER DEFAULT 1,
-                    scenes_count INTEGER DEFAULT 0,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    is_published BOOLEAN DEFAULT 0,
-                    author_id INTEGER,
-                    FOREIGN KEY (author_id) REFERENCES users (id)
-                )
-            ''')
-
-            # Таблица глав
-            cursor.execute('''
-                CREATE TABLE IF NOT EXISTS chapters (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    story_id INTEGER NOT NULL,
-                    chapter_number INTEGER NOT NULL,
-                    title TEXT,
-                    description TEXT,
-                    background_image TEXT,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    FOREIGN KEY (story_id) REFERENCES stories (id) ON DELETE CASCADE,
-                    UNIQUE(story_id, chapter_number)
-                )
-            ''')
-
-            # Таблица сцен
-            cursor.execute('''
-                CREATE TABLE IF NOT EXISTS scenes (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    chapter_id INTEGER NOT NULL,
-                    scene_number INTEGER NOT NULL,
-                    character_name TEXT NOT NULL,
-                    character_image TEXT,
-                    dialogue_text TEXT NOT NULL,
-                    background_image TEXT,
-                    music_track TEXT,
-                    effects TEXT,
-                    position_x INTEGER DEFAULT 0,
-                    position_y INTEGER DEFAULT 0,
-                    scale REAL DEFAULT 1.0,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    FOREIGN KEY (chapter_id) REFERENCES chapters (id) ON DELETE CASCADE,
-                    UNIQUE(chapter_id, scene_number)
-                )
-            ''')
-
-            # Таблица вариантов выбора
-            cursor.execute('''
-                CREATE TABLE IF NOT EXISTS choices (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    scene_id INTEGER NOT NULL,
-                    choice_number INTEGER NOT NULL,
-                    choice_text TEXT NOT NULL,
-                    next_scene_id INTEGER,
-                    next_chapter_id INTEGER,
-                    effect_type TEXT,
-                    effect_data TEXT,
-                    premium BOOLEAN DEFAULT 0,
-                    diamonds_cost INTEGER DEFAULT 0,
-                    affection_change INTEGER DEFAULT 0,
-                    trust_change INTEGER DEFAULT 0,
-                    passion_change INTEGER DEFAULT 0,
-                    unlock_condition TEXT,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    FOREIGN KEY (scene_id) REFERENCES scenes (id) ON DELETE CASCADE,
-                    FOREIGN KEY (next_scene_id) REFERENCES scenes (id),
-                    FOREIGN KEY (next_chapter_id) REFERENCES chapters (id)
-                )
-            ''')
-
-            # Таблица персонажей
-            cursor.execute('''
-                CREATE TABLE IF NOT EXISTS characters (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    name TEXT NOT NULL,
-                    description TEXT,
-                    avatar_image TEXT,
-                    portrait_image TEXT,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                )
-            ''')
-
-            # Таблица связей историй и персонажей
-            cursor.execute('''
-                CREATE TABLE IF NOT EXISTS story_characters (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    story_id INTEGER NOT NULL,
-                    character_id INTEGER NOT NULL,
-                    role TEXT,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    FOREIGN KEY (story_id) REFERENCES stories (id) ON DELETE CASCADE,
-                    FOREIGN KEY (character_id) REFERENCES characters (id) ON DELETE CASCADE,
-                    UNIQUE(story_id, character_id)
-                )
-            ''')
-
-            print("✓ Таблицы сюжетов инициализированы")
-
-            # Создание тестового администратора
-            cursor.execute('SELECT * FROM users WHERE username = ?', ('admin',))
-            admin_exists = cursor.fetchone()
-
-            if not admin_exists:
-                from models import User
-                admin_user = User.create_admin(
-                    username='admin',
-                    email='admin@lovesim.com',
-                    password='admin',
-                    display_name='Администратор'
-                )
-                cursor.execute('''
-                    INSERT INTO users (username, email, password_hash, password_salt, 
-                                     display_name, is_admin, diamonds)
-                    VALUES (?, ?, ?, ?, ?, ?, ?)
-                ''', (
-                    admin_user.username,
-                    admin_user.email,
-                    admin_user.password_hash,
-                    admin_user.password_salt,
-                    admin_user.display_name,
-                    admin_user.is_admin,
-                    admin_user.diamonds
-                ))
-                print("✓ Создан тестовый администратор: admin / admin")
-
-            print("✓ База данных инициализирована")
-
-    # ========== Методы для пользователей ==========
-
-    def get_user_by_id(self, user_id: int) -> Optional[Dict[str, Any]]:
-        """
-        Получить пользователя по ID
-
-        Args:
-            user_id: ID пользователя
-
-        Returns:
-            Словарь с данными пользователя или None
-        """
-        with self.get_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute('SELECT * FROM users WHERE id = ?', (user_id,))
-            user = cursor.fetchone()
-            return dict(user) if user else None
-
-    def get_user_by_username(self, username: str) -> Optional[Dict[str, Any]]:
-        """
-        Получить пользователя по имени
-
-        Args:
-            username: Имя пользователя
-
-        Returns:
-            Словарь с данными пользователя или None
-        """
-        with self.get_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute('SELECT * FROM users WHERE username = ?', (username,))
-            user = cursor.fetchone()
-            return dict(user) if user else None
-
-    def get_user_by_email(self, email: str) -> Optional[Dict[str, Any]]:
-        """
-        Получить пользователя по email
-
-        Args:
-            email: Email пользователя
-
-        Returns:
-            Словарь с данными пользователя или None
-        """
-        with self.get_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute('SELECT * FROM users WHERE email = ?', (email,))
-            user = cursor.fetchone()
-            return dict(user) if user else None
-
-    def create_user(self, username: str, email: str, password_hash: str,
-                    password_salt: str, display_name: str = None,
-                    diamonds: int = 100) -> Optional[int]:
-        """
-        Создать нового пользователя
-
-        Args:
-            username: Имя пользователя
-            email: Email
-            password_hash: Хеш пароля
-            password_salt: Соль пароля
-            display_name: Отображаемое имя
-            diamonds: Начальное количество алмазов
-
-        Returns:
-            ID созданного пользователя или None
-        """
-        with self.get_connection() as conn:
-            cursor = conn.cursor()
+    def create_user(
+        self,
+        username: str,
+        email: str,
+        password_hash: str,
+        password_salt: str,
+        display_name: Optional[str] = None,
+        diamonds: int = 0,
+        is_leader: bool = False,
+    ) -> Optional[int]:
+        with self.get_session() as s:
+            user = User(
+                username=username,
+                email=email,
+                password_hash=password_hash,
+                password_salt=password_salt,
+                display_name=display_name or username,
+                diamonds=diamonds,
+                is_leader=is_leader,
+            )
+            s.add(user)
             try:
-                cursor.execute('''
-                    INSERT INTO users (username, email, password_hash, password_salt, 
-                                     display_name, diamonds)
-                    VALUES (?, ?, ?, ?, ?, ?)
-                ''', (username, email, password_hash, password_salt,
-                      display_name or username, diamonds))
-                return cursor.lastrowid
-            except sqlite3.IntegrityError:
+                s.flush()
+                return user.id
+            except IntegrityError:
                 return None
 
-    def update_user(self, user_id: int, **kwargs) -> bool:
-        """
-        Обновить данные пользователя
+    def update_user(self, user_id: int, **kwargs):
+        with Session(self.engine) as s:
+            user = self.get_user_by_id(user_id)
 
-        Args:
-            user_id: ID пользователя
-            **kwargs: Поля для обновления
+            for arg, value in kwargs.items():
+                setattr(user, arg, value)
 
-        Returns:
-            True если успешно, False в противном случае
-        """
-        allowed_fields = {
-            'display_name', 'avatar_url', 'theme', 'diamonds',
-            'failed_login_attempts', 'locked_until', 'last_login'
-        }
+            s.commit()
 
-        fields_to_update = {k: v for k, v in kwargs.items() if k in allowed_fields}
-
-        if not fields_to_update:
-            return False
-
-        set_clause = ', '.join([f'{field} = ?' for field in fields_to_update.keys()])
-        values = list(fields_to_update.values()) + [user_id]
-
-        with self.get_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute(f'''
-                UPDATE users 
-                SET {set_clause}
-                WHERE id = ?
-            ''', values)
-            return cursor.rowcount > 0
-
-    def increment_diamonds(self, user_id: int, amount: int) -> bool:
-        """
-        Увеличить количество алмазов у пользователя
-
-        Args:
-            user_id: ID пользователя
-            amount: Количество алмазов
-
-        Returns:
-            True если успешно
-        """
-        with self.get_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute('''
-                UPDATE users 
-                SET diamonds = diamonds + ?
-                WHERE id = ?
-            ''', (amount, user_id))
-            return cursor.rowcount > 0
-
-    def decrement_diamonds(self, user_id: int, amount: int) -> bool:
-        """
-        Уменьшить количество алмазов у пользователя
-
-        Args:
-            user_id: ID пользователя
-            amount: Количество алмазов
-
-        Returns:
-            True если успешно, False если недостаточно алмазов
-        """
-        with self.get_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute('''
-                UPDATE users 
-                SET diamonds = diamonds - ?
-                WHERE id = ? AND diamonds >= ?
-            ''', (amount, user_id, amount))
-            return cursor.rowcount > 0
-
-    # ========== Методы для сессий ==========
-
-    def create_session(self, user_id: int, session_token: str,
-                       expires_at: datetime, ip_address: str = None,
-                       user_agent: str = None) -> bool:
-        """
-        Создать новую сессию
-
-        Args:
-            user_id: ID пользователя
-            session_token: Токен сессии
-            expires_at: Время истечения
-            ip_address: IP адрес
-            user_agent: User agent
-
-        Returns:
-            True если успешно
-        """
-        with self.get_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute('''
-                INSERT INTO sessions (user_id, session_token, expires_at, ip_address, user_agent)
-                VALUES (?, ?, ?, ?, ?)
-            ''', (user_id, session_token, expires_at.isoformat(), ip_address, user_agent))
+    def create_session(
+        self,
+        user_id: int,
+        session_token: str,
+        expires_at: datetime,
+        ip_address: Optional[str] = None,
+        user_agent: Optional[str] = None,
+    ) -> bool:
+        with self.get_session() as s:
+            session_obj = UserSession(
+                user_id=user_id,
+                session_token=session_token,
+                expires_at=expires_at,
+                ip_address=ip_address,
+                user_agent=user_agent,
+            )
+            s.add(session_obj)
             return True
 
     def validate_session(self, session_token: str) -> Optional[Dict[str, Any]]:
-        """
-        Проверить валидность сессии
-
-        Args:
-            session_token: Токен сессии
-
-        Returns:
-            Словарь с данными сессии и пользователя или None
-        """
-        with self.get_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute('''
-                SELECT s.*, u.id as user_id, u.username, u.email, u.display_name,
-                       u.avatar_url, u.diamonds, u.theme, u.is_admin
-                FROM sessions s
-                JOIN users u ON s.user_id = u.id
-                WHERE s.session_token = ? AND s.expires_at > ?
-            ''', (session_token, datetime.now().isoformat()))
-            result = cursor.fetchone()
-            return dict(result) if result else None
+        with self.get_session() as s:
+            now = datetime.now()
+            stmt = (
+                select(UserSession)
+                .options(joinedload(UserSession.user))
+                .where(
+                    UserSession.session_token == session_token,
+                    UserSession.expires_at > now
+                )
+            )
+            session_obj = s.scalar(stmt)
+            if not session_obj:
+                return None
+            user = session_obj.user
+            return {
+                'session_token': session_obj.session_token,
+                'user_id': user.id,
+                'username': user.username,
+                'email': user.email,
+                'display_name': user.display_name,
+                'avatar_url': user.avatar_url,
+                'diamonds': user.diamonds,
+                'theme': user.theme,
+                'is_admin': user.is_admin,
+                'expires_at': session_obj.expires_at
+            }
 
     def delete_session(self, session_token: str) -> bool:
-        """
-        Удалить сессию
+        with self.get_session() as s:
+            stmt = delete(UserSession).where(UserSession.session_token == session_token)
+            result = s.execute(stmt)
+            return result.rowcount > 0
 
-        Args:
-            session_token: Токен сессии
+    # ── Остальные методы (сохранения, статистика и т.д.) можно добавить по аналогии ──
 
-        Returns:
-            True если успешно
-        """
-        with self.get_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute('DELETE FROM sessions WHERE session_token = ?', (session_token,))
-            return cursor.rowcount > 0
-
-    def delete_user_sessions(self, user_id: int) -> bool:
-        """
-        Удалить все сессии пользователя
-
-        Args:
-            user_id: ID пользователя
-
-        Returns:
-            True если успешно
-        """
-        with self.get_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute('DELETE FROM sessions WHERE user_id = ?', (user_id,))
+    def save_game(self, user_id: int, game_name: str, save_slot: int, save_data: Dict) -> bool:
+        json_data = json.dumps(save_data, ensure_ascii=False)
+        with self.get_session() as s:
+            stmt = (
+                update(GameSave)
+                .where(
+                    GameSave.user_id == user_id,
+                    GameSave.game_name == game_name,
+                    GameSave.save_slot == save_slot
+                )
+                .values(save_data=json_data, updated_at=func.now())
+            )
+            result = s.execute(stmt)
+            if result.rowcount == 0:
+                save = GameSave(
+                    user_id=user_id,
+                    game_name=game_name,
+                    save_slot=save_slot,
+                    save_data=json_data,
+                )
+                s.add(save)
             return True
 
-    # ========== Методы для сохранений игр ==========
+    def get_user_stats(self, user_id: int) -> dict:
+        with self.get_session() as s:
+            stmt = (
+                select(
+                    func.sum(GameStat.play_time).label("total_play_time"),
+                    func.count(GameStat.id).label("games_played"),
+                    func.sum(GameStat.choices_made).label("total_choices"),
+                    func.avg(GameStat.rating).label("avg_rating"),
+                    func.count(GameStat.completed).filter(GameStat.completed == True).label("completed_games")
+                )
+                .select_from(GameStat)
+                .where(GameStat.user_id == user_id)
+            )
 
-    def save_game(self, user_id: int, game_name: str, save_slot: int,
-                  save_data: Dict[str, Any]) -> bool:
-        """
-        Сохранить игру
+            result = s.execute(stmt).one()
 
-        Args:
-            user_id: ID пользователя
-            game_name: Название игры
-            save_slot: Слот сохранения
-            save_data: Данные сохранения
+            total_minutes = (result.total_play_time or 0) // 60
 
-        Returns:
-            True если успешно
-        """
-        save_json = json.dumps(save_data, ensure_ascii=False)
+            return {
+                "total_play_time_minutes": total_minutes,
+                "games_played": result.games_played or 0,
+                "completed_games": result.completed_games or 0,
+                "total_choices": result.total_choices or 0,
+                "average_rating": round(float(result.avg_rating), 1) if result.avg_rating else None,
+            }
 
-        with self.get_connection() as conn:
-            cursor = conn.cursor()
-            try:
-                cursor.execute('''
-                    INSERT INTO game_saves (user_id, game_name, save_slot, save_data)
-                    VALUES (?, ?, ?, ?)
-                    ON CONFLICT(user_id, game_name, save_slot) 
-                    DO UPDATE SET save_data = excluded.save_data, 
-                                 updated_at = CURRENT_TIMESTAMP
-                ''', (user_id, game_name, save_slot, save_json))
-                return True
-            except Exception:
-                return False
+    def get_user_achievements(self, user_id: int) -> list[dict]:
+        with self.get_session() as s:
+            stmt = (
+                select(
+                    Achievement.achievement_name,
+                    Achievement.description,
+                    Achievement.unlocked_at
+                )
+                .where(Achievement.user_id == user_id)
+                .order_by(Achievement.unlocked_at.desc())
+            )
 
-    def load_game(self, user_id: int, game_name: str,
-                  save_slot: int) -> Optional[Dict[str, Any]]:
-        """
-        Загрузить игру
+            results = s.execute(stmt).all()
 
-        Args:
-            user_id: ID пользователя
-            game_name: Название игры
-            save_slot: Слот сохранения
+            return [
+                {
+                    "name": row.achievement_name,
+                    "description": row.description or "Без описания",
+                    "unlocked_at": row.unlocked_at.isoformat() if row.unlocked_at else None,
+                    # Можно добавить иконку/цвет/редкость позже
+                    # "icon": f"/static/achievements/{row.achievement_name.lower()}.png",
+                }
+                for row in results
+            ]
 
-        Returns:
-            Данные сохранения или None
-        """
-        with self.get_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute('''
-                SELECT save_data FROM game_saves
-                WHERE user_id = ? AND game_name = ? AND save_slot = ?
-            ''', (user_id, game_name, save_slot))
-            result = cursor.fetchone()
-
-            if result:
-                return json.loads(result['save_data'])
-            return None
-
-    def get_user_saves(self, user_id: int, game_name: str) -> List[Dict[str, Any]]:
-        """
-        Получить все сохранения пользователя для игры
-
-        Args:
-            user_id: ID пользователя
-            game_name: Название игры
-
-        Returns:
-            Список сохранений
-        """
-        with self.get_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute('''
-                SELECT id, save_slot, created_at, updated_at
-                FROM game_saves
-                WHERE user_id = ? AND game_name = ?
-                ORDER BY save_slot
-            ''', (user_id, game_name))
-            return [dict(row) for row in cursor.fetchall()]
-
-    # ========== Методы для статистики ==========
-
-    def create_game_stat(self, user_id: int, game_name: str) -> Optional[int]:
-        """
-        Создать запись статистики игры
-
-        Args:
-            user_id: ID пользователя
-            game_name: Название игры
-
-        Returns:
-            ID записи или None
-        """
-        with self.get_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute('''
-                INSERT INTO game_stats (user_id, game_name)
-                VALUES (?, ?)
-            ''', (user_id, game_name))
-            return cursor.lastrowid
-
-    def update_game_stat(self, stat_id: int, **kwargs) -> bool:
-        """
-        Обновить статистику игры
-
-        Args:
-            stat_id: ID записи
-            **kwargs: Поля для обновления
-
-        Returns:
-            True если успешно
-        """
-        allowed_fields = {'play_time', 'completed', 'rating', 'choices_made'}
-        fields_to_update = {k: v for k, v in kwargs.items() if k in allowed_fields}
-
-        if not fields_to_update:
-            return False
-
-        set_clause = ', '.join([f'{field} = ?' for field in fields_to_update.keys()])
-        values = list(fields_to_update.values()) + [stat_id]
-
-        with self.get_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute(f'''
-                UPDATE game_stats 
-                SET {set_clause}
-                WHERE id = ?
-            ''', values)
-            return cursor.rowcount > 0
-
-    def get_user_stats(self, user_id: int) -> List[Dict[str, Any]]:
-        """
-        Получить статистику пользователя
-
-        Args:
-            user_id: ID пользователя
-
-        Returns:
-            Список статистики
-        """
-        with self.get_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute('''
-                SELECT game_name, SUM(play_time) as total_time, 
-                       COUNT(*) as games_played,
-                       SUM(CASE WHEN completed THEN 1 ELSE 0 END) as completed_count
-                FROM game_stats
-                WHERE user_id = ?
-                GROUP BY game_name
-            ''', (user_id,))
-            return [dict(row) for row in cursor.fetchall()]
-
-    # ========== Методы для достижений ==========
-
-    def unlock_achievement(self, user_id: int, achievement_name: str,
-                           description: str = None) -> bool:
-        """
-        Разблокировать достижение
-
-        Args:
-            user_id: ID пользователя
-            achievement_name: Название достижения
-            description: Описание
-
-        Returns:
-            True если успешно
-        """
-        with self.get_connection() as conn:
-            cursor = conn.cursor()
-            try:
-                cursor.execute('''
-                    INSERT INTO achievements (user_id, achievement_name, description)
-                    VALUES (?, ?, ?)
-                ''', (user_id, achievement_name, description))
-                return True
-            except sqlite3.IntegrityError:
-                return False
-
-    def get_user_achievements(self, user_id: int) -> List[Dict[str, Any]]:
-        """
-        Получить достижения пользователя
-
-        Args:
-            user_id: ID пользователя
-
-        Returns:
-            Список достижений
-        """
-        with self.get_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute('''
-                SELECT achievement_name, description, unlocked_at
-                FROM achievements
-                WHERE user_id = ?
-                ORDER BY unlocked_at DESC
-            ''', (user_id,))
-            return [dict(row) for row in cursor.fetchall()]
-
-    def get_choice_by_id(self, choice_id: int) -> Optional[Dict[str, Any]]:
-        """
-        Получить вариант выбора по ID
-
-        Args:
-            choice_id: ID варианта
-
-        Returns:
-            Словарь с данными варианта или None
-        """
-        with self.get_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute('SELECT * FROM choices WHERE id = ?', (choice_id,))
-            choice = cursor.fetchone()
-            return dict(choice) if choice else None
-
-    def delete_user_saves(self, user_id):
-        """Удалить все сохранения пользователя"""
-        with self.get_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute('DELETE FROM game_saves WHERE user_id = ?', (user_id,))
-            return cursor.rowcount > 0
-
-    def delete_user_game_stats(self, user_id):
-        """Удалить статистику игр пользователя"""
-        with self.get_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute('DELETE FROM game_stats WHERE user_id = ?', (user_id,))
-            return cursor.rowcount > 0
-
-    def delete_user_achievements(self, user_id):
-        """Удалить достижения пользователя"""
-        with self.get_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute('DELETE FROM achievements WHERE user_id = ?', (user_id,))
-            return cursor.rowcount > 0
-
-    def get_scene_by_id(self, scene_id: int) -> Optional[Dict[str, Any]]:
-        """
-        Получить сцену по ID
-
-        Args:
-            scene_id: ID сцены
-
-        Returns:
-            Словарь с данными сцены или None
-        """
-        with self.get_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute('SELECT * FROM scenes WHERE id = ?', (scene_id,))
-            scene = cursor.fetchone()
-            return dict(scene) if scene else None
-
-    def get_chapter_by_id(self, chapter_id: int) -> Optional[Dict[str, Any]]:
-        """
-        Получить главу по ID
-
-        Args:
-            chapter_id: ID главы
-
-        Returns:
-            Словарь с данными главы или None
-        """
-        with self.get_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute('SELECT * FROM chapters WHERE id = ?', (chapter_id,))
-            chapter = cursor.fetchone()
-            return dict(chapter) if chapter else None
+if __name__ == "__main__":
+    db = Database()
+    print("База данных инициализирована")

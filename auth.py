@@ -1,239 +1,195 @@
 # -*- coding: utf-8 -*-
 """
 Логика авторизации и регистрации
-Любовный симулятор
+Любовный симулятор — без models.py
 """
 
 from datetime import datetime, timedelta
-from typing import Optional, Dict, Any
-from models import User, Session
-from database import Database
+from typing import Optional, Tuple, Dict, Any
+import hashlib
+import secrets
+
+from database import Database, User, UserSession  # Убедитесь, что методы возвращают dict, а не объекты
+
+
+def hash_password(password: str, salt: Optional[str] = None) -> Tuple[str, str]:
+    """Хеширование пароля SHA-256 + соль"""
+    if salt is None:
+        salt = secrets.token_hex(16)
+    pwd_hash = hashlib.sha256((password + salt).encode('utf-8')).hexdigest()
+    return pwd_hash, salt
+
+
+def verify_password(password: str, pwd_hash: str, salt: str) -> bool:
+    """Проверка пароля"""
+    new_hash, _ = hash_password(password, salt)
+    return new_hash == pwd_hash
+
+
+def generate_session_token(length: int = 64) -> str:
+    """Генерация токена сессии (URL-safe)"""
+    return secrets.token_urlsafe(length)
 
 
 class AuthService:
-    """Сервис авторизации"""
-
     def __init__(self, db: Database):
-        """
-        Инициализация сервиса
-
-        Args:
-            db: Объект базы данных
-        """
         self.db = db
 
-    def register_user(self, username: str, email: str, password: str,
-                      display_name: str = None) -> tuple[bool, str, Optional[Dict[str, Any]]]:
-        """
-        Регистрация нового пользователя
+    def register_user(
+            self,
+            username: str,
+            email: str,
+            password: str,
+            display_name: Optional[str] = None
+    ) -> Tuple[bool, str, Optional[User]]:
+        username = (username or "").strip()
+        email = (email or "").strip().lower()
+        password = (password or "").strip()
 
-        Args:
-            username: Имя пользователя
-            email: Email
-            password: Пароль
-            display_name: Отображаемое имя
-
-        Returns:
-            Кортеж (успешно, сообщение, данные пользователя)
-        """
-        # Валидация данных
         if len(username) < 3:
-            return False, 'Имя пользователя должно содержать минимум 3 символа', None
-
-        if '@' not in email:
-            return False, 'Неверный формат email', None
-
+            return False, "Имя пользователя: минимум 3 символа", None
+        if len(email) < 5 or "@" not in email or "." not in email.split("@")[-1]:
+            return False, "Неверный email", None
         if len(password) < 6:
-            return False, 'Пароль должен содержать минимум 6 символов', None
+            return False, "Пароль: минимум 6 символов", None
 
-        # Проверка существования пользователя
         if self.db.get_user_by_username(username):
-            return False, 'Пользователь с таким именем уже существует', None
-
+            return False, "Имя пользователя занято", None
         if self.db.get_user_by_email(email):
-            return False, 'Пользователь с таким email уже существует', None
+            return False, "Email уже зарегистрирован", None
 
-        # Хеширование пароля
-        pwd_hash, salt = User.hash_password(password)
-
-        # Создание пользователя
+        pwd_hash, salt = hash_password(password)
         user_id = self.db.create_user(
             username=username,
             email=email,
             password_hash=pwd_hash,
             password_salt=salt,
-            display_name=display_name,
-            diamonds=100  # Начальные алмазы
+            display_name=display_name or username,
+            diamonds=100,
+            is_leader=False
         )
 
         if not user_id:
-            return False, 'Ошибка создания пользователя', None
+            return False, "Ошибка создания (дубликат или БД)", None
 
-        # Получение данных пользователя
         user_data = self.db.get_user_by_id(user_id)
+        return True, "Регистрация успешна", user_data
 
-        return True, 'Регистрация успешна', user_data
+    def login_user(
+            self,
+            identifier: str,
+            password: str,
+            ip_address: Optional[str] = None,
+            user_agent: Optional[str] = None
+    ) -> Tuple[bool, str, Optional[User], Optional[str]]:
+        identifier = (identifier or "").strip()
+        password = (password or "").strip()
 
-    def login_user(self, identifier: str, password: str,
-                   ip_address: str = None, user_agent: str = None) -> tuple[
-        bool, str, Optional[Dict[str, Any]], Optional[str]]:
-        """
-        Авторизация пользователя
-
-        Args:
-            identifier: Имя пользователя или email
-            password: Пароль
-            ip_address: IP адрес
-            user_agent: User agent
-
-        Returns:
-            Кортеж (успешно, сообщение, данные пользователя, токен сессии)
-        """
-        # Поиск пользователя
         user_data = self.db.get_user_by_username(identifier)
+
         if not user_data:
             user_data = self.db.get_user_by_email(identifier)
 
         if not user_data:
-            return False, 'Неверный логин или пароль', None, None
+            return False, "Неверный логин или пароль", None, None
 
-        # Создание объекта пользователя
-        user = User(
-            user_id=user_data['id'],
-            username=user_data['username'],
-            email=user_data['email'],
-            password_hash=user_data['password_hash'],
-            password_salt=user_data['password_salt'],
-            display_name=user_data['display_name'],
-            avatar_url=user_data['avatar_url'],
-            created_at=user_data['created_at'],
-            last_login=user_data['last_login'],
-            is_active=user_data['is_active'],
-            is_admin=user_data['is_admin'],
-            failed_login_attempts=user_data['failed_login_attempts'],
-            locked_until=user_data['locked_until'],
-            diamonds=user_data['diamonds'],
-            theme=user_data['theme']
-        )
+        user_id = user_data.id
+        pwd_hash = user_data.password_hash
+        salt = user_data.password_salt
+        failed_attempts = user_data.failed_login_attempts
+        locked_until_str = user_data.locked_until
 
-        # Проверка блокировки
-        if user.is_locked():
-            remaining = user.get_lockout_remaining_minutes()
-            return False, f'Аккаунт заблокирован. Попробуйте через {remaining} минут', None, None
+        if locked_until_str:
+            try:
+                lock_time = datetime.fromisoformat(locked_until_str.replace('Z', '+00:00'))  # UTC fix
+                if datetime.now() < lock_time:
+                    remaining_min = max(1, int((lock_time - datetime.now()).total_seconds() / 60))
+                    return False, f"Заблокировано на {remaining_min} мин", None, None
+            except (ValueError, TypeError):
+                pass
 
-        # Проверка пароля
-        if not User.verify_password(password, user.password_hash, user.password_salt):
-            # Увеличение счетчика неудачных попыток
-            new_attempts = user.failed_login_attempts + 1
-            self.db.update_user(user.id, failed_login_attempts=new_attempts)
+        if not verify_password(password, pwd_hash, salt):
+            new_attempts = failed_attempts + 1
+            updates: Dict[str, Any] = {"failed_login_attempts": new_attempts}
 
-            # Блокировка при превышении лимита
             if new_attempts >= 5:
-                lockout_until = datetime.now() + timedelta(minutes=15)
-                self.db.update_user(user.id, locked_until=lockout_until.isoformat())
-                return False, 'Слишком много неудачных попыток. Аккаунт заблокирован на 15 минут', None, None
+                lock_until = datetime.now() + timedelta(minutes=15)
+                updates["locked_until"] = lock_until.isoformat()
+                msg = "Блокировка на 15 мин (5+ попыток)"
+            else:
+                msg = "Неверный логин или пароль"
 
-            return False, 'Неверный логин или пароль', None, None
+            self.db.update_user(user_id, **updates)
+            return False, msg, None, None
 
-        # Сброс счетчика неудачных попыток
         self.db.update_user(
-            user.id,
+            user_id,
             failed_login_attempts=0,
             locked_until=None,
             last_login=datetime.now().isoformat()
         )
 
-        # Создание сессии
-        session_token = Session.generate_token()
-        expires_at = datetime.now() + timedelta(days=30)
+        session_token = generate_session_token()
+        expires_at = (datetime.now() + timedelta(days=30))
 
         self.db.create_session(
-            user_id=user.id,
+            user_id=user_id,
             session_token=session_token,
             expires_at=expires_at,
             ip_address=ip_address,
             user_agent=user_agent
         )
 
-        # Обновление данных пользователя
-        user_data = self.db.get_user_by_id(user.id)
-
-        return True, 'Авторизация успешна', user_data, session_token
+        fresh_data = self.db.get_user_by_id(user_id)
+        return True, "Вход успешен", fresh_data, session_token
 
     def logout_user(self, session_token: str) -> bool:
-        """
-        Выход из системы
-
-        Args:
-            session_token: Токен сессии
-
-        Returns:
-            True если успешно
-        """
         return self.db.delete_session(session_token)
 
-    def validate_session_token(self, session_token: str) -> tuple[bool, Optional[Dict[str, Any]]]:
-        """
-        Проверка токена сессии
-
-        Args:
-            session_token: Токен сессии
-
-        Returns:
-            Кортеж (валиден, данные пользователя)
-        """
+    def validate_session_token(self, session_token: str) -> Tuple[bool, Optional[Dict[str, Any]]]:
         session_data = self.db.validate_session(session_token)
-
         if not session_data:
             return False, None
 
-        # Извлечение данных пользователя из сессии
-        user_data = {
-            'id': session_data['user_id'],
-            'username': session_data['username'],
-            'email': session_data['email'],
-            'display_name': session_data['display_name'],
-            'avatar_url': session_data['avatar_url'],
-            'diamonds': session_data['diamonds'],
-            'theme': session_data['theme'],
-            'is_admin': session_data['is_admin']
+        return True, {
+            "id": session_data.get("user_id"),
+            "username": session_data.get("username"),
+            "email": session_data.get("email"),
+            "display_name": session_data.get("display_name", session_data.get("username")),
+            "avatar_url": session_data.get("avatar_url"),
+            "diamonds": session_data.get("diamonds", 0),
+            "theme": session_data.get("theme", "orange"),
+            "is_admin": session_data.get("is_admin", False)
         }
 
-        return True, user_data
-
-    def change_password(self, user_id: int, old_password: str,
-                        new_password: str) -> tuple[bool, str]:
-        """
-        Изменение пароля
-
-        Args:
-            user_id: ID пользователя
-            old_password: Старый пароль
-            new_password: Новый пароль
-
-        Returns:
-            Кортеж (успешно, сообщение)
-        """
+    def change_password(
+            self,
+            user_id: int,
+            old_password: str,
+            new_password: str
+    ) -> Tuple[bool, str]:
         user_data = self.db.get_user_by_id(user_id)
-
         if not user_data:
-            return False, 'Пользователь не найден'
+            return False, "Пользователь не найден"
 
-        # Проверка старого пароля
-        if not User.verify_password(old_password, user_data['password_hash'],
-                                    user_data['password_salt']):
-            return False, 'Неверный старый пароль'
+        if not verify_password(old_password, user_data["password_hash"], user_data["password_salt"]):
+            return False, "Неверный старый пароль"
 
-        # Хеширование нового пароля
-        pwd_hash, salt = User.hash_password(new_password)
+        new_pwd = (new_password or "").strip()
+        if len(new_pwd) < 6:
+            return False, "Новый пароль: минимум 6 символов"
 
-        # Обновление пароля
-        with self.db.get_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute('''
-                UPDATE users 
-                SET password_hash = ?, password_salt = ?
-                WHERE id = ?
-            ''', (pwd_hash, salt, user_id))
+        new_hash, new_salt = hash_password(new_pwd)
 
-        return True, 'Пароль успешно изменен'
+        self.db.update_user(
+            user_id,
+            password_hash=new_hash,
+            password_salt=new_salt
+        )
+
+        return (True, "Пароль изменён")
+
+
+if __name__ == "__main__":
+    db = Database()
+    auth = AuthService(db)

@@ -12,16 +12,13 @@ from database import Database
 from auth import AuthService
 from game import GameService
 
-# Инициализация приложения
 app = Flask(__name__,
             template_folder='templates',
             static_folder='static')
 
-# Загрузка конфигурации
 app.config.from_object(config['development'])
 
-# Инициализация базы данных и сервисов
-db = Database(app.config['DATABASE_PATH'])
+db = Database("postgresql+psycopg2://postgres:y82AtQ8aM8=m@84.21.191.37:5432/postgres")
 auth_service = AuthService(db)
 game_service = GameService(db)
 
@@ -35,12 +32,7 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
 
-
-# ========== Декораторы ==========
-
 def login_required(f):
-    """Декоратор проверки авторизации"""
-
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'user_id' not in session:
@@ -51,8 +43,6 @@ def login_required(f):
 
 
 def api_login_required(f):
-    """Декоратор проверки авторизации для API"""
-
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'user_id' not in session:
@@ -63,15 +53,13 @@ def api_login_required(f):
 
 
 def admin_required(f):
-    """Декоратор проверки прав администратора"""
-
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'user_id' not in session:
             return redirect(url_for('login_page'))
 
         user = db.get_user_by_id(session['user_id'])
-        if not user or not user.get('is_admin'):
+        if not user or not user.is_admin:
             return render_template('error.html',
                                    message='Доступ запрещен',
                                    code=403), 403
@@ -81,13 +69,8 @@ def admin_required(f):
     return decorated_function
 
 
-# ========== API Роуты ==========
-
-# ----- Авторизация -----
-
 @app.route('/api/register', methods=['POST'])
 def api_register():
-    """API регистрации нового пользователя"""
     try:
         data = request.get_json()
 
@@ -109,20 +92,19 @@ def api_register():
         if not success:
             return jsonify({'error': message}), 400
 
-        # Создание сессии
-        session['user_id'] = user_data['id']
-        session['username'] = user_data['username']
+        session['user_id'] = user_data.id
+        session['username'] = user_data.username
 
         return jsonify({
             'success': True,
             'message': message,
             'user': {
-                'id': user_data['id'],
-                'username': user_data['username'],
-                'email': user_data['email'],
-                'display_name': user_data['display_name'],
-                'diamonds': user_data['diamonds'],
-                'theme': user_data['theme']
+                'id': user_data.id,
+                'username': user_data.username,
+                'email': user_data.email,
+                'display_name': user_data.display_name,
+                'diamonds': user_data.diamonds,
+                'theme': user_data.theme
             }
         }), 201
 
@@ -152,22 +134,21 @@ def api_login():
         if not success:
             return jsonify({'error': message}), 401
 
-        # Создание сессии
-        session['user_id'] = user_data['id']
-        session['username'] = user_data['username']
+        session['user_id'] = user_data.id
+        session['username'] = user_data.username
 
         return jsonify({
             'success': True,
             'message': message,
             'user': {
-                'id': user_data['id'],
-                'username': user_data['username'],
-                'email': user_data['email'],
-                'display_name': user_data['display_name'],
-                'avatar_url': user_data['avatar_url'],
-                'diamonds': user_data['diamonds'],
-                'theme': user_data['theme'],
-                'is_admin': user_data['is_admin']
+                'id': user_data.id,
+                'username': user_data.username,
+                'email': user_data.email,
+                'display_name': user_data.display_name,
+                'avatar_url': user_data.avatar_url,
+                'diamonds': user_data.diamonds,
+                'theme': user_data.theme,
+                'is_admin': user_data.is_admin
             },
             'session_token': session_token
         }), 200
@@ -197,7 +178,6 @@ def api_logout():
 @app.route('/api/profile', methods=['GET'])
 @api_login_required
 def api_get_profile():
-    """API получения профиля"""
     try:
         user = db.get_user_by_id(session['user_id'])
 
@@ -205,23 +185,22 @@ def api_get_profile():
             session.clear()
             return jsonify({'error': 'Пользователь не найден'}), 404
 
-        # Получение статистики
         stats = db.get_user_stats(session['user_id'])
         achievements = db.get_user_achievements(session['user_id'])
 
         return jsonify({
             'success': True,
             'user': {
-                'id': user['id'],
-                'username': user['username'],
-                'email': user['email'],
-                'display_name': user['display_name'],
-                'avatar_url': user['avatar_url'],
-                'diamonds': user['diamonds'],
-                'theme': user['theme'],
-                'created_at': user['created_at'],
-                'last_login': user['last_login'],
-                'is_admin': user['is_admin']
+                'id': user.id,
+                'username': user.username,
+                'email': user.email,
+                'display_name': user.display_name,
+                'avatar_url': user.avatar_url,
+                'diamonds': user.diamonds,
+                'theme': user.theme,
+                'created_at': user.created_at,
+                'last_login': user.last_login,
+                'is_admin': user.is_admin
             },
             'stats': stats,
             'achievements': achievements
@@ -509,17 +488,14 @@ def register_page():
 @app.route('/dashboard')
 @login_required
 def dashboard():
-    """Дашборд пользователя"""
     user = db.get_user_by_id(session['user_id'])
 
     if not user:
         session.clear()
         return redirect(url_for('login_page'))
 
-    # Получение списка игр
     games = game_service.get_available_games(session['user_id'])
 
-    # Получение прогресса
     progress = game_service.get_user_progress(session['user_id'])
 
     return render_template(
@@ -582,7 +558,6 @@ def game_page(game_key):
 @app.route('/profile')
 @login_required
 def profile_page():
-    """Страница профиля"""
     user = db.get_user_by_id(session['user_id'])
 
     if not user:
