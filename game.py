@@ -7,7 +7,11 @@
 import json
 from datetime import datetime
 from typing import Optional, Dict, Any, List
-from database import Database
+
+from flask import session
+from sqlalchemy.orm import Session
+
+from database import Database, Story, Scene, Chapter, User
 from story import StoryService
 
 
@@ -24,30 +28,21 @@ class GameService:
         self.db = db
         self.story_service = StoryService(db)
 
-    def get_game_info(self, game_key: str) -> Optional[Dict[str, Any]]:
-        """
-        Получить информацию об игре/истории по ключу
+    def get_game_info(self, story_id: int) -> Optional[Dict[str, Any]]:
 
-        Args:
-            game_key: Ключ игры/истории
-
-        Returns:
-            Информация об игре или None
-        """
-        # Сначала проверяем в новых историях
-        story = self.story_service.get_story_by_key(game_key)
+        story = self.story_service.get_story_by_id(story_id)
 
         if story:
             return {
-                'key': story['story_key'],
-                'title': story['title'],
-                'description': story['description'] or 'Интерактивная история',
-                'premium': bool(story['premium']),
-                'diamonds_cost': story['diamonds_cost'],
-                'chapters_count': story['chapters_count'],
-                'is_published': bool(story['is_published']),
-                'cover_image': story['cover_image'],
-                'background_image': story['background_image']
+                'key': story.story_key,
+                'title': story.title,
+                'description': story.description,
+                'premium': story.premium,
+                'diamonds_cost': story.diamonds_cost,
+                'chapters_count': story.chapters_count,
+                'is_published': story.is_published,
+                'cover_image': story.cover_image,
+                'background_image': story.background_image
             }
 
         return None
@@ -69,8 +64,8 @@ class GameService:
 
         return games_list
 
-    def can_access_game(self, user_id: int, game_key: str) -> tuple[bool, str]:
-        story = self.story_service.get_story_by_key(game_key)
+    def can_access_game(self, user_id: int, story_id: int) -> tuple[bool, str]:
+        story = self.story_service.get_story_by_id(story_id)
 
         if story:
             if not story.is_published:
@@ -96,65 +91,13 @@ class GameService:
 
         return True, 'Игра доступна за алмазы'
 
-    def purchase_game(self, user_id: int, game_key: str) -> tuple[bool, str]:
-        accessible, message = self.can_access_game(user_id, game_key)
-
-        if not accessible and 'Недостаточно алмазов' in message:
-            return False, message
-
-        # Определяем стоимость
-        diamonds_cost = 0
-        story = self.story_service.get_story_by_key(game_key)
-
-        if story:
-            diamonds_cost = story.get('diamonds_cost', 0)
-
-        # Снимаем алмазы если нужно
-        if diamonds_cost > 0:
-            success = self.db.decrement_diamonds(user_id, diamonds_cost)
-            if not success:
-                return False, 'Недостаточно алмазов'
-
-        # Создание начального сохранения
-        initial_save = {
-            'chapter': 1,
-            'scene': 1,
-            'choices': [],
-            'stats': {
-                'affection': 0,
-                'trust': 0,
-                'passion': 0
-            },
-            'unlocked': True
-        }
-
-        success = self.db.save_game(user_id, game_key, 1, initial_save)
-
-        if success:
-            return True, f'Игра куплена за {diamonds_cost} алмазов'
-        else:
-            # Возврат алмазов при ошибке
-            if diamonds_cost > 0:
-                self.db.increment_diamonds(user_id, diamonds_cost)
-            return False, 'Ошибка покупки игры'
 
     def load_game_state(self, user_id: int, game_key: str,
                         save_slot: int = 1) -> Optional[Dict[str, Any]]:
-        """
-        Загрузка состояния игры
 
-        Args:
-            user_id: ID пользователя
-            game_key: Ключ игры/истории
-            save_slot: Слот сохранения
-
-        Returns:
-            Состояние игры или None
-        """
-        game_state = self.db.load_game(user_id, game_key, save_slot)
+        game_state = self.db.load_game(user_id, g)
 
         if not game_state:
-            # Создание нового сохранения
             game_state = {
                 'chapter': 1,
                 'scene': 1,
@@ -278,80 +221,39 @@ class GameService:
         else:
             return False, 'Ошибка сохранения', None
 
-    def get_game_story(self, game_key: str, chapter: int,
-                       scene: int) -> Optional[Dict[str, Any]]:
-        """
-        Получить сценарий сцены из базы данных
+    @staticmethod
+    def get_current_user_scene(db: Database, user_id: int, story_id: int) -> Optional[Dict[str, Any]]:
+        save_game = db.load_game(user_id, story_id)
 
-        Args:
-            game_key: Ключ игры/истории
-            chapter: Глава
-            scene: Сцена
-
-        Returns:
-            Данные сцены или None
-        """
-        # Получаем историю по ключу
-        story = self.story_service.get_story_by_key(game_key)
-
-
-        # Получаем главу
-        chapters = self.story_service.get_chapters_by_story(story['id'])
-        chapter_data = None
-
-        for ch in chapters:
-            if ch['chapter_number'] == chapter:
-                chapter_data = ch
-                break
-
-        if not chapter_data:
-            return None
-
-        # Получаем сцену
-        scenes = self.story_service.get_scenes_by_chapter(chapter_data['id'])
-        scene_data = None
-
-        for sc in scenes:
-            if sc['scene_number'] == scene:
-                scene_data = sc
-                break
-
-        if not scene_data:
-            return None
-
-        # Получаем варианты выбора
-        choices = self.story_service.get_choices_by_scene(scene_data['id'])
-
-        # Формируем данные для возврата
-        background = scene_data['background_image'] or chapter_data.get('background_image') or story.get(
-            'background_image') or 'background1.jpg'
+        with Session(db.engine) as s:
+            scene = s.get(Scene, save_game.scene_id)
 
         return {
-            'character': scene_data['character_name'],
-            'dialogue': scene_data['dialogue_text'],
-            'background': background,
-            'character_image': scene_data['character_image'] or 'guy.png',
-            'music': scene_data['music_track'],
+            'character': scene.character_name,
+            'dialogue': scene.dialogue_text,
+            'background': scene.background_image if scene.background_image else "",
+            'character_image': scene.character_image,
+            'music': scene.music_track,
             'position': {
-                'x': scene_data['position_x'],
-                'y': scene_data['position_y']
+                'x': scene.position_x,
+                'y': scene.position_y
             },
-            'scale': scene_data['scale'],
+            'scale': scene.scale,
             'choices': [
                 {
-                    'id': choice['id'],
-                    'text': choice['choice_text'],
-                    'premium': bool(choice['premium']),
-                    'diamonds_cost': choice['diamonds_cost'],
-                    'next_scene_id': choice['next_scene_id'],
-                    'next_chapter_id': choice['next_chapter_id'],
+                    'id': choice.id,
+                    'text': choice.choice_text,
+                    'premium': choice.premium,
+                    'diamonds_cost': choice.diamonds_cost,
+                    'next_scene_id': choice.next_scene_id,
+                    'next_chapter_id': choice.next_chapter_id,
                     'effects': {
-                        'affection': choice['affection_change'],
-                        'trust': choice['trust_change'],
-                        'passion': choice['passion_change']
+                        'affection': choice.affection_change,
+                        'trust': choice.trust_change,
+                        'passion': choice.passion_change
                     }
                 }
-                for choice in choices
+                for choice in scene.choices
             ]
         }
 

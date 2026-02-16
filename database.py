@@ -94,18 +94,11 @@ class UserSession(Base):
 
 class GameSave(Base):
     __tablename__ = "game_saves"
-    __table_args__ = (UniqueConstraint("user_id", "game_name", "save_slot", name="uq_game_save"),)
-
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
-    game_name: Mapped[str] = mapped_column(String(100), nullable=False)
-    save_slot: Mapped[int] = mapped_column(nullable=False)
-    save_data: Mapped[str] = mapped_column(Text, nullable=False)  # JSON
-    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
-    updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now())
-
-    user: Mapped["User"] = relationship("User", back_populates="game_saves")
-
+    story_id: Mapped[int] = mapped_column(ForeignKey("stories.id", ondelete="CASCADE"), nullable=False),
+    scene_id: Mapped[[int]] = mapped_column(Integer, nullable=False, default=1)
+    chapter_id: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
 
 class GameStat(Base):
     __tablename__ = "game_stats"
@@ -198,7 +191,7 @@ class Scene(Base):
         "Choice",
         back_populates="scene",
         cascade="all, delete-orphan",
-        foreign_keys="Choice.scene_id",           # ← исправление неоднозначности
+        foreign_keys="Choice.scene_id",
     )
 
 
@@ -410,30 +403,32 @@ class Database:
             result = s.execute(stmt)
             return result.rowcount > 0
 
-    # ── Остальные методы (сохранения, статистика и т.д.) можно добавить по аналогии ──
+    def save_game(self, user_id: int, story_id: int, scene_id: int, chapter_id: int):
+        with Session(self.engine) as s:
+            saved_game = s.query(GameSave).filter_by(user_id=user_id,story_id=story_id).first()
 
-    def save_game(self, user_id: int, game_name: str, save_slot: int, save_data: Dict) -> bool:
-        json_data = json.dumps(save_data, ensure_ascii=False)
-        with self.get_session() as s:
-            stmt = (
-                update(GameSave)
-                .where(
-                    GameSave.user_id == user_id,
-                    GameSave.game_name == game_name,
-                    GameSave.save_slot == save_slot
-                )
-                .values(save_data=json_data, updated_at=func.now())
-            )
-            result = s.execute(stmt)
-            if result.rowcount == 0:
-                save = GameSave(
-                    user_id=user_id,
-                    game_name=game_name,
-                    save_slot=save_slot,
-                    save_data=json_data,
-                )
-                s.add(save)
-            return True
+            if not saved_game:
+                saved_game = GameSave(user_id=user_id,
+                                      story_id=story_id)
+                s.add(saved_game)
+
+            saved_game.scene_id = scene_id
+            saved_game.chapter_id = chapter_id
+
+            s.commit()
+
+    def load_game(self, user_id: int, story_id: int) -> GameSave:
+        with Session(self.engine) as s:
+            saved_game = s.query(GameSave).filter_by(user_id=user_id, story_id=story_id).first()
+
+            if not saved_game:
+                saved_game = GameSave(user_id=user_id,
+                                      story_id=story_id)
+                s.add(saved_game)
+                s.commit()
+
+            return saved_game
+
 
     def get_user_stats(self, user_id: int) -> dict:
         with self.get_session() as s:

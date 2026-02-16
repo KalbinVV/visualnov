@@ -73,11 +73,9 @@ class StoryService:
             return s.get(Story, story_id)
 
     def get_story_by_key(self, story_key: str) -> Optional[Story]:
-        """
-        Получить историю по ключу
-        """
         with self.db.get_session() as s:
             return s.scalar(select(Story).where(Story.story_key == story_key))
+
 
     def get_all_stories(self, published_only: bool = False) -> List[Story]:
         """

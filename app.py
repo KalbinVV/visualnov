@@ -506,47 +506,33 @@ def dashboard():
 
 @app.route('/game/<game_key>')
 @login_required
-def game_page(game_key):
+def game_page(story_id: int):
     user = db.get_user_by_id(session['user_id'])
 
     if not user:
         session.clear()
         return redirect(url_for('login_page'))
 
-    accessible, message = game_service.can_access_game(session['user_id'], game_key)
+    accessible, message = game_service.can_access_game(session['user_id'], story_id)
 
     if not accessible:
         return render_template('error.html', message=message, code=403), 403
 
-    game_info = game_service.get_game_info(game_key)
+    game_info = game_service.get_game_info(story_id)
 
     if not game_info:
         return render_template('error.html', message='Игра не найдена', code=404), 404
 
-    # Загрузка состояния игры
-    game_state = game_service.load_game_state(session['user_id'], game_key)
+    game_scene = GameService.get_current_user_scene(db, user.id, story_id)
 
-    # Получение текущей сцены
-    chapter = game_state.get('chapter', 1)
-    scene = game_state.get('scene', 1)
-    story_data = game_service.get_game_story(game_key, chapter, scene)
-
-    if not story_data:
-        # Если сцена не найдена, попробуем загрузить первую сцену
-        game_state['chapter'] = 1
-        game_state['scene'] = 1
-        story_data = game_service.get_game_story(game_key, 1, 1)
-
-        if not story_data:
-            return render_template('error.html', message='Сцена не найдена', code=404), 404
+    if not game_scene:
+        return render_template('error.html', message='Сцена не найдена', code=404), 404
 
     return render_template(
         'game_2.html',
         user=user,
-        game_key=game_key,
-        game_info=game_info,
-        game_state=game_state,
-        story=story_data
+        story_id=story_id,
+        game_data=game_scene
     )
 
 
