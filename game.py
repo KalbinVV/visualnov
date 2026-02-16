@@ -181,7 +181,6 @@ class GameService:
                 if diamonds_cost > 0:
                     self.db.decrement_diamonds(user_id, diamonds_cost)
 
-            # ===== ВАЖНО: Обработка переходов на следующую сцену или главу =====
             next_scene_id = choice_data.get('next_scene_id')
             next_chapter_id = choice_data.get('next_chapter_id')
 
