@@ -557,9 +557,7 @@
 </div>
 
 <script>
-  //let gameState = {{ game_state|tojson }};
-  let currentStory = {{ story|tojson }};
-  let gameKey = '{{ game_key }}';
+  let gameInfo = {{ game_info|tojson }};
 
   function isMobile() {
     return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
