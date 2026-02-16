@@ -1243,21 +1243,17 @@ function renderChapters() {
   });
 }
 
-// Выбор главы
 async function selectChapter(chapterId) {
   currentChapterId = chapterId;
   renderChapters();
 
-  // Обновить заголовок
   const chapter = chapters.find(c => c.id === chapterId);
   document.getElementById('currentChapterNumber').textContent = chapter.chapter_number;
   document.getElementById('currentChapterTitle').textContent = chapter.title || 'Без названия';
 
-  // Загрузить сцены
   await loadScenes(chapterId);
 }
 
-// Загрузка сцен
 async function loadScenes(chapterId) {
   try {
     const response = await fetch(`/api/chapters/${chapterId}/scenes`);
@@ -1273,7 +1269,6 @@ async function loadScenes(chapterId) {
   }
 }
 
-// Отображение сцен
 function renderScenes() {
   const container = document.getElementById('scenesList');
   container.innerHTML = '';
@@ -1299,7 +1294,6 @@ function renderScenes() {
       <div class="scene-number">Сцена ${scene.scene_number}</div>
       <div class="scene-character">${scene.character_name}</div>
       <div class="scene-dialogue">${scene.dialogue_text.substring(0, 60)}${scene.dialogue_text.length > 60 ? '...' : ''}</div>
-      <div class="scene-choices">${scene.choices ? scene.choices.length : 0} вариантов</div>
     `;
 
     container.appendChild(sceneEl);

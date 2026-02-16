@@ -847,8 +847,6 @@ def api_create_chapter():
         if not chapter_id:
             return jsonify({'error': 'Ошибка создания главы'}), 500
 
-        chapter = story_service.get_chapter_by_id(chapter_id)
-
         return jsonify({
             'success': True,
             'message': 'Глава создана'
@@ -909,19 +907,16 @@ def api_delete_chapter(chapter_id):
 @app.route('/api/chapters/<int:chapter_id>/scenes', methods=['GET'])
 @admin_required
 def api_get_scenes(chapter_id):
-    """API получения сцен главы"""
     try:
         scenes = story_service.get_scenes_by_chapter(chapter_id)
 
-        # Добавить варианты выбора для каждой сцены
-        for scene in scenes:
-            scene_id = scene['id']
-            choices = story_service.get_choices_by_scene(scene_id)
-            scene['choices'] = choices
-
         return jsonify({
             'success': True,
-            'scenes': scenes
+            'scenes': [{'id': scene.id,
+                        'scene_number': scene.scene_number,
+                        'character_name': scene.character_name,
+                        'dialogue_text': scene.dialogue_text,
+                        } for scene in scenes]
         }), 200
 
     except Exception as e:
@@ -931,7 +926,6 @@ def api_get_scenes(chapter_id):
 @app.route('/api/scenes', methods=['POST'])
 @admin_required
 def api_create_scene():
-    """API создания сцены"""
     try:
         data = request.get_json()
 

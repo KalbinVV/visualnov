@@ -223,8 +223,6 @@ class StoryService:
 
             return True
 
-    # ========== CRUD для сцен ==========
-
     def create_scene(
         self,
         chapter_id: int,
@@ -237,11 +235,8 @@ class StoryService:
         position_x: int = 0,
         position_y: int = 0,
         scale: float = 1.0,
-        effects: Optional[str] = None  # Добавлено поле effects из модели
+        effects: Optional[str] = None
     ) -> Optional[int]:
-        """
-        Создать сцену
-        """
         with self.db.get_session() as s:
             try:
                 scene = Scene(
@@ -260,7 +255,6 @@ class StoryService:
                 s.add(scene)
                 s.flush()
 
-                # Обновить scenes_count в истории (упрощённый subquery)
                 story_id_sub = select(Chapter.story_id).where(Chapter.id == chapter_id).scalar_subquery()
                 scenes_count_sub = (
                     select(func.count(Scene.id))
@@ -274,7 +268,8 @@ class StoryService:
                 )
 
                 return scene.id
-            except IntegrityError:
+            except IntegrityError as e:
+                print(e)
                 s.rollback()
                 return None
             except Exception as e:
