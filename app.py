@@ -851,8 +851,7 @@ def api_create_chapter():
 
         return jsonify({
             'success': True,
-            'message': 'Глава создана',
-            'chapter': chapter
+            'message': 'Глава создана'
         }), 201
 
     except Exception as e:
