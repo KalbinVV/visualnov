@@ -405,8 +405,7 @@ class Database:
             saved_game = s.query(GameSave).filter_by(user_id=user_id,story_id=story_id).first()
 
             if not saved_game:
-                saved_game = GameSave(user_id=user_id,
-                                          story_id=story_id)
+                saved_game = GameSave(user_id=user_id, story_id=story_id)
 
                 s.add(saved_game)
                 s.commit()
