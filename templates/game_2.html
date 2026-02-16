@@ -631,7 +631,7 @@
 
   async function makeChoice(choiceId) {
     try {
-      const response = await fetch(`/api/games/${story_id}/choice`, {
+      const response = await fetch(`/api/games/${storyId}/choice`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
