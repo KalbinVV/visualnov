@@ -1237,7 +1237,7 @@ function renderChapters() {
     chapterEl.onclick = () => selectChapter(chapter.id);
 
     chapterEl.innerHTML = `
-      <div class="chapter-number">챕터 ${chapter.chapter_number}</div>
+      <div class="chapter-number">Глава ${chapter.chapter_number}</div>
       <div class="chapter-title">${chapter.title || 'Без названия'}</div>
       <div class="chapter-scenes">${chapter.scenes ? chapter.scenes.length : 0} сцен</div>
     `;

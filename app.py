@@ -1,9 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Любовный симулятор - Веб приложение
-Автор: V.V. Kalbin
-"""
+
 
 from flask import Flask, request, jsonify, session, render_template, redirect, url_for, make_response
 from functools import wraps
