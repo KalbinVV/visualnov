@@ -1025,7 +1025,6 @@ def api_get_choices(scene_id):
 @app.route('/api/choices', methods=['POST'])
 @admin_required
 def api_create_choice():
-    """API создания варианта выбора"""
     try:
         data = request.get_json()
 
@@ -1051,15 +1050,9 @@ def api_create_choice():
         if not choice_id:
             return jsonify({'error': 'Ошибка создания варианта'}), 500
 
-        with db.get_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute('SELECT * FROM choices WHERE id = ?', (choice_id,))
-            choice = dict(cursor.fetchone())
-
         return jsonify({
             'success': True,
-            'message': 'Вариант создан',
-            'choice': choice
+            'message': 'Вариант создан'
         }), 201
 
     except Exception as e:

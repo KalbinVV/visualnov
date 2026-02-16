@@ -343,8 +343,6 @@ class StoryService:
 
             return True
 
-    # ========== CRUD для вариантов выбора ==========
-
     def create_choice(
         self,
         scene_id: int,
@@ -363,9 +361,6 @@ class StoryService:
         only_leader: Optional[bool] = None,
         is_locked: bool = False
     ) -> Optional[int]:
-        """
-        Создать вариант выбора
-        """
         with self.db.get_session() as s:
             try:
                 choice = Choice(
@@ -388,7 +383,8 @@ class StoryService:
                 s.add(choice)
                 s.flush()
                 return choice.id
-            except IntegrityError:
+            except IntegrityError as e:
+                print(e)
                 s.rollback()
                 return None
             except Exception as e:
@@ -558,7 +554,6 @@ class StoryService:
                 print(f"Пропуск главы {chapter_data.get('chapter_number')}: ошибка создания")
                 continue
 
-            # Создать сцены
             for scene_data in chapter_data.get('scenes', []):
                 scene_id = self.create_scene(
                     chapter_id=chapter_id,
@@ -578,7 +573,6 @@ class StoryService:
                     print(f"Пропуск сцены {scene_data['scene_number']}: ошибка создания")
                     continue
 
-                # Создать варианты выбора
                 for choice_data in scene_data.get('choices', []):
                     self.create_choice(
                         scene_id=scene_id,
