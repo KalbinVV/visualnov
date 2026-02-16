@@ -504,7 +504,7 @@ def dashboard():
     )
 
 
-@app.route('/game/<game_key>')
+@app.route('/game/<story_id>')
 @login_required
 def game_page(story_id: int):
     user = db.get_user_by_id(session['user_id'])
