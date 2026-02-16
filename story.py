@@ -285,9 +285,6 @@ class StoryService:
             return s.get(Scene, scene_id)
 
     def get_scenes_by_chapter(self, chapter_id: int) -> List[Scene]:
-        """
-        Получить все сцены главы
-        """
         with self.db.get_session() as s:
             return s.scalars(
                 select(Scene)

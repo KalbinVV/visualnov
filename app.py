@@ -902,8 +902,6 @@ def api_delete_chapter(chapter_id):
         return jsonify({'error': f'Ошибка удаления главы: {str(e)}'}), 500
 
 
-# ----- Сцены -----
-
 @app.route('/api/chapters/<int:chapter_id>/scenes', methods=['GET'])
 @admin_required
 def api_get_scenes(chapter_id):
