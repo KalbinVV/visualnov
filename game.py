@@ -93,10 +93,9 @@ class GameService:
         return True, 'Игра доступна за алмазы'
 
 
-    def load_game_state(self, user_id: int, game_key: str,
-                        save_slot: int = 1) -> Optional[Dict[str, Any]]:
+    def load_game_state(self, user_id: int, story_id: int) -> Optional[Dict[str, Any]]:
 
-        game_state = self.db.load_game(user_id, g)
+        game_state = self.db.load_game(user_id, story_id)
 
         if not game_state:
             game_state = {
