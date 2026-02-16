@@ -584,16 +584,17 @@ def admin_page():
         cursor = conn.connection.cursor()
 
         cursor.execute('SELECT COUNT(*) as count FROM users')
-        total_users = cursor.fetchone()['count']
+        total_users = cursor.fetchone()[0]
 
         cursor.execute('SELECT COUNT(*) as count FROM game_stats')
-        total_games_played = cursor.fetchone()['count']
+
+        total_games_played = cursor.fetchone()[0]
 
         cursor.execute('SELECT SUM(play_time) as total FROM game_stats')
-        total_play_time = cursor.fetchone()['total'] or 0
+        total_play_time = cursor.fetchone()[0] or 0
 
         cursor.execute('SELECT * FROM users ORDER BY created_at DESC LIMIT 10')
-        recent_users = [dict(row) for row in cursor.fetchall()]
+        recent_users = [row for row in cursor.fetchall()]
 
     return render_template(
         'admin.html',
