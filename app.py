@@ -927,17 +927,11 @@ def api_update_scene(scene_id):
         if not data:
             return jsonify({'error': 'Нет данных'}), 400
 
-        success = story_service.update_scene(scene_id, **data)
-
-        if not success:
-            return jsonify({'error': 'Ошибка обновления сцены'}), 500
-
-        scene = story_service.get_scene_by_id(scene_id)
+        story_service.update_scene(scene_id, **data)
 
         return jsonify({
             'success': True,
-            'message': 'Сцена обновлена',
-            'scene': scene
+            'message': 'Сцена обновлена'
         }), 200
 
     except Exception as e:
