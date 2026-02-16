@@ -920,7 +920,6 @@ def api_create_scene():
 @app.route('/api/scenes/<int:scene_id>', methods=['PUT'])
 @admin_required
 def api_update_scene(scene_id):
-    """API обновления сцены"""
     try:
         data = request.get_json()
 

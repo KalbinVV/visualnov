@@ -290,28 +290,14 @@ class StoryService:
                 .order_by(Scene.scene_number)
             ).all()
 
-    def update_scene(self, scene_id: int, **kwargs) -> bool:
-        """
-        Обновить сцену
-        """
-        allowed_fields = {
-            'character_name', 'dialogue_text', 'character_image',
-            'background_image', 'music_track', 'position_x', 'position_y',
-            'scale', 'effects'  # Добавлено поле effects
-        }
-        data = {k: v for k, v in kwargs.items() if k in allowed_fields}
+    def update_scene(self, scene_id: int, **kwargs):
+        with Session(self.db.engine) as s:
+            scene = s.get(Scene, scene_id)
 
-        if not data:
-            return False
+            for k, v in kwargs.items():
+                setattr(scene, k, v)
 
-        with self.db.get_session() as s:
-            stmt = (
-                update(Scene)
-                .where(Scene.id == scene_id)
-                .values(**data)
-            )
-            result = s.execute(stmt)
-            return result.rowcount > 0
+            s.commit()
 
     def delete_scene(self, scene_id: int) -> bool:
         """
