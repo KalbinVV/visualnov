@@ -60,6 +60,7 @@ class GameService:
                 'chapters': story.chapters_count,
                 'premium': story.premium,
                 'diamonds_cost': story.diamonds_cost,
+                'id': story.id
             })
 
         return games_list
