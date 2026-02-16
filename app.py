@@ -578,12 +578,10 @@ def profile_page():
 @app.route('/admin')
 @admin_required
 def admin_page():
-    """Административная панель"""
     user = db.get_user_by_id(session['user_id'])
 
-    # Статистика базы данных
     with db.get_connection() as conn:
-        cursor = conn.cursor()
+        cursor = conn.connection.cursor()
 
         cursor.execute('SELECT COUNT(*) as count FROM users')
         total_users = cursor.fetchone()['count']
