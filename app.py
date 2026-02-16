@@ -725,8 +725,7 @@ def api_update_story(story_id):
 
         return jsonify({
             'success': True,
-            'message': 'История обновлена',
-            'story': story
+            'message': 'История обновлена'
         }), 200
 
     except Exception as e:
