@@ -22,7 +22,7 @@ from sqlalchemy import (
     select,
     update,
     delete,
-    UniqueConstraint,
+    UniqueConstraint, Connection,
 )
 from sqlalchemy.orm import (
     DeclarativeBase,
@@ -280,6 +280,9 @@ class Database:
     def init_database(self):
         Base.metadata.create_all(self.engine)
         print("✓ Все таблицы созданы")
+
+    def get_connection(self) -> Connection:
+        return self.engine.connect()
 
     @contextmanager
     def get_session(self):
