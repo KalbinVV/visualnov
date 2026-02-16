@@ -1204,7 +1204,6 @@ async function loadChapters() {
       chapters = data.chapters;
       renderChapters();
 
-      // Выбрать первую главу если есть
       if (chapters.length > 0) {
         selectChapter(chapters[0].id);
       }

@@ -812,19 +812,14 @@ def api_import_story():
 @app.route('/api/stories/<int:story_id>/chapters', methods=['GET'])
 @admin_required
 def api_get_chapters(story_id):
-    """API получения глав истории"""
     try:
         chapters = story_service.get_chapters_by_story(story_id)
 
-        # Добавить сцены для каждой главы
-        for chapter in chapters:
-            chapter_id = chapter['id']
-            scenes = story_service.get_scenes_by_chapter(chapter_id)
-            chapter['scenes'] = scenes
-
         return jsonify({
             'success': True,
-            'chapters': chapters
+            'chapters': [{'id': chapter.id,
+                          'title': chapter.title,
+                          'scenes': chapter.scenes} for chapter in chapters]
         }), 200
 
     except Exception as e:
