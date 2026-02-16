@@ -11,7 +11,7 @@ from typing import Optional, Dict, Any, List
 from flask import session
 from sqlalchemy.orm import Session
 
-from database import Database, Story, Scene, Chapter, User
+from database import Database, Story, Scene, Chapter, User, Choice
 from story import StoryService
 
 
@@ -133,91 +133,16 @@ class GameService:
 
         return self.db.save_game(user_id, game_key, save_slot, game_state)
 
-    def make_choice(self, user_id: int, game_key: str,
-                    choice_id: int, save_slot: int = 1) -> tuple[bool, str, Optional[Dict[str, Any]]]:
-        """
-        Сделать выбор в игре с обработкой переходов
+    def make_choice(self, user_id: int, story_id: int,
+                    choice_id: int) -> tuple[bool, str, int, int]:
 
-        Args:
-            user_id: ID пользователя
-            game_key: Ключ игры/истории
-            choice_id: ID выбора
-            save_slot: Слот сохранения
+        with Session(self.db.engine) as s:
+            choice = s.get(Choice, choice_id)
 
-        Returns:
-            Кортеж (успешно, сообщение, новое состояние)
-        """
-        game_state = self.load_game_state(user_id, game_key, save_slot)
+            self.db.save_game(user_id, story_id, choice.next_scene_id, choice.next_chapter_id)
 
-        if not game_state:
-            return False, 'Игра не найдена', None
+            return True, '', choice.next_scene_id, choice.next_chapter_id
 
-        # Добавление выбора в историю
-        if 'choices' not in game_state:
-            game_state['choices'] = []
-
-        game_state['choices'].append({
-            'choice_id': choice_id,
-            'timestamp': datetime.now().isoformat(),
-            'scene': game_state.get('scene', 1),
-            'chapter': game_state.get('chapter', 1)
-        })
-
-        # Получаем данные варианта выбора из базы
-        choice_data = self.db.get_choice_by_id(choice_id)
-
-        if choice_data:
-            # Обновляем статистику
-            if 'stats' not in game_state:
-                game_state['stats'] = {'affection': 0, 'trust': 0, 'passion': 0}
-
-            game_state['stats']['affection'] = game_state['stats'].get('affection', 0) + choice_data['affection_change']
-            game_state['stats']['trust'] = game_state['stats'].get('trust', 0) + choice_data['trust_change']
-            game_state['stats']['passion'] = game_state['stats'].get('passion', 0) + choice_data['passion_change']
-
-            # Обработка премиум выбора (снимаем алмазы)
-            if choice_data['premium']:
-                diamonds_cost = choice_data['diamonds_cost']
-                if diamonds_cost > 0:
-                    self.db.decrement_diamonds(user_id, diamonds_cost)
-
-            next_scene_id = choice_data.get('next_scene_id')
-            next_chapter_id = choice_data.get('next_chapter_id')
-
-            if next_scene_id:
-                # Переход на конкретную сцену
-                next_scene = self.db.get_scene_by_id(next_scene_id)
-                if next_scene:
-                    # Получаем главу, к которой принадлежит сцена
-                    chapter = self.db.get_chapter_by_id(next_scene['chapter_id'])
-                    if chapter:
-                        game_state['chapter'] = chapter['chapter_number']
-                        game_state['scene'] = next_scene['scene_number']
-                    else:
-                        return False, 'Глава для следующей сцены не найдена', None
-                else:
-                    return False, 'Следующая сцена не найдена', None
-
-            elif next_chapter_id:
-                # Переход на конкретную главу (начинаем с первой сцены)
-                next_chapter = self.db.get_chapter_by_id(next_chapter_id)
-                if next_chapter:
-                    game_state['chapter'] = next_chapter['chapter_number']
-                    game_state['scene'] = 1  # Начинаем с первой сцены главы
-                else:
-                    return False, 'Следующая глава не найдена', None
-
-            else:
-                # Продолжаем следующую сцену в текущей главе
-                game_state['scene'] = game_state.get('scene', 1) + 1
-
-        # Сохранение состояния
-        success = self.save_game_state(user_id, game_key, game_state, save_slot)
-
-        if success:
-            return True, 'Выбор сделан', game_state
-        else:
-            return False, 'Ошибка сохранения', None
 
     @staticmethod
     def get_current_user_scene_data(db: Database, user_id: int, story_id: int) -> Optional[Dict[str, Any]]:

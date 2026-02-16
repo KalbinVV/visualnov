@@ -383,10 +383,9 @@ def api_save_game(game_key):
         return jsonify({'error': f'Ошибка сохранения игры: {str(e)}'}), 500
 
 
-@app.route('/api/games/<game_key>/choice', methods=['POST'])
+@app.route('/api/games/<story_id>/choice', methods=['POST'])
 @api_login_required
-def api_make_choice(game_key):
-    """API совершения выбора в игре"""
+def api_make_choice(story_id: int):
     try:
         data = request.get_json()
 
@@ -409,7 +408,6 @@ def api_make_choice(game_key):
         if not success:
             return jsonify({'error': message}), 400
 
-        # Получение следующей сцены
 
         choice = db.get_choice_by_id(choice_id)
 
@@ -532,7 +530,7 @@ def game_page(story_id: int):
         user=user,
         story_id=story_id,
         scene_data=scene_data,
-        game_info=game_info
+        game_info=game_info,
     )
 
 
