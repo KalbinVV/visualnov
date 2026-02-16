@@ -226,7 +226,7 @@ class GameService:
         save_game = db.load_game(user_id, story_id)
 
         with Session(db.engine) as s:
-            scene = s.query(Scene).filter_by(id=save_game.scene_id).first()
+            scene = s.query(Scene).filter_by(id=save_game[1]).first()
 
             return {
                 'character': scene.character_name,

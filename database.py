@@ -402,14 +402,24 @@ class Database:
 
     def save_game(self, user_id: int, story_id: int, scene_id: int, chapter_id: int):
         with Session(self.engine) as s:
-            saved_game = self.load_game(user_id, story_id)
+            saved_game = s.query(Session).filter_by(user_id=user_id,story_id=story_id).first()
+
+            if not saved_game:
+                if not saved_game:
+                    saved_game = GameSave(user_id=user_id,
+                                          story_id=story_id)
+
+                    first_chapter_in_story = s.query(Chapter).filter_by(story_id=story_id).first()
+
+                    s.add(saved_game)
+                    s.commit()
 
             saved_game.scene_id = scene_id
             saved_game.chapter_id = chapter_id
 
             s.commit()
 
-    def load_game(self, user_id: int, story_id: int) -> GameSave:
+    def load_game(self, user_id: int, story_id: int) -> tuple[int, int]:
         with Session(self.engine) as s:
             saved_game = s.query(GameSave).filter_by(user_id=user_id, story_id=story_id).first()
 
@@ -425,7 +435,7 @@ class Database:
                 s.add(saved_game)
                 s.commit()
 
-            return saved_game
+            return saved_game.chapter_id, saved_game.scene_id
 
 
     def get_user_stats(self, user_id: int) -> dict:
