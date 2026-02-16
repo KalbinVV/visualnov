@@ -456,18 +456,8 @@ class GameService:
         )
 
     def get_user_progress(self, user_id: int) -> Dict[str, Any]:
-        """
-        Получить прогресс пользователя во всех играх
-
-        Args:
-            user_id: ID пользователя
-
-        Returns:
-            Словарь с прогрессом
-        """
         saves = {}
 
-        # Получаем все опубликованные истории
         stories = self.story_service.get_all_stories(published_only=True)
 
         for story in stories:

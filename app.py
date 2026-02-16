@@ -497,13 +497,10 @@ def dashboard():
 
     games = game_service.get_available_games(session['user_id'])
 
-    progress = game_service.get_user_progress(session['user_id'])
-
     return render_template(
         'dashboard.html',
         user=user,
-        games=games,
-        progress=progress
+        games=games
     )
 
 
