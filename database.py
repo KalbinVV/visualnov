@@ -226,8 +226,21 @@ class Choice(Base):
     scene: Mapped["Scene"] = relationship(
         "Scene",
         back_populates="choices",
-        foreign_keys=[scene_id],                  # ← для ясности (рекомендуется)
+        foreign_keys=[scene_id],
     )
+
+    @staticmethod
+    def as_dict(choice) -> dict:
+        return {'choice_number': choice.choice_number,
+                'choice_text': choice.choice_text,
+                'next_scene_id': choice.next_scene_id,
+                'next_chapter_id': choice.next_chapter_id,
+                'effect_type': choice.effect_type,
+                'affection_change': choice.affection_change,
+                'trust_change': choice.trust_change,
+                'passion_change': choice.passion_change,
+                'premium': choice.premium,
+                'diamonds_cost': choice.diamonds_cost}
 
 
 class Character(Base):

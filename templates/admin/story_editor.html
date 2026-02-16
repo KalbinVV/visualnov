@@ -1748,7 +1748,6 @@ async function saveChoice(e) {
         })
       });
     } else {
-      // Создание
       response = await fetch('/api/choices', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1785,17 +1784,14 @@ async function saveChoice(e) {
   }
 }
 
-// Редактировать вариант выбора
 async function editChoice(choiceId) {
   try {
-    // Загрузить данные варианта
     const response = await fetch(`/api/choices/${choiceId}`);
     const data = await response.json();
 
     if (data.success && data.choice) {
       openChoiceModal(null, choiceId);
 
-      // Заполнить форму данными через небольшую задержку для корректного отображения
       setTimeout(() => {
         document.getElementById('choiceId').value = choiceId;
         document.getElementById('choiceNumber').value = data.choice.choice_number;

@@ -10,7 +10,7 @@ import os
 from sqlalchemy.orm import Session
 
 from config import config
-from database import Database, User
+from database import Database, User, Choice
 from auth import AuthService
 from game import GameService
 
@@ -1081,15 +1081,12 @@ def api_update_choice(choice_id):
         if not success:
             return jsonify({'error': 'Ошибка обновления варианта'}), 500
 
-        with db.get_connection() as conn:
-            cursor = conn.connection.cursor()
-            cursor.execute('SELECT * FROM choices WHERE id = ?', (choice_id,))
-            choice = dict(cursor.fetchone())
+        with Session(db.engine) as s:
+            choice = s.query(Choice).filter_by(id = choice_id).first()
 
         return jsonify({
             'success': True,
-            'message': 'Вариант обновлен',
-            'choice': choice
+            'message': 'Вариант обновлен'
         }), 200
 
     except Exception as e:
@@ -1146,19 +1143,13 @@ def admin_story_create_page():
 @app.route('/api/choices/<int:choice_id>', methods=['GET'])
 @admin_required
 def api_get_choice(choice_id):
-    """API получения варианта выбора по ID"""
     try:
-        with db.get_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute('SELECT * FROM choices WHERE id = ?', (choice_id,))
-            choice = cursor.fetchone()
-
-            if not choice:
-                return jsonify({'error': 'Вариант не найден'}), 404
+        with Session(db.engine) as s:
+            choice = s.query(Choice).filter_by(id=choice_id).first()
 
             return jsonify({
                 'success': True,
-                'choice': dict(choice)
+                'choice': Choice.as_dict(choice)
             }), 200
 
     except Exception as e:
