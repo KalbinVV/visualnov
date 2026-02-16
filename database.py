@@ -64,9 +64,6 @@ class User(Base):
     user_sessions: Mapped[List["UserSession"]] = relationship(
         "UserSession", back_populates="user", cascade="all, delete-orphan"
     )
-    game_saves: Mapped[List["GameSave"]] = relationship(
-        "GameSave", back_populates="user", cascade="all, delete-orphan"
-    )
     game_stats: Mapped[List["GameStat"]] = relationship(
         "GameStat", back_populates="user", cascade="all, delete-orphan"
     )
