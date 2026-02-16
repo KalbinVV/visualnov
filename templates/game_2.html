@@ -630,7 +630,7 @@
     currentStory.choices.forEach(choice => {
       const choiceBtn = document.createElement('div');
       choiceBtn.className = `choice`;
-      choiceBtn.innerHTML = choice.text + (choice.premium ? ' <span class="premium-mark">💎</span>' : '');
+      choiceBtn.innerHTML = choice.text + (choice.premium ? ' <span class="premium-mark">' + choice.diamonds_cost + '💎</span>' : '');
       choiceBtn.onclick = () => makeChoice(choice.id);
       choicesContainer.appendChild(choiceBtn);
     });
