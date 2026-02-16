@@ -1021,7 +1021,8 @@ def api_get_choices(scene_id):
                          'affection_change': choice.affection_change,
                          'trust_change': choice.trust_change,
                          'passion_change': choice.passion_change,
-                         'premium': choice.premium} for choice in choices]
+                         'premium': choice.premium,
+                         'choice_text': choice.choice_text} for choice in choices]
         }), 200
 
     except Exception as e:
