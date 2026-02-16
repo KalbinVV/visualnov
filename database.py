@@ -158,7 +158,6 @@ class Story(Base):
     story_characters: Mapped[List["StoryCharacter"]] = relationship("StoryCharacter", back_populates="story", cascade="all, delete-orphan")
 
 
-
 class Chapter(Base):
     __tablename__ = "chapters"
     __table_args__ = (UniqueConstraint("story_id", "chapter_number", name="uq_chapter"),)

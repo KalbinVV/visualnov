@@ -39,12 +39,6 @@ class StoryService:
         diamonds_cost: int = 0,
         author_id: Optional[int] = None
     ) -> Optional[int]:
-        """
-        Создать новую историю
-
-        Returns:
-            ID созданной истории или None
-        """
         with self.db.get_session() as s:
             try:
                 story = Story(
@@ -61,7 +55,7 @@ class StoryService:
                     is_published=False
                 )
                 s.add(story)
-                s.flush()  # Получаем ID без коммита
+                s.flush()
                 return story.id
             except IntegrityError:
                 s.rollback()
