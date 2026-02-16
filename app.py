@@ -7,8 +7,10 @@ from functools import wraps
 from datetime import datetime
 import os
 
+from sqlalchemy.orm import Session
+
 from config import config
-from database import Database
+from database import Database, User
 from auth import AuthService
 from game import GameService
 
@@ -593,8 +595,8 @@ def admin_page():
         cursor.execute('SELECT SUM(play_time) as total FROM game_stats')
         total_play_time = cursor.fetchone()[0] or 0
 
-        cursor.execute('SELECT * FROM users ORDER BY created_at DESC LIMIT 10')
-        recent_users = [row for row in cursor.fetchall()]
+        with Session(db.engine) as s:
+            users = s.query(User).all()
 
     return render_template(
         'admin.html',
@@ -602,7 +604,7 @@ def admin_page():
         total_users=total_users,
         total_games_played=total_games_played,
         total_play_time=total_play_time,
-        recent_users=recent_users
+        recent_users=users
     )
 
 
