@@ -946,12 +946,9 @@ def api_create_scene():
         if not scene_id:
             return jsonify({'error': 'Ошибка создания сцены'}), 500
 
-        scene = story_service.get_scene_by_id(scene_id)
-
         return jsonify({
             'success': True,
-            'message': 'Сцена создана',
-            'scene': scene
+            'message': 'Сцена создана'
         }), 201
 
     except Exception as e:
@@ -1069,7 +1066,6 @@ def api_create_choice():
 @app.route('/api/choices/<int:choice_id>', methods=['PUT'])
 @admin_required
 def api_update_choice(choice_id):
-    """API обновления варианта выбора"""
     try:
         data = request.get_json()
 
@@ -1080,9 +1076,6 @@ def api_update_choice(choice_id):
 
         if not success:
             return jsonify({'error': 'Ошибка обновления варианта'}), 500
-
-        with Session(db.engine) as s:
-            choice = s.query(Choice).filter_by(id = choice_id).first()
 
         return jsonify({
             'success': True,
