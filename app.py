@@ -280,12 +280,11 @@ def api_get_games():
         return jsonify({'error': f'Ошибка получения списка игр: {str(e)}'}), 500
 
 
-@app.route('/api/games/<game_key>/access', methods=['GET'])
+@app.route('/api/games/<game_id>/access', methods=['GET'])
 @api_login_required
-def api_check_game_access(game_key):
-    """API проверки доступа к игре"""
+def api_check_game_access(game_id: int):
     try:
-        accessible, message = game_service.can_access_game(session['user_id'], game_key)
+        accessible, message = game_service.can_access_game(session['user_id'], game_id)
 
         return jsonify({
             'accessible': accessible,

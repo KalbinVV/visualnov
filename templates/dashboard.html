@@ -450,11 +450,7 @@ function renderGames(games) {
       </div>
       <div class="game-description">${game.description}</div>
       <div class="game-meta">
-        <button class="game-action ${hasSave ? '' : 'secondary'}">
-          ${actionText}
-        </button>
       </div>
-      ${hasSave ? `<div class="game-saves">Сохранений: <span>${game.saves.length}</span></div>` : ''}
     `;
     
     gamesGrid.appendChild(gameCard);
@@ -463,17 +459,15 @@ function renderGames(games) {
 
 function handleGameClick(game) {
   if (game.premium && (!game.saves || game.saves.length === 0)) {
-    // Проверить доступ
-    checkGameAccess(game.key);
+    checkGameAccess(game.id);
   } else {
-    // Перейти к игре
-    window.location.href = `/game/${game.key}`;
+    window.location.href = `/game/${game.id}`;
   }
 }
 
-async function checkGameAccess(gameKey) {
+async function checkGameAccess(gameId) {
   try {
-    const response = await fetch(`/api/games/${gameKey}/access`);
+    const response = await fetch(`/api/games/${gameId}/access`);
     const data = await response.json();
     
     if (data.accessible) {
