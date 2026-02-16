@@ -558,6 +558,7 @@
 
 <script>
   let gameInfo = {{ game_info|tojson }};
+  let sceneData = {{ scene_data|tojson }};
 
   function isMobile() {
     return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
