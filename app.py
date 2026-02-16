@@ -819,7 +819,7 @@ def api_get_chapters(story_id):
             'success': True,
             'chapters': [{'id': chapter.id,
                           'title': chapter.title,
-                          'scenes': chapter.scenes} for chapter in chapters]
+                          'chapter_number': chapter.chapter_number} for chapter in chapters]
         }), 200
 
     except Exception as e:
