@@ -389,52 +389,16 @@ def api_make_choice(story_id: int):
     try:
         data = request.get_json()
 
-        if not data:
-            return jsonify({'error': 'Нет данных'}), 400
-
         choice_id = data.get('choice_id')
-        save_slot = data.get('slot', 1)
 
-        if not choice_id:
-            return jsonify({'error': 'Не указан выбор'}), 400
-
-        success, message, game_state = game_service.make_choice(
-            session['user_id'],
-            game_key,
-            choice_id,
-            save_slot
-        )
-
-        if not success:
-            return jsonify({'error': message}), 400
-
-
-        choice = db.get_choice_by_id(choice_id)
-
-        if choice['next_scene_id']:
-            scene = int(choice['next_scene_id'])
-        else:
-            scene = game_state.get('scene', 1) + 1
-
-        if choice['next_chapter_id']:
-            chapter = int(choice['next_chapter_id'])
-        else:
-            chapter = game_state.get('chapter', 1)
-
-        game_state['scene'] = scene
-        game_state['chapter'] = chapter
-
-        game_service.save_game_state(session['user_id'], game_key, game_state, save_slot)
-
-        story_data = game_service.get_game_story(game_key, chapter, scene)
-
-        game_service.update_game_stats(session['user_id'], game_key, choices_made=1)
+        status, msg, scene_id, chapter_id = game_service.make_choice(session['user_id'], story_id,
+                                                                     int(choice_id))
 
         return jsonify({
-            'success': True,
-            'message': message,
-            'game_state': game_state,
-            'story': story_data
+            'success': status,
+            'message': msg,
+            'scene_id': scene_id,
+            'chapter_id': chapter_id
         }), 200
 
     except Exception as e:
