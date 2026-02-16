@@ -507,20 +507,17 @@ def dashboard():
 @app.route('/game/<game_key>')
 @login_required
 def game_page(game_key):
-    """Страница игры"""
     user = db.get_user_by_id(session['user_id'])
 
     if not user:
         session.clear()
         return redirect(url_for('login_page'))
 
-    # Проверка доступа к игре
     accessible, message = game_service.can_access_game(session['user_id'], game_key)
 
     if not accessible:
         return render_template('error.html', message=message, code=403), 403
 
-    # Получение информации об игре
     game_info = game_service.get_game_info(game_key)
 
     if not game_info:

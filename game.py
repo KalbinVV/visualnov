@@ -70,71 +70,33 @@ class GameService:
         return games_list
 
     def can_access_game(self, user_id: int, game_key: str) -> tuple[bool, str]:
-        """
-        Проверка доступа к игре
-
-        Args:
-            user_id: ID пользователя
-            game_key: Ключ игры/истории
-
-        Returns:
-            Кортеж (доступен, сообщение)
-        """
-        # Сначала проверяем в новых историях
         story = self.story_service.get_story_by_key(game_key)
 
         if story:
-            # Проверка, опубликована ли история
-            if not story.get('is_published'):
+            if not story.is_published:
                 return False, 'История еще не опубликована'
 
-            # Бесплатные истории всегда доступны
-            if not story.get('premium'):
+            if not story.premium:
                 return True, 'История доступна'
 
-            # Проверка, куплена ли уже история (есть сохранение)
-            saves = self.db.get_user_saves(user_id, game_key)
-            if saves:
-                return True, 'История уже куплена'
 
-            # Проверка достаточности алмазов
             user = self.db.get_user_by_id(user_id)
             if not user:
                 return False, 'Пользователь не найден'
 
-            diamonds_cost = story.get('diamonds_cost', 0)
-            if user['diamonds'] < diamonds_cost:
+            diamonds_cost = story.diamonds_cost
+            if user.diamonds < diamonds_cost:
                 return False, f'Недостаточно алмазов. Нужно {diamonds_cost}'
 
             return True, 'История доступна за алмазы'
 
-        # Проверка, куплена ли уже игра (есть сохранение)
-        saves = self.db.get_user_saves(user_id, game_key)
-        if saves:
-            return True, 'Игра уже куплена'
-
-        # Проверка достаточности алмазов
         user = self.db.get_user_by_id(user_id)
         if not user:
             return False, 'Пользователь не найден'
 
-        diamonds_cost = game_info.get('diamonds_cost', 0)
-        if user['diamonds'] < diamonds_cost:
-            return False, f'Недостаточно алмазов. Нужно {diamonds_cost}'
-
         return True, 'Игра доступна за алмазы'
 
     def purchase_game(self, user_id: int, game_key: str) -> tuple[bool, str]:
-        """
-        Покупка игры за алмазы
-
-        Args:
-            user_id: ID пользователя
-            game_key: Ключ игры/истории
-
-        Returns:
-            Кортеж (успешно, сообщение)
-        """
         accessible, message = self.can_access_game(user_id, game_key)
 
         if not accessible and 'Недостаточно алмазов' in message:
