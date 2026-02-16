@@ -574,30 +574,24 @@
   });
 
   function loadScene() {
-    if (!currentStory) {
-      document.getElementById('dialogueText').textContent = 'История закончилась или не найдена.';
-      return;
-    }
-
-    // Обновить фон
-    if (currentStory.background) {
-      document.body.style.backgroundImage = `url('${currentStory.background}')`;
+    if (sceneData.background) {
+      document.body.style.backgroundImage = `url('${sceneData.background}')`;
       document.body.style.backgroundSize = 'cover';
       document.body.style.backgroundPosition = 'center';
     }
 
     const characterImage = document.querySelector('.character');
-    if (currentStory.character_image) {
-      characterImage.style.backgroundImage = `url('${currentStory.character_image}')`;
+    if (sceneData.character_image) {
+      characterImage.style.backgroundImage = `url('${sceneData.character_image}')`;
       characterImage.style.opacity = '1';
     } else {
       characterImage.style.opacity = '0';
     }
 
-    document.querySelector('.name').innerHTML = currentStory.character;
+    document.querySelector('.name').innerHTML = sceneData.character;
 
     const dialogueText = document.querySelector('.text');
-    dialogueText.innerHTML = currentStory.dialogue;
+    dialogueText.innerHTML = sceneData.dialogue;
     dialogueText.classList.remove('show');
 
     const bubble = document.querySelector('.bubble');
@@ -616,7 +610,7 @@
     const choicesContainer = document.querySelector('.choices');
     choicesContainer.innerHTML = '';
 
-    if (!currentStory.choices || currentStory.choices.length === 0) {
+    if (!sceneData.choices || sceneData.choices.length === 0) {
       const continueBtn = document.createElement('div');
       continueBtn.className = `choice`;
       continueBtn.innerHTML = 'Продолжить';
@@ -625,7 +619,7 @@
       return;
     }
 
-    currentStory.choices.forEach(choice => {
+    sceneData.choices.forEach(choice => {
       const choiceBtn = document.createElement('div');
       choiceBtn.className = `choice`;
       choiceBtn.innerHTML = choice.text + (choice.premium ? ' <span class="premium-mark">' + choice.diamonds_cost + '💎</span>' : '');
