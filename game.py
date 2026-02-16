@@ -29,7 +29,6 @@ class GameService:
         self.story_service = StoryService(db)
 
     def get_game_info(self, story_id: int) -> Optional[Dict[str, Any]]:
-
         story = self.story_service.get_story_by_id(story_id)
 
         if story:
@@ -222,7 +221,7 @@ class GameService:
             return False, 'Ошибка сохранения', None
 
     @staticmethod
-    def get_current_user_scene(db: Database, user_id: int, story_id: int) -> Optional[Dict[str, Any]]:
+    def get_current_user_scene_data(db: Database, user_id: int, story_id: int) -> Optional[Dict[str, Any]]:
         save_game = db.load_game(user_id, story_id)
 
         with Session(db.engine) as s:

@@ -522,16 +522,17 @@ def game_page(story_id: int):
     if not game_info:
         return render_template('error.html', message='Игра не найдена', code=404), 404
 
-    game_scene = GameService.get_current_user_scene(db, user.id, story_id)
+    scene_data = GameService.get_current_user_scene_data(db, user.id, story_id)
 
-    if not game_scene:
+    if not scene_data:
         return render_template('error.html', message='Сцена не найдена', code=404), 404
 
     return render_template(
         'game_2.html',
         user=user,
         story_id=story_id,
-        game_data=game_scene
+        scene_data=scene_data,
+        game_info=game_info
     )
 
 
