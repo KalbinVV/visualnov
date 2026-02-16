@@ -630,14 +630,17 @@ story_service = StoryService(db)
 @app.route('/api/stories', methods=['GET'])
 @admin_required
 def api_get_stories():
-    """API получения всех историй"""
     try:
         published_only = request.args.get('published', 'false').lower() == 'true'
         stories = story_service.get_all_stories(published_only)
 
         return jsonify({
             'success': True,
-            'stories': stories
+            'stories': [{'title': story.title,
+                         'description': story.description,
+                         'chapters_count': story.chapters_count,
+                         'scenes_count': story.scenes_count,
+                         'id': story.id} for story in stories]
         }), 200
 
     except Exception as e:
@@ -1129,7 +1132,6 @@ def api_delete_choice(choice_id):
 @app.route('/admin/stories')
 @admin_required
 def admin_stories_page():
-    """Страница управления историями"""
     user = db.get_user_by_id(session['user_id'])
     return render_template('admin/stories.html', user=user)
 
