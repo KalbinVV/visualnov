@@ -619,13 +619,9 @@ def error_page():
 
 from story import StoryService
 
-# Инициализация сервиса сюжетов
 story_service = StoryService(db)
 
 
-# ========== API для редактора сюжетов ==========
-
-# ----- Истории -----
 
 @app.route('/api/stories', methods=['GET'])
 @admin_required
@@ -650,14 +646,13 @@ def api_get_stories():
 @app.route('/api/stories', methods=['POST'])
 @admin_required
 def api_create_story():
-    """API создания новой истории"""
     try:
         data = request.get_json()
 
         if not data:
             return jsonify({'error': 'Нет данных'}), 400
 
-        story_id = story_service.create_story(
+        story_service.create_story(
             story_key=data['story_key'],
             title=data['title'],
             description=data.get('description'),
@@ -668,15 +663,9 @@ def api_create_story():
             author_id=session['user_id']
         )
 
-        if not story_id:
-            return jsonify({'error': 'Ошибка создания истории'}), 500
-
-        story = story_service.get_story_by_id(story_id)
-
         return jsonify({
             'success': True,
-            'message': 'История создана',
-            'story': story
+            'message': 'История создана'
         }), 201
 
     except Exception as e:
