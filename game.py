@@ -229,34 +229,34 @@ class GameService:
         with Session(db.engine) as s:
             scene = s.get(Scene, save_game.scene_id)
 
-        return {
-            'character': scene.character_name,
-            'dialogue': scene.dialogue_text,
-            'background': scene.background_image if scene.background_image else "",
-            'character_image': scene.character_image,
-            'music': scene.music_track,
-            'position': {
-                'x': scene.position_x,
-                'y': scene.position_y
-            },
-            'scale': scene.scale,
-            'choices': [
-                {
-                    'id': choice.id,
-                    'text': choice.choice_text,
-                    'premium': choice.premium,
-                    'diamonds_cost': choice.diamonds_cost,
-                    'next_scene_id': choice.next_scene_id,
-                    'next_chapter_id': choice.next_chapter_id,
-                    'effects': {
-                        'affection': choice.affection_change,
-                        'trust': choice.trust_change,
-                        'passion': choice.passion_change
+            return {
+                'character': scene.character_name,
+                'dialogue': scene.dialogue_text,
+                'background': scene.background_image if scene.background_image else "",
+                'character_image': scene.character_image,
+                'music': scene.music_track,
+                'position': {
+                    'x': scene.position_x,
+                    'y': scene.position_y
+                },
+                'scale': scene.scale,
+                'choices': [
+                    {
+                        'id': choice.id,
+                        'text': choice.choice_text,
+                        'premium': choice.premium,
+                        'diamonds_cost': choice.diamonds_cost,
+                        'next_scene_id': choice.next_scene_id,
+                        'next_chapter_id': choice.next_chapter_id,
+                        'effects': {
+                            'affection': choice.affection_change,
+                            'trust': choice.trust_change,
+                            'passion': choice.passion_change
+                        }
                     }
-                }
-                for choice in scene.choices
-            ]
-        }
+                    for choice in scene.choices
+                ]
+            }
 
 
 
