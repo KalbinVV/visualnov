@@ -1773,9 +1773,9 @@ async function saveChoice(e) {
   const passion = parseInt(document.getElementById('passionChange').value) || 0;
   const premium = document.getElementById('choicePremium').checked;
   const diamonds = parseInt(document.getElementById('diamondsCost').value) || 0;
-  const requiredPassionLevel = parseInt(document.getElementById('requiredPassionLevel')) || 0;
-  const requiredTeasingLevel = parseInt(document.getElementById('requiredTeasingLevel')) || 0;
-  const requiredFriendshipLevel = parseInt(document.getElementById('requiredFriendshipLevel')) || 0;
+  const requiredPassionLevel = parseInt(document.getElementById('requiredPassionLevel').value) || 0;
+  const requiredTeasingLevel = parseInt(document.getElementById('requiredTeasingLevel').value) || 0;
+  const requiredFriendshipLevel = parseInt(document.getElementById('requiredFriendshipLevel').value) || 0;
 
 
   if (!choiceText) {

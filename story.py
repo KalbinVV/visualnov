@@ -337,6 +337,7 @@ class StoryService:
 
                 s.add(choice)
                 s.flush()
+
                 return choice.id
             except IntegrityError as e:
                 print(e)
