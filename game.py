@@ -152,7 +152,7 @@ class GameService:
             scene = s.query(Scene).filter_by(id=save_game[1]).first()
 
             return {
-                'character': scene.character_name,
+                'character_name': scene.character_name,
                 'dialogue': scene.dialogue_text,
                 'background': scene.background_image if scene.background_image else "",
                 'character_image': scene.character_image,
