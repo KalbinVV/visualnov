@@ -7,9 +7,9 @@
   <div class="top-bar">
     <div class="top-left">
       <button class="icon-btn" onclick="window.location.href='/dashboard'">
-        <svg class="icon" viewBox="0 0 24 24">
-          <path d="M15 18l-6-6 6-6"/>
-        </svg>
+          <svg class="icon" viewBox="0 0 24 24">
+            <path d="M15 18l-6-6 6-6"/>
+          </svg>
       </button>
       <div class="page-title">Профиль</div>
     </div>
@@ -90,26 +90,48 @@
     <!-- Статистика игр -->
     <div class="section">
       <h3>📊 Статистика игр</h3>
-      <div class="stats-list">
-        {% if stats %}
-          {% for stat in stats %}
-            <div class="stat-row">
-              <div class="stat-game">{{ stat.game_name }}</div>
-              <div class="stat-detail">Сыграно: {{ stat.games_played }} раз</div>
-              <div class="stat-detail">Завершено: {{ stat.completed_count }}</div>
-            </div>
-          {% endfor %}
-        {% else %}
-          <div class="empty-state">
-            <p>Статистика пока пуста</p>
-          </div>
-        {% endif %}
-      </div>
     </div>
   </div>
 </div>
 
 <style>
+  .icon-btn {
+      width: 48px;
+      height: 48px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(176, 140, 255, 0.25);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.4, 0.0, 0.2, 1);
+      touch-action: manipulation;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .icon-btn:hover,
+    .icon-btn:active {
+      background: rgba(176, 140, 255, 0.2);
+      transform: scale(1.08) translateY(-1px);
+      box-shadow: var(--glow);
+    }
+
+    .icon {
+      width: 22px;
+      height: 22px;
+      stroke: #e0e0ff;
+      stroke-width: 2.4;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+      transition: stroke 0.25s ease;
+    }
+
+    .icon-btn:hover .icon {
+      stroke: #fff;
+    }
+
   :root {
     --bg-primary: #0a0a0f;
     --bg-gradient-start: #0f0f1a;
