@@ -181,32 +181,36 @@ def api_logout():
 @api_login_required
 def api_get_profile():
     try:
-        user = db.get_user_by_id(session['user_id'])
+        with Session(db.engine) as s:
+            user = s.query(User).filter_by(id=session['user_id']).first()
 
-        if not user:
-            session.clear()
-            return jsonify({'error': 'Пользователь не найден'}), 404
+            if not user:
+                session.clear()
+                return jsonify({'error': 'Пользователь не найден'}), 404
 
-        stats = db.get_user_stats(session['user_id'])
-        achievements = db.get_user_achievements(session['user_id'])
+            stats = db.get_user_stats(session['user_id'])
+            achievements = db.get_user_achievements(session['user_id'])
 
-        return jsonify({
-            'success': True,
-            'user': {
-                'id': user.id,
-                'username': user.username,
-                'email': user.email,
-                'display_name': user.display_name,
-                'avatar_url': user.avatar_url,
-                'diamonds': user.diamonds,
-                'theme': user.theme,
-                'created_at': user.created_at,
-                'last_login': user.last_login,
-                'is_admin': user.is_admin
-            },
-            'stats': stats,
-            'achievements': achievements
-        }), 200
+            return jsonify({
+                'success': True,
+                'user': {
+                    'id': user.id,
+                    'username': user.username,
+                    'email': user.email,
+                    'display_name': user.display_name,
+                    'avatar_url': user.avatar_url,
+                    'diamonds': user.diamonds,
+                    'theme': user.theme,
+                    'created_at': user.created_at,
+                    'last_login': user.last_login,
+                    'is_admin': user.is_admin,
+                    'team': {
+                        'name': user.team.name
+                    } if user.team else None
+                },
+                'stats': stats,
+                'achievements': achievements
+            }), 200
 
     except Exception as e:
         return jsonify({'error': f'Ошибка получения профиля: {str(e)}'}), 500
