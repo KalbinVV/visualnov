@@ -645,10 +645,8 @@
       const data = await response.json();
 
       if (response.ok && data.success) {
-        gameState = data.game_state;
-        currentStory = data.story;
+        sceneData = data.sceneData;
 
-        // Анимация исчезновения
         const bubble = document.querySelector('.bubble');
         bubble.style.transition = 'opacity 0.2s, transform 0.2s';
         bubble.style.opacity = '0';
@@ -656,9 +654,7 @@
 
         document.querySelector('.choices').innerHTML = '';
 
-        setTimeout(() => {
-          loadScene();
-        }, 220);
+        loadScene();
       } else {
         alert(data.error || 'Ошибка при совершении выбора');
       }
