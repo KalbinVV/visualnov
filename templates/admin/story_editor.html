@@ -1725,7 +1725,7 @@ async function saveChoice(e) {
   const choiceText = document.getElementById('choiceText').value.trim();
   const nextSceneId = document.getElementById('nextSceneId').value.trim() || null;
   const nextChapterId = document.getElementById('nextChapterId').value.trim() || null;
-  const effectType = document.getElementById('effectType').value || null;
+  //const effectType = document.getElementById('effectType').value || null;
   const friendship = parseInt(document.getElementById('friendshipChange').value) || 0;
   const teasing = parseInt(document.getElementById('teasingChange').value) || 0;
   const passion = parseInt(document.getElementById('passionChange').value) || 0;
@@ -1748,7 +1748,7 @@ async function saveChoice(e) {
           choice_text: choiceText,
           next_scene_id: nextSceneId ? parseInt(nextSceneId) : null,
           next_chapter_id: nextChapterId ? parseInt(nextChapterId) : null,
-          effect_type: effectType,
+          effect_type: null,
           friendship_change: friendship,
           teasing_change: teasing,
           passion_change: passion,
@@ -1766,7 +1766,7 @@ async function saveChoice(e) {
           choice_text: choiceText,
           next_scene_id: nextSceneId ? parseInt(nextSceneId) : null,
           next_chapter_id: nextChapterId ? parseInt(nextChapterId) : null,
-          effect_type: effectType,
+          effect_type: null,
           friendship_change: friendship,
           teasing_change: teasing,
           passion_change: passion,
