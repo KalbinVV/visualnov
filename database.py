@@ -230,7 +230,8 @@ class Choice(Base):
                 'trust_change': choice.trust_change,
                 'passion_change': choice.passion_change,
                 'premium': choice.premium,
-                'diamonds_cost': choice.diamonds_cost}
+                'diamonds_cost': choice.diamonds_cost,
+                'id': choice.id}
 
 
 class Character(Base):
