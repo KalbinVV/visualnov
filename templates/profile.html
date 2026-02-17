@@ -4,7 +4,6 @@
 
 {% block content %}
 <div class="profile-container">
-  <!-- Верхняя панель -->
   <div class="top-bar">
     <div class="top-left">
       <button class="icon-btn" onclick="window.location.href='/dashboard'">
@@ -22,10 +21,8 @@
       </div>
     </div>
   </div>
-  
-  <!-- Основной контент -->
+
   <div class="main-content">
-    <!-- Карточка профиля -->
     <div class="profile-card">
       <div class="profile-header">
         <div class="profile-avatar">
@@ -40,7 +37,7 @@
           <p class="username">@{{ user.username }}</p>
           <p class="email">{{ user.email }}</p>
           <div class="member-since">
-            На платформе с {{ user.created_at[:10] }}
+            На платформе с {{ user.created_at }}
           </div>
         </div>
       </div>

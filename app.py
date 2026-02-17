@@ -931,9 +931,6 @@ def api_delete_scene(scene_id):
     except Exception as e:
         return jsonify({'error': f'Ошибка удаления сцены: {str(e)}'}), 500
 
-
-# ----- Варианты выбора -----
-
 @app.route('/api/scenes/<int:scene_id>/choices', methods=['GET'])
 @admin_required
 def api_get_choices(scene_id):
