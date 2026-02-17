@@ -464,7 +464,7 @@ document.addEventListener('DOMContentLoaded', function() {
       const data = await response.json();
 
       if (response.ok && data.success) {
-        window.location.href = `/admin/stories/editor/${data.story.id}`;
+        window.location.href = `/admin/stories/`;
       } else {
         alert(data.error || 'Ошибка создания истории');
         submitBtn.disabled = false;
