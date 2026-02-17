@@ -142,7 +142,10 @@ class GameService:
 
             if self.is_choice_available(user_id, choice_id):
                 if choice.premium:
+                    print(user.diamonds)
                     user.diamonds -= choice.diamonds_cost
+                    print(user.diamonds)
+                    s.commit()
 
             self.db.save_game(user_id, story_id, choice.next_scene_id, choice.next_chapter_id)
 
