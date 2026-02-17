@@ -528,20 +528,7 @@
       left: 5px;
     }
 
-    .diamond-icon {
-      background: linear-gradient(135deg, var(--accent), var(--accent-dark));
-      color: white;
-      font-weight: 700;
-      font-size: 1.15rem;
-      padding: 6px 18px;
-      border-radius: 40px;
-      box-shadow: 0 4px 15px rgba(176,140,255,0.5),
-                  inset 0 -2px 0 rgba(255,255,255,0.3);
-      letter-spacing: 0.4px;
-      text-transform: uppercase;
-    }
-
-    .locked-icon {
+    .status-icon {
       background: linear-gradient(135deg, var(--accent), var(--accent-dark));
       color: white;
       font-weight: 700;
@@ -706,20 +693,20 @@
 
       if(choice.premium) {
         const diamondIcon = document.createElement('span');
-        diamondIcon.className = 'diamond-icon'
+        diamondIcon.className = 'status-icon'
         diamondIcon.innerHTML = `${choice.diamonds_cost} 💎`
 
         choiceStatusContainer.appendChild(diamondIcon)
       }
 
       if(choice.is_available) {
-        choiceStatusContainer.className = `choice`;
+        choiceBtn.className = `choice`;
         choiceBtn.onclick = () => makeChoice(choice.id);
       } else {
         const lockedIcon = document.createElement('span')
 
-        choiceContainer.className = 'invalid-choice'
-        lockedIcon.className = 'locked-icon'
+        choiceBtn.className = 'invalid-choice'
+        lockedIcon.className = 'status-icon'
         lockedIcon.innerHTML = '🔒'
 
         choiceStatusContainer.appendChild(lockedIcon)
