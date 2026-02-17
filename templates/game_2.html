@@ -206,33 +206,6 @@
       max-height: 15vh;
     }
 
-    .invalid-choice {
-      backdrop-filter: blur(24px);
-      border: 2px solid var(--accent-light);
-      border-radius: 20px;
-      padding: 18px 24px;
-      font-size: 1.08rem;
-      font-weight: 600;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.22s cubic-bezier(0.4, 0.0, 0.2, 1);
-      color: white;
-      position: relative;
-      overflow: hidden;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.35);
-      overflow-wrap: break-word;
-      hyphens: auto;
-      -webkit-hyphens: auto;
-      -ms-hyphens: auto;
-      word-break: break-word;
-      white-space: normal;
-      flex: 0 0 40%;
-      min-width: 300px;
-      max-width: 40%;
-      scroll-snap-align: start;
-      max-height: 15vh;
-    }
-
     .choice::before {
       content: '';
       position: absolute;
@@ -707,13 +680,12 @@
         choiceStatusContainer.appendChild(onlyLeaderIcon)
       }
 
-      if(choice.is_available) {
-        choiceBtn.className = `choice`;
-        choiceBtn.onclick = () => makeChoice(choice.data.id);
-      } else {
+      choiceBtn.className = `choice`;
+      choiceBtn.onclick = () => makeChoice(choice.data.id);
+
+      if (!choice.is_available){
         const lockedIcon = document.createElement('span')
 
-        choiceBtn.className = 'invalid-choice'
         lockedIcon.className = 'status-icon'
         lockedIcon.innerHTML = '🔒'
 
