@@ -402,7 +402,7 @@ class Database:
 
     def save_game(self, user_id: int, story_id: int, scene_id: int, chapter_id: int):
         with Session(self.engine) as s:
-            saved_game = s.query(GameSave).filter_by(user_id=user_id,story_id=story_id).first()
+            saved_game = s.query(GameSave).filter_by(user_id=user_id, story_id=story_id).first()
 
             if not saved_game:
                 saved_game = GameSave(user_id=user_id, story_id=story_id)
