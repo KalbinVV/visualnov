@@ -721,7 +721,8 @@
         const lockedIcon = document.createElement('span')
 
         choiceBtn.className = 'invalid-choice'
-        lockedIcon.innerHTML = ' 🔒'
+        lockedIcon.className = 'locked-icon'
+        lockedIcon.innerHTML = '🔒'
 
         choiceStatusContainer.appendChild(lockedIcon)
       }
