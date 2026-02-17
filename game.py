@@ -11,6 +11,7 @@ from typing import Optional, Dict, Any, List
 from flask import session
 from sqlalchemy.orm import Session
 
+from app import game_service
 from database import Database, Story, Scene, Chapter, User, Choice
 from story import StoryService
 
@@ -201,7 +202,8 @@ class GameService:
                             'affection': choice.affection_change,
                             'trust': choice.trust_change,
                             'passion': choice.passion_change
-                        }
+                        },
+                        'is_available': game_service.is_choice_available(user_id, choice.id)
                     }
                     for choice in scene.choices
                 ]
