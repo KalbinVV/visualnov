@@ -252,7 +252,8 @@ class Choice(Base):
                 'diamonds_cost': choice.diamonds_cost,
                 'id': choice.id,
                 'only_leader': choice.only_leader,
-                'is_important': choice.is_important_choice}
+                'is_important': choice.is_important_choice,
+                }
 
 
 class Character(Base):
