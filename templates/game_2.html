@@ -699,6 +699,14 @@
         choiceStatusContainer.appendChild(diamondIcon)
       }
 
+      if(choice.only_leader) {
+        const onlyLeaderIcon = document.createElement('span');
+        onlyLeaderIcon.className = 'status-icon'
+        onlyLeaderIcon.innerHTML = '👥'
+
+        choiceStatusContainer.appendChild(onlyLeaderIcon)
+      }
+
       if(choice.is_available) {
         choiceBtn.className = `choice`;
         choiceBtn.onclick = () => makeChoice(choice.id);
