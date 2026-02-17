@@ -11,7 +11,6 @@ from typing import Optional, Dict, Any, List
 from flask import session
 from sqlalchemy.orm import Session
 
-from app import game_service
 from database import Database, Story, Scene, Chapter, User, Choice
 from story import StoryService
 
