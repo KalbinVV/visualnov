@@ -40,6 +40,7 @@ from contextlib import contextmanager
 class Base(DeclarativeBase):
     pass
 
+
 class User(Base):
     __tablename__ = "users"
 
@@ -59,7 +60,8 @@ class User(Base):
     diamonds: Mapped[int] = mapped_column(default=0)
     is_leader: Mapped[bool] = mapped_column(Boolean, default=False)
     theme: Mapped[str] = mapped_column(String(50), default="orange")
-    settings: Mapped[str] = mapped_column(Text, default="{}")  # JSON
+    settings: Mapped[str] = mapped_column(Text, default="{}")
+    team_id: Mapped[int] = mapped_column(ForeignKey("teams.id", ondelete="CASCADE"), nullable=True)
 
     user_sessions: Mapped[List["UserSession"]] = relationship(
         "UserSession", back_populates="user", cascade="all, delete-orphan"
@@ -73,6 +75,18 @@ class User(Base):
     authored_stories: Mapped[List["Story"]] = relationship(
         "Story", back_populates="author", foreign_keys="[Story.author_id]"
     )
+
+    team: Mapped["Team"] = relationship()
+
+
+class Team(Base):
+    __tablename__ = 'teams'
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    name: Mapped[str] = mapped_column(String, nullable=False)
+    icon: Mapped[str] = mapped_column(String, nullable=False)
+
+    users: Mapped[List[User]] = relationship()
 
 
 class UserSession(Base):
