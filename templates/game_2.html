@@ -668,7 +668,7 @@
       const choiceBtn = document.createElement('div');
       choiceBtn.innerHTML = choice.text + (choice.premium ? ' <span class="premium-mark">' + choice.diamonds_cost + '💎</span>' : '');
 
-      if(choiceBtn.is_available) {
+      if(choice.is_available) {
         choiceBtn.className = `choice`;
         choiceBtn.onclick = () => makeChoice(choice.id);
       } else {
