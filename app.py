@@ -516,22 +516,23 @@ def game_page(story_id: int):
 @app.route('/profile')
 @login_required
 def profile_page():
-    user = db.get_user_by_id(session['user_id'])
+    with Session(db.engine) as s:
+        user = s.query(User).filter_by(id=session['user_id']).first()
 
-    if not user:
-        session.clear()
-        return redirect(url_for('login_page'))
+        if not user:
+            session.clear()
+            return redirect(url_for('login_page'))
 
-    stats = db.get_user_stats(session['user_id'])
-    achievements = db.get_user_achievements(session['user_id'])
+        stats = db.get_user_stats(session['user_id'])
+        achievements = db.get_user_achievements(session['user_id'])
 
-    return render_template(
-        'profile.html',
-        user=user,
-        team_info=user.team,
-        stats=stats,
-        achievements=achievements
-    )
+        return render_template(
+            'profile.html',
+            user=user,
+            team_info=user.team,
+            stats=stats,
+            achievements=achievements
+        )
 
 
 @app.route('/admin')
