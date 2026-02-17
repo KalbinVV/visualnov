@@ -450,7 +450,7 @@ def api_get_next_scene(story_id: int):
         user_save = db.load_game_raw(user.id, story_id)
         scenes = s.query(Scene).filter(Scene.id >= user_save.scene_id).all()
 
-        print(scenes)
+        scene = scenes[1] if len(scenes) > 1 else scenes[0]
 
         return jsonify({
             'success': True,
