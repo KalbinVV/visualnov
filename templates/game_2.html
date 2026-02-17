@@ -207,6 +207,33 @@
       max-height: 15vh;
     }
 
+    .invalid-choice {
+      backdrop-filter: blur(24px);
+      border: 2px solid var(--accent-light);
+      border-radius: 20px;
+      padding: 18px 24px;
+      font-size: 1.08rem;
+      font-weight: 600;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.22s cubic-bezier(0.4, 0.0, 0.2, 1);
+      color: #1a1a2e;
+      position: relative;
+      overflow: auto;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+      overflow-wrap: break-word;
+      hyphens: auto;
+      -webkit-hyphens: auto;
+      -ms-hyphens: auto;
+      word-break: break-word;
+      white-space: normal;
+      flex: 0 0 40%;
+      min-width: 300px;
+      max-width: 40%;
+      scroll-snap-align: start;
+      max-height: 15vh;
+    }
+
     .choice::before {
       content: '';
       position: absolute;
@@ -639,9 +666,13 @@
 
     sceneData.choices.forEach(choice => {
       const choiceBtn = document.createElement('div');
-      choiceBtn.className = `choice`;
+      if(choiceBtn.is_available) {
+        choiceBtn.className = `choice`;
+        choiceBtn.onclick = () => makeChoice(choice.id);
+      } else {
+        choiceBtn.className = 'invalid-choice'
+      }
       choiceBtn.innerHTML = choice.text + (choice.premium ? ' <span class="premium-mark">' + choice.diamonds_cost + '💎</span>' : '');
-      choiceBtn.onclick = () => makeChoice(choice.id);
       choicesContainer.appendChild(choiceBtn);
     });
   }

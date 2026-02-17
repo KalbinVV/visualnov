@@ -201,7 +201,7 @@ class GameService:
                             'trust': choice.trust_change,
                             'passion': choice.passion_change
                         },
-                        'is_available': self.is_choice_available(user_id, choice.id)
+                        'is_available': self.is_choice_available(user_id, choice.id)[0]
                     }
                     for choice in scene.choices
                 ]
