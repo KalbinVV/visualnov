@@ -221,8 +221,8 @@ class Choice(Base):
 
     @staticmethod
     def as_dict(choice) -> dict:
-        return {'choice_number': choice.choice_number,
-                'choice_text': choice.choice_text,
+        return {'number': choice.choice_number,
+                'text': choice.choice_text,
                 'next_scene_id': choice.next_scene_id,
                 'next_chapter_id': choice.next_chapter_id,
                 'effect_type': choice.effect_type,
