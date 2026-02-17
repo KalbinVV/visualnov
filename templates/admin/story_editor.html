@@ -1330,7 +1330,6 @@ function renderSceneEditor(scene) {
     return;
   }
 
-  // Загрузить варианты выбора
   loadChoices(scene.id).then(choices => {
     editorContent.innerHTML = `
       <div class="editor-grid">
@@ -1423,12 +1422,12 @@ function renderSceneEditor(scene) {
                   ${choice.premium ? `<div style="color:#ff9e00;font-weight:600;margin-top:8px;">💎 Премиум вариант</div>` : ''}
                   <div class="choice-effects">
                     <div class="choice-effect">
-                      <div class="choice-effect-label">Привязанность</div>
-                      <div class="choice-effect-value">${choice.affection_change >= 0 ? '+' : ''}${choice.affection_change}</div>
+                      <div class="choice-effect-label">Дружелюбие</div>
+                      <div class="choice-effect-value">${choice.teasing_change >= 0 ? '+' : ''}${choice.affection_change}</div>
                     </div>
                     <div class="choice-effect">
-                      <div class="choice-effect-label">Доверие</div>
-                      <div class="choice-effect-value">${choice.trust_change >= 0 ? '+' : ''}${choice.trust_change}</div>
+                      <div class="choice-effect-label">Teasing</div>
+                      <div class="choice-effect-value">${choice.teasing_change >= 0 ? '+' : ''}${choice.trust_change}</div>
                     </div>
                     <div class="choice-effect">
                       <div class="choice-effect-label">Страсть</div>
