@@ -170,8 +170,7 @@ class GameService:
             return True, ''
 
 
-    @staticmethod
-    def get_current_user_scene_data(db: Database, user_id: int, story_id: int) -> Optional[Dict[str, Any]]:
+    def get_current_user_scene_data(self, db: Database, user_id: int, story_id: int) -> Optional[Dict[str, Any]]:
         save_game = db.load_game(user_id, story_id)
 
         with Session(db.engine) as s:
@@ -203,7 +202,7 @@ class GameService:
                             'trust': choice.trust_change,
                             'passion': choice.passion_change
                         },
-                        'is_available': game_service.is_choice_available(user_id, choice.id)
+                        'is_available': self.is_choice_available(user_id, choice.id)
                     }
                     for choice in scene.choices
                 ]
