@@ -162,6 +162,10 @@ class GameService:
                 if user.diamonds < choice.diamonds_cost:
                     return False, 'Недостаточно алмазов!'
 
+            if choice.only_leader:
+                if not user.is_leader:
+                    return False, 'Вы должны быть лидером команды!'
+
             return True, ''
 
 

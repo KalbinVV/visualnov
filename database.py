@@ -223,7 +223,7 @@ class Choice(Base):
     trust_change: Mapped[int] = mapped_column(default=0)
     passion_change: Mapped[int] = mapped_column(default=0)
     unlock_condition: Mapped[Optional[str]] = mapped_column(String(255))
-    only_leader: Mapped[Optional[bool]] = mapped_column(Boolean)
+    only_leader: Mapped[bool] = mapped_column(Boolean, default=False)
     is_locked: Mapped[bool] = mapped_column(default=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
     is_legend_choice: Mapped[bool] = mapped_column(Boolean, default=False)
