@@ -133,6 +133,11 @@ class GameSave(Base):
     story_id: Mapped[int] = mapped_column(ForeignKey("stories.id", ondelete="CASCADE"), nullable=False)
     scene_id: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
     chapter_id: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+    teasing_level: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    friendship_level: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    passion_level: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+
+
 
 class GameStat(Base):
     __tablename__ = "game_stats"
@@ -219,14 +224,15 @@ class Choice(Base):
     effect_data: Mapped[Optional[str]] = mapped_column(Text)  # JSON
     premium: Mapped[bool] = mapped_column(default=False)
     diamonds_cost: Mapped[int] = mapped_column(default=0)
-    affection_change: Mapped[int] = mapped_column(default=0)
-    trust_change: Mapped[int] = mapped_column(default=0)
+    teasing_change: Mapped[int] = mapped_column(default=0)
+    friendship_change: Mapped[int] = mapped_column(default=0)
     passion_change: Mapped[int] = mapped_column(default=0)
     unlock_condition: Mapped[Optional[str]] = mapped_column(String(255))
     only_leader: Mapped[bool] = mapped_column(Boolean, default=False)
     is_locked: Mapped[bool] = mapped_column(default=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
     is_legend_choice: Mapped[bool] = mapped_column(Boolean, default=False)
+    is_important_choice: Mapped[bool] = mapped_column(Boolean, default=False)
     legend_title: Mapped[str] = mapped_column(String, nullable=True)
     legend_icon: Mapped[str] = mapped_column(String, nullable=True)
 
@@ -242,14 +248,11 @@ class Choice(Base):
                 'text': choice.choice_text,
                 'next_scene_id': choice.next_scene_id,
                 'next_chapter_id': choice.next_chapter_id,
-                'effect_type': choice.effect_type,
-                'affection_change': choice.affection_change,
-                'trust_change': choice.trust_change,
-                'passion_change': choice.passion_change,
                 'premium': choice.premium,
                 'diamonds_cost': choice.diamonds_cost,
                 'id': choice.id,
-                'only_leader': choice.only_leader}
+                'only_leader': choice.only_leader,
+                'is_important': choice.is_important_choice}
 
 
 class Character(Base):

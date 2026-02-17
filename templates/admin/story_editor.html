@@ -1110,27 +1110,15 @@
           Эффекты
         </div>
 
-        <div class="form-group">
-          <label for="effectType">Тип эффекта</label>
-          <select id="effectType" class="form-control">
-            <option value="">Без эффекта</option>
-            <option value="affection">Привязанность</option>
-            <option value="trust">Доверие</option>
-            <option value="passion">Страсть</option>
-            <option value="unlock_scene">Разблокировать сцену</option>
-            <option value="unlock_chapter">Разблокировать главу</option>
-          </select>
-        </div>
-
         <div class="form-row">
           <div class="form-group" style="flex:1;">
-            <label for="affectionChange">Изменение привязанности</label>
-            <input type="number" id="affectionChange" class="form-control" value="0">
+            <label for="friendshipChange">Изменение дружелюбия</label>
+            <input type="number" id="friendshipChange" class="form-control" value="0">
           </div>
 
           <div class="form-group" style="flex:1;">
-            <label for="trustChange">Изменение доверия</label>
-            <input type="number" id="trustChange" class="form-control" value="0">
+            <label for="teasingChange">Дразнения/teasing/Сам переведи ей богу</label>
+            <input type="number" id="teasingChange" class="form-control" value="0">
           </div>
 
           <div class="form-group" style="flex:1;">
@@ -1738,8 +1726,8 @@ async function saveChoice(e) {
   const nextSceneId = document.getElementById('nextSceneId').value.trim() || null;
   const nextChapterId = document.getElementById('nextChapterId').value.trim() || null;
   const effectType = document.getElementById('effectType').value || null;
-  const affection = parseInt(document.getElementById('affectionChange').value) || 0;
-  const trust = parseInt(document.getElementById('trustChange').value) || 0;
+  const friendship = parseInt(document.getElementById('friendshipChange').value) || 0;
+  const teasing = parseInt(document.getElementById('teasingChange').value) || 0;
   const passion = parseInt(document.getElementById('passionChange').value) || 0;
   const premium = document.getElementById('choicePremium').checked;
   const diamonds = parseInt(document.getElementById('diamondsCost').value) || 0;
@@ -1761,8 +1749,8 @@ async function saveChoice(e) {
           next_scene_id: nextSceneId ? parseInt(nextSceneId) : null,
           next_chapter_id: nextChapterId ? parseInt(nextChapterId) : null,
           effect_type: effectType,
-          affection_change: affection,
-          trust_change: trust,
+          friendship_change: friendship,
+          teasing_change: teasing,
           passion_change: passion,
           premium: premium,
           diamonds_cost: diamonds
@@ -1779,8 +1767,8 @@ async function saveChoice(e) {
           next_scene_id: nextSceneId ? parseInt(nextSceneId) : null,
           next_chapter_id: nextChapterId ? parseInt(nextChapterId) : null,
           effect_type: effectType,
-          affection_change: affection,
-          trust_change: trust,
+          friendship_change: friendship,
+          teasing_change: teasing,
           passion_change: passion,
           premium: premium,
           diamonds_cost: diamonds

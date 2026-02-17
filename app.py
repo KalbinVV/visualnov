@@ -956,8 +956,8 @@ def api_get_choices(scene_id):
             'choices': [{'length': 999,
                          'choice_number': choice.choice_number,
                          'id': choice.id,
-                         'affection_change': choice.affection_change,
-                         'trust_change': choice.trust_change,
+                         'friendship_change': choice.friendship_change,
+                         'teasing_change': choice.teasing_change,
                          'passion_change': choice.passion_change,
                          'premium': choice.premium,
                          'choice_text': choice.choice_text} for choice in choices]
@@ -986,8 +986,8 @@ def api_create_choice():
             effect_data=data.get('effect_data'),
             premium=data.get('premium', False),
             diamonds_cost=data.get('diamonds_cost', 0),
-            affection_change=data.get('affection_change', 0),
-            trust_change=data.get('trust_change', 0),
+            teasing_change=data.get('teasing_change', 0),
+            friendship_change=data.get('trust_change', 0),
             passion_change=data.get('passion_change', 0),
             unlock_condition=data.get('unlock_condition')
         )
