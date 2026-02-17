@@ -1237,6 +1237,7 @@ function renderChapters() {
     chapterEl.innerHTML = `
       <div class="chapter-number">Глава ${chapter.chapter_number}</div>
       <div class="chapter-title">${chapter.title || 'Без названия'}</div>
+      <p>ID: ${chapter.id}</p>
     `;
 
     container.appendChild(chapterEl);
@@ -1294,6 +1295,7 @@ function renderScenes() {
       <div class="scene-number">Сцена ${scene.scene_number}</div>
       <div class="scene-character">${scene.character_name}</div>
       <div class="scene-dialogue">${scene.dialogue_text.substring(0, 60)}${scene.dialogue_text.length > 60 ? '...' : ''}</div>
+      <p>ID: ${scene.id}</p>
     `;
 
     container.appendChild(sceneEl);
