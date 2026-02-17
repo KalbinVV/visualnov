@@ -764,8 +764,7 @@
   }
 
   function goToNextScene() {
-    // Логика перехода к следующей сцене
-    gameState.scene = (gameState.scene || 1) + 1;
+    sceneData.scene = (sceneData.scene || 1) + 1;
     loadScene();
   }
 

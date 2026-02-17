@@ -10,7 +10,7 @@ import os
 from sqlalchemy.orm import Session
 
 from config import config
-from database import Database, User, Choice, Scene
+from database import Database, User, Choice, Scene, Story
 from auth import AuthService
 from game import GameService
 
@@ -441,11 +441,37 @@ def api_get_progress():
         return jsonify({'error': f'Ошибка получения прогресса: {str(e)}'}), 500
 
 
-# ========== Web Роуты ==========
+@app.route('/api/games/<story_id>/get_next_scene', methods=['GET'])
+@api_login_required
+def api_get_next_scene(story_id: int):
+    with Session(db.engine) as s:
+        user = s.get(User, session['user_id'])
+
+        user_save = db.load_game_raw(user.id, story_id)
+        scene = s.query(Scene).filter(Scene.id >= user_save.scene_id).all()[1]
+
+        return jsonify({
+            'success': True,
+            'message': '',
+            'scene_id': scene.id,
+            'chapter_id': scene.chapter_id,
+            'next_scene': {
+                'character_image': scene.character_image,
+                'character_name': scene.character_name,
+                'background': scene.background_image,
+                'dialogue': scene.dialogue_text,
+                'choices': [{'data': Choice.as_dict(choice),
+                             'is_available': game_service.is_choice_available(user.id, choice.id)[0]}
+                            for choice in scene.choices],
+                'current_user_diamonds': user.diamonds
+            }
+        }), 200
+
+        return
+
 
 @app.route('/')
 def index():
-    """Главная страница"""
     if 'user_id' in session:
         return redirect(url_for('dashboard'))
     return redirect(url_for('login_page'))
