@@ -670,10 +670,10 @@
 
       if(choiceBtn.is_available) {
         choiceBtn.className = `choice`;
-        choiceBtn.innerHTML += ' 🔒'
         choiceBtn.onclick = () => makeChoice(choice.id);
       } else {
         choiceBtn.className = 'invalid-choice'
+        choiceBtn.innerHTML += ' 🔒'
       }
       choicesContainer.appendChild(choiceBtn);
     });
