@@ -10,7 +10,7 @@ import os
 from sqlalchemy.orm import Session
 
 from config import config
-from database import Database, User, Choice
+from database import Database, User, Choice, Scene
 from auth import AuthService
 from game import GameService
 
@@ -394,12 +394,20 @@ def api_make_choice(story_id: int):
         status, msg, scene_id, chapter_id = game_service.make_choice(session['user_id'], story_id,
                                                                      int(choice_id))
 
-        return jsonify({
-            'success': status,
-            'message': msg,
-            'scene_id': scene_id,
-            'chapter_id': chapter_id
-        }), 200
+        with Session(db.engine) as s:
+            next_scene = s.get(Scene, scene_id)
+
+            return jsonify({
+                'success': status,
+                'message': msg,
+                'scene_id': scene_id,
+                'chapter_id': chapter_id,
+                'next-scene': {
+                    'character_image': next_scene.character_image,
+                    'character_name': next_scene.character_name,
+                    'choices': [Choice.as_dict(choice) for choice in next_scene.choices]
+                }
+            }), 200
 
     except Exception as e:
         print(e)
