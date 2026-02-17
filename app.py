@@ -267,8 +267,6 @@ def api_update_profile():
         return jsonify({'error': f'Ошибка обновления профиля: {str(e)}'}), 500
 
 
-# ----- Игры -----
-
 @app.route('/api/games', methods=['GET'])
 @api_login_required
 def api_get_games():
@@ -414,7 +412,7 @@ def api_make_choice(story_id: int):
                         'background': next_scene.background_image,
                         'dialogue': next_scene.dialogue_text,
                         'choices': [{'data': Choice.as_dict(choice),
-                                     'is_available': game_service.is_choice_available(choice.id, user.id)[0]}
+                                     'is_available': game_service.is_choice_available(user.id, choice_id)[0]}
                                     for choice in next_scene.choices],
                         'current_user_diamonds': user.diamonds
                     }
