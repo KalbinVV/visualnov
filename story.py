@@ -395,16 +395,7 @@ class StoryService:
             ).all()
 
     def update_choice(self, choice_id: int, **kwargs) -> bool:
-        """
-        Обновить вариант выбора
-        """
-        allowed_fields = {
-            'choice_text', 'next_scene_id', 'next_chapter_id',
-            'effect_type', 'effect_data', 'premium', 'diamonds_cost',
-            'affection_change', 'trust_change', 'passion_change',
-            'unlock_condition', 'only_leader', 'is_locked'
-        }
-        data = {k: v for k, v in kwargs.items() if k in allowed_fields}
+        data = {k: v for k, v in kwargs.items()}
 
         if not data:
             return False
