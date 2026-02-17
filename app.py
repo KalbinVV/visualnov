@@ -405,6 +405,8 @@ def api_make_choice(story_id: int):
                 'next-scene': {
                     'character_image': next_scene.character_image,
                     'character_name': next_scene.character_name,
+                    'background': next_scene.background_image,
+                    'dialogue': next_scene.dialogue_text,
                     'choices': [Choice.as_dict(choice) for choice in next_scene.choices]
                 }
             }), 200
