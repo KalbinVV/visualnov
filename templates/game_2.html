@@ -526,8 +526,8 @@
     .diamond-icon {
       position: relative;
       z-index: 20;
-      top: -18px;
-      left: 32px;
+      top: 10px;
+      left: 5px;
       background: linear-gradient(135deg, var(--accent), var(--accent-dark));
       color: white;
       font-weight: 700;
@@ -538,7 +538,6 @@
                   inset 0 -2px 0 rgba(255,255,255,0.3);
       letter-spacing: 0.4px;
       text-transform: uppercase;
-      font-family: 'Playfair Display', serif;
     }
   </style>
 </head>
@@ -690,7 +689,7 @@
       if(choice.premium) {
         const diamondIcon = document.createElement('span');
         diamondIcon.className = 'diamond-icon'
-        diamondIcon.innerHTML = '💎'
+        diamondIcon.innerHTML = `{choice.diamonds_cost} 💎`
         choiceContainer.appendChild(diamondIcon)
       }
 
