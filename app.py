@@ -414,7 +414,7 @@ def api_make_choice(story_id: int):
                         'background': next_scene.background_image,
                         'dialogue': next_scene.dialogue_text,
                         'choices': [{'data': Choice.as_dict(choice),
-                                     'is_available': game_service.is_choice_available(choice.id, user.id)}
+                                     'is_available': game_service.is_choice_available(choice.id, user.id)[0]}
                                     for choice in next_scene.choices],
                         'current_user_diamonds': user.diamonds
                     }

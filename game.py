@@ -191,7 +191,7 @@ class GameService:
                 'choices': [
                     {
                         'data': Choice.as_dict(choice),
-                        'is_available': self.is_choice_available(choice.id, user.id)
+                        'is_available': self.is_choice_available(choice.id, user.id)[0]
                     }
                     for choice in scene.choices
                 ]
