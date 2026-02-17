@@ -238,6 +238,7 @@ class Choice(Base):
     required_teasing_level: Mapped[str] = mapped_column(Integer, default=0)
     required_passion_level: Mapped[str] = mapped_column(Integer, default=0)
     required_friendship_level: Mapped[str] = mapped_column(Integer, default=0)
+    unlocked_for_teams: Mapped[str] = mapped_column(String, nullable=False)
 
     scene: Mapped["Scene"] = relationship(
         "Scene",

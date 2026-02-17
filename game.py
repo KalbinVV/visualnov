@@ -184,6 +184,15 @@ class GameService:
             if user_save.teasing_level < choice.teasing_change:
                 return False, 'Данный вариант недоступен, в связи с вашими предыдущими выборами'
 
+            if choice.is_locked:
+                if not choice.unlocked_for_teams:
+                    return False, 'Ваша команда не разблокировала ещё данный вариант!'
+
+                teams_ids = list(map(int, choice.unlocked_for_teams.split(';')))
+
+                if user.team_id not in teams_ids:
+                    return False, 'Ваша команда не разблокировала ещё данный вариант!'
+
             return True, ''
 
 
