@@ -960,7 +960,10 @@ def api_get_choices(scene_id):
                          'teasing_change': choice.teasing_change,
                          'passion_change': choice.passion_change,
                          'premium': choice.premium,
-                         'choice_text': choice.choice_text} for choice in choices]
+                         'choice_text': choice.choice_text,
+                         'required_passion_level': choice.required_passion_level,
+                         'required_friendship_level': choice.required_friendship_level,
+                         'required_teasing_level': choice.required_teasing_level} for choice in choices]
         }), 200
 
     except Exception as e:
