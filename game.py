@@ -163,8 +163,10 @@ class GameService:
 
         with Session(db.engine) as s:
             scene = s.query(Scene).filter_by(id=save_game[1]).first()
+            user = s.get(User, user_id)
 
             return {
+                'current_user_diamonds': user.diamonds,
                 'character_name': scene.character_name,
                 'dialogue': scene.dialogue_text,
                 'background': scene.background_image if scene.background_image else "",
