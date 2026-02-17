@@ -248,7 +248,8 @@ class Choice(Base):
                 'passion_change': choice.passion_change,
                 'premium': choice.premium,
                 'diamonds_cost': choice.diamonds_cost,
-                'id': choice.id}
+                'id': choice.id,
+                'only_leader': choice.only_leader}
 
 
 class Character(Base):
