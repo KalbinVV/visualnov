@@ -528,6 +528,7 @@ def profile_page():
     return render_template(
         'profile.html',
         user=user,
+        team_info=user.team,
         stats=stats,
         achievements=achievements
     )
