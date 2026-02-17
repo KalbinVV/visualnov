@@ -666,13 +666,15 @@
 
     sceneData.choices.forEach(choice => {
       const choiceBtn = document.createElement('div');
+      choiceBtn.innerHTML = choice.text + (choice.premium ? ' <span class="premium-mark">' + choice.diamonds_cost + '💎</span>' : '');
+
       if(choiceBtn.is_available) {
         choiceBtn.className = `choice`;
+        choiceBtn.innerHTML += ' 🔒'
         choiceBtn.onclick = () => makeChoice(choice.id);
       } else {
         choiceBtn.className = 'invalid-choice'
       }
-      choiceBtn.innerHTML = choice.text + (choice.premium ? ' <span class="premium-mark">' + choice.diamonds_cost + '💎</span>' : '');
       choicesContainer.appendChild(choiceBtn);
     });
   }
