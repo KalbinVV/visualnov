@@ -441,7 +441,7 @@ def api_get_progress():
         return jsonify({'error': f'Ошибка получения прогресса: {str(e)}'}), 500
 
 
-@app.route('/api/games/<story_id>/to_next_scene', methods=['GET'])
+@app.route('/api/games/<story_id>/to_next_scene', methods=['POST'])
 @api_login_required
 def to_next_scene(story_id: int):
     with Session(db.engine) as s:
