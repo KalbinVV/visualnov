@@ -89,6 +89,29 @@ class UserSession(Base):
     user: Mapped["User"] = relationship("User", back_populates="user_sessions")
 
 
+class Story(Base):
+    __tablename__ = "stories"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    story_key: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
+    title: Mapped[str] = mapped_column(String(200), nullable=False)
+    description: Mapped[Optional[str]] = mapped_column(Text)
+    cover_image: Mapped[Optional[str]] = mapped_column(String(255))
+    background_image: Mapped[Optional[str]] = mapped_column(String(255))
+    premium: Mapped[bool] = mapped_column(default=False)
+    diamonds_cost: Mapped[int] = mapped_column(default=0)
+    chapters_count: Mapped[int] = mapped_column(default=0)
+    scenes_count: Mapped[int] = mapped_column(default=0)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now())
+    is_published: Mapped[bool] = mapped_column(default=False)
+    author_id: Mapped[Optional[int]] = mapped_column(ForeignKey("users.id"))
+
+    author: Mapped[Optional["User"]] = relationship("User", back_populates="authored_stories")
+    chapters: Mapped[List["Chapter"]] = relationship("Chapter", back_populates="story", cascade="all, delete-orphan")
+    story_characters: Mapped[List["StoryCharacter"]] = relationship("StoryCharacter", back_populates="story", cascade="all, delete-orphan")
+
+
 class GameSave(Base):
     __tablename__ = "game_saves"
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
@@ -123,29 +146,6 @@ class Achievement(Base):
     unlocked_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
 
     user: Mapped["User"] = relationship("User", back_populates="achievements")
-
-
-class Story(Base):
-    __tablename__ = "stories"
-
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    story_key: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
-    title: Mapped[str] = mapped_column(String(200), nullable=False)
-    description: Mapped[Optional[str]] = mapped_column(Text)
-    cover_image: Mapped[Optional[str]] = mapped_column(String(255))
-    background_image: Mapped[Optional[str]] = mapped_column(String(255))
-    premium: Mapped[bool] = mapped_column(default=False)
-    diamonds_cost: Mapped[int] = mapped_column(default=0)
-    chapters_count: Mapped[int] = mapped_column(default=0)
-    scenes_count: Mapped[int] = mapped_column(default=0)
-    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
-    updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now())
-    is_published: Mapped[bool] = mapped_column(default=False)
-    author_id: Mapped[Optional[int]] = mapped_column(ForeignKey("users.id"))
-
-    author: Mapped[Optional["User"]] = relationship("User", back_populates="authored_stories")
-    chapters: Mapped[List["Chapter"]] = relationship("Chapter", back_populates="story", cascade="all, delete-orphan")
-    story_characters: Mapped[List["StoryCharacter"]] = relationship("StoryCharacter", back_populates="story", cascade="all, delete-orphan")
 
 
 class Chapter(Base):
