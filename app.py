@@ -467,8 +467,6 @@ def api_get_next_scene(story_id: int):
             }
         }), 200
 
-        return
-
 
 @app.route('/')
 def index():
