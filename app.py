@@ -402,7 +402,7 @@ def api_make_choice(story_id: int):
                 'message': msg,
                 'scene_id': scene_id,
                 'chapter_id': chapter_id,
-                'next-scene': {
+                'next_scene': {
                     'character_image': next_scene.character_image,
                     'character_name': next_scene.character_name,
                     'background': next_scene.background_image,

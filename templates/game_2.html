@@ -647,7 +647,7 @@
       const data = await response.json();
 
       if (response.ok && data.success) {
-        sceneData = data.sceneData;
+        sceneData = data.next_scene;
 
         const bubble = document.querySelector('.bubble');
         bubble.style.transition = 'opacity 0.2s, transform 0.2s';
