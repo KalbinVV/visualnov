@@ -1802,7 +1802,7 @@ async function editChoice(choiceId) {
 
       setTimeout(() => {
         document.getElementById('choiceId').value = data.choice.id;
-        document.getElementById('choiceNumber').value = data.choice.choice_number;
+        document.getElementById('choiceNumber').value = data.choice.number;
         document.getElementById('choiceText').value = data.choice.text;
         document.getElementById('nextSceneId').value = data.choice.next_scene_id || '';
         document.getElementById('nextChapterId').value = data.choice.next_chapter_id || '';
