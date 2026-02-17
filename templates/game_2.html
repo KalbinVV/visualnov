@@ -74,6 +74,8 @@
     }
 
     .dialogue-container {
+      position: relative;
+      top: -10%:
       z-index: 10;
       padding: 0 24px 30vh;
       background: linear-gradient(to top, var(--bg-overlay) 45%, transparent 100%);
@@ -172,6 +174,8 @@
       -webkit-overflow-scrolling: touch;
       scrollbar-width: none;
       -ms-overflow-style: none;
+      position: relative;
+      top: 2%;
     }
 
     .choices::-webkit-scrollbar {
@@ -236,34 +240,6 @@
       font-size: 1.2em;
       vertical-align: middle;
       margin-left: 6px;
-    }
-
-    @media (max-width: 500px) {
-      .bubble {
-        padding: 20px 22px 24px;
-        border-radius: 22px 22px 22px 10px;
-      }
-      .text {
-        font-size: 1.02rem;
-        line-height: 1.5;
-      }
-      .choice {
-        font-size: 1rem;
-        padding: 16px 20px;
-        border-radius: 18px;
-        flex: 0 0 85%;
-        min-width: 280px;
-        max-width: 85%;
-        scroll-snap-align: start;
-      }
-      .name {
-        font-size: 1.05rem;
-        padding: 5px 16px;
-        left: 24px;
-      }
-      .dialogue-container {
-        padding: 0 12px 30vh !important;
-      }
     }
 
     .top-bar {
