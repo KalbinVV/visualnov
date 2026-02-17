@@ -1126,6 +1126,35 @@
             <input type="number" id="passionChange" class="form-control" value="0">
           </div>
 
+          <div class="editor-section-title">
+            <svg style="width:18px;height:18px;" viewBox="0 0 24 24">
+              <path fill="currentColor" d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z" />
+            </svg>
+            Необходимые показатели
+          </div>
+
+          <div class="form-group" style="flex:1;">
+            <label for="requiredPassionLevel">Необходимый уровень страсти</label>
+            <input type="number" id="requiredPassionLevel" class="form-control" value="0">
+          </div>
+
+          <div class="form-group" style="flex:1;">
+            <label for="requiredTeasingLevel">Необходимый уровень teasing</label>
+            <input type="number" id="requiredTeasingLevel" class="form-control" value="0">
+          </div>
+
+          <div class="form-group" style="flex:1;">
+            <label for="requiredFriendshipLevel">Необходимый уровень дружбы</label>
+            <input type="number" id="requiredFriendshipLevel" class="form-control" value="0">
+          </div>
+
+          <div class="editor-section-title">
+            <svg style="width:18px;height:18px;" viewBox="0 0 24 24">
+              <path fill="currentColor" d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z" />
+            </svg>
+            Концовки (еще не готово)
+          </div>
+
           <div class="form-group" style="flex:1;">
             <label for="legendChoice">Вариант для статистики (Будет отображаться в концовке)</label>
             <input type="checkbox" id="legendChoice" class="form-control" value="false">
@@ -1434,6 +1463,21 @@ function renderSceneEditor(scene) {
                       <div class="choice-effect-value">${choice.passion_change >= 0 ? '+' : ''}${choice.passion_change}</div>
                     </div>
                   </div>
+                  <h3>Необходимые условия открытия</h3>
+                  <div class="choice-effects">
+                    <div class="choice-effect">
+                      <div class="choice-effect-label">Дружелюбие</div>
+                      <div class="choice-effect-value">${choice.required_friendship_level}</div>
+                    </div>
+                    <div class="choice-effect">
+                      <div class="choice-effect-label">Teasing</div>
+                      <div class="choice-effect-value">${choice.required_teasing_level}</div>
+                    </div>
+                    <div class="choice-effect">
+                      <div class="choice-effect-label">Страсть</div>
+                      <div class="choice-effect-value">${choice.required_passion_level}</div>
+                    </div>
+                  </div>
                 </div>
               `).join('')}
             </div>
@@ -1729,6 +1773,10 @@ async function saveChoice(e) {
   const passion = parseInt(document.getElementById('passionChange').value) || 0;
   const premium = document.getElementById('choicePremium').checked;
   const diamonds = parseInt(document.getElementById('diamondsCost').value) || 0;
+  const requiredPassionLevel = parseInt(document.getElementById('requiredPassionLevel')) || 0;
+  const requiredTeasingLevel = parseInt(document.getElementById('requiredTeasingLevel')) || 0;
+  const requiredFriendshipLevel = parseInt(document.getElementById('requiredFriendshipLevel')) || 0;
+
 
   if (!choiceText) {
     alert('Введите текст варианта выбора');
@@ -1751,7 +1799,10 @@ async function saveChoice(e) {
           teasing_change: teasing,
           passion_change: passion,
           premium: premium,
-          diamonds_cost: diamonds
+          diamonds_cost: diamonds,
+          required_passion_level: requiredPassionLevel,
+          required_friendship_level: requiredFriendshipLevel,
+          required_teasing_level: requiredTeasingLevel
         })
       });
     } else {
@@ -1769,7 +1820,10 @@ async function saveChoice(e) {
           teasing_change: teasing,
           passion_change: passion,
           premium: premium,
-          diamonds_cost: diamonds
+          diamonds_cost: diamonds,
+          required_passion_level: requiredPassionLevel,
+          required_friendship_level: requiredFriendshipLevel,
+          required_teasing_level: requiredTeasingLevel
         })
       });
     }
@@ -1811,6 +1865,9 @@ async function editChoice(choiceId) {
         document.getElementById('passionChange').value = data.choice.passion_change || 0;
         document.getElementById('choicePremium').checked = data.choice.premium ? true : false;
         document.getElementById('diamondsCost').value = data.choice.diamonds_cost || 0;
+        document.getElementById('requiredPassionLevel').value = data.choice.required_passion_level || 0;
+        document.getElementById('requiredFriendshipLevel').value = data.choice.required_friendship_level || 0;
+        document.getElementById('requiredTeasingLevel').value = data.choice.required_teasing_level || 0;
       }, 100);
     } else {
       alert(data.error || 'Ошибка загрузки варианта');

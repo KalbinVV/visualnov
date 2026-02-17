@@ -327,43 +327,14 @@ class StoryService:
 
             return True
 
-    def create_choice(
-        self,
-        scene_id: int,
-        choice_number: int,
-        choice_text: str,
-        next_scene_id: Optional[int] = None,
-        next_chapter_id: Optional[int] = None,
-        effect_type: Optional[str] = None,
-        effect_data: Optional[str] = None,
-        premium: bool = False,
-        diamonds_cost: int = 0,
-        teasing_change: int = 0,
-        friendship_change: int = 0,
-        passion_change: int = 0,
-        unlock_condition: Optional[str] = None,
-        only_leader: Optional[bool] = None,
-        is_locked: bool = False
-    ) -> Optional[int]:
+    def create_choice(self,**kwargs) -> Optional[int]:
         with self.db.get_session() as s:
             try:
-                choice = Choice(
-                    scene_id=scene_id,
-                    choice_number=choice_number,
-                    choice_text=choice_text,
-                    next_scene_id=next_scene_id,
-                    next_chapter_id=next_chapter_id,
-                    effect_type=effect_type,
-                    effect_data=effect_data,
-                    premium=premium,
-                    diamonds_cost=diamonds_cost,
-                    teasing_change=teasing_change,
-                    friendship_change=friendship_change,
-                    passion_change=passion_change,
-                    unlock_condition=unlock_condition,
-                    only_leader=only_leader,
-                    is_locked=is_locked
-                )
+                choice = Choice()
+
+                for arg, value in kwargs.items():
+                    setattr(choice, arg, value)
+
                 s.add(choice)
                 s.flush()
                 return choice.id

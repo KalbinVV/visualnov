@@ -982,14 +982,14 @@ def api_create_choice():
             choice_text=data['choice_text'],
             next_scene_id=data.get('next_scene_id'),
             next_chapter_id=data.get('next_chapter_id'),
-            effect_type=data.get('effect_type'),
-            effect_data=data.get('effect_data'),
             premium=data.get('premium', False),
             diamonds_cost=data.get('diamonds_cost', 0),
             teasing_change=data.get('teasing_change', 0),
-            friendship_change=data.get('trust_change', 0),
+            friendship_change=data.get('friendship_change', 0),
             passion_change=data.get('passion_change', 0),
-            unlock_condition=data.get('unlock_condition')
+            required_passion_level=data.get('required_passion_level'),
+            required_friendship_level=data.get('required_friendship_level'),
+            required_teasing_level=data.get('required_teasing_level')
         )
 
         if not choice_id:

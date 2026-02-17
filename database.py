@@ -235,6 +235,9 @@ class Choice(Base):
     is_important_choice: Mapped[bool] = mapped_column(Boolean, default=False)
     legend_title: Mapped[str] = mapped_column(String, nullable=True)
     legend_icon: Mapped[str] = mapped_column(String, nullable=True)
+    required_teasing_level: Mapped[str] = mapped_column(Integer, default=0)
+    required_passion_level: Mapped[str] = mapped_column(Integer, default=0)
+    required_friendship_level: Mapped[str] = mapped_column(Integer, default=0)
 
     scene: Mapped["Scene"] = relationship(
         "Scene",
@@ -255,7 +258,10 @@ class Choice(Base):
                 'is_important': choice.is_important_choice,
                 'teasing_change': choice.teasing_change,
                 'friendship_change': choice.friendship_change,
-                'passion_change': choice.passion_change
+                'passion_change': choice.passion_change,
+                'required_teasing_level': choice.required_teasing_level,
+                'required_passion_level': choice.required_passion_level,
+                'required_friendship_level': choice.required_friendship_level
                 }
 
 
@@ -426,12 +432,18 @@ class Database:
             result = s.execute(stmt)
             return result.rowcount > 0
 
-    def save_game(self, user_id: int, story_id: int, scene_id: int, chapter_id: int):
+    def save_game(self, user_id: int, story_id: int, scene_id: int,
+                  chapter_id: int, teasing_change: int, passion_change: int,
+                  friendship_change: int):
         with Session(self.engine) as s:
             saved_game = s.query(GameSave).filter_by(user_id=user_id, story_id=story_id).first()
 
             if not saved_game:
                 saved_game = GameSave(user_id=user_id, story_id=story_id)
+
+                saved_game.teasing_level += teasing_change
+                saved_game.friendship_level += friendship_change
+                saved_game.passion_level += passion_change
 
                 s.add(saved_game)
                 s.commit()
@@ -458,6 +470,24 @@ class Database:
                 s.commit()
 
             return saved_game.chapter_id, saved_game.scene_id
+
+    def load_game_raw(self, user_id: int, story_id: int) -> GameSave:
+        with Session(self.engine) as s:
+            saved_game = s.query(GameSave).filter_by(user_id=user_id, story_id=story_id).first()
+
+            if not saved_game:
+                saved_game = GameSave(user_id=user_id,
+                                      story_id=story_id)
+
+                first_chapter_in_story = s.query(Chapter).filter_by(story_id=story_id).first()
+
+                saved_game.chapter_id = first_chapter_in_story.id
+                saved_game.scene_id = s.query(Scene).filter_by(chapter_id=first_chapter_in_story.id).first().id
+
+                s.add(saved_game)
+                s.commit()
+
+            return saved_game
 
 
     def get_user_stats(self, user_id: int) -> dict:

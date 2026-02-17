@@ -147,7 +147,12 @@ class GameService:
                     user.diamonds -= choice.diamonds_cost
                     s.commit()
 
-                self.db.save_game(user_id, story_id, choice.next_scene_id, choice.next_chapter_id)
+                self.db.save_game(user_id, story_id,
+                                  choice.next_scene_id,
+                                  choice.next_chapter_id,
+                                  teasing_change=choice.teasing_change,
+                                  friendship_change=choice.friendship_change,
+                                  passion_change=choice.passion_change)
             else:
                 return False, msg, -1, -1
 
@@ -156,7 +161,11 @@ class GameService:
     def is_choice_available(self, user_id: int, choice_id: int) -> tuple[bool,str]:
         with Session(self.db.engine) as s:
             choice = s.get(Choice, choice_id)
+            scene = s.query(Scene).filter_by(id=choice.scene_id).first()
+            chapter = s.query(Chapter).filter_by(id=scene.chapter_id).first()
+
             user = s.get(User, user_id)
+            user_save = self.db.load_game_raw(user_id, chapter.story_id)
 
             if choice.premium:
                 if user.diamonds < choice.diamonds_cost:
@@ -165,6 +174,15 @@ class GameService:
             if choice.only_leader:
                 if not user.is_leader:
                     return False, 'Вы должны быть лидером команды!'
+
+            if user_save.friendship_level < choice.required_friendship_level:
+                return False, 'Данный вариант недоступен, в связи с вашими предыдущими выборами'
+
+            if user_save.passion_level < choice.passion_change:
+                return False, 'Данный вариант недоступен, в связи с вашими предыдущими выборами!'
+
+            if user_save.teasing_level < choice.teasing_change:
+                return False, 'Данный вариант недоступен, в связи с вашими предыдущими выборами'
 
             return True, ''
 
