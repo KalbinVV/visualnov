@@ -671,7 +671,7 @@
 
         loadScene();
       } else {
-        alert(data.error || 'Ошибка при совершении выбора');
+        alert(data.message || 'Ошибка при совершении выбора');
       }
     } catch (error) {
       console.error('Ошибка:', error);

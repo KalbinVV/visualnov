@@ -398,24 +398,27 @@ def api_make_choice(story_id: int):
         status, msg, scene_id, chapter_id = game_service.make_choice(session['user_id'], story_id,
                                                                      int(choice_id))
 
-        with Session(db.engine) as s:
-            next_scene = s.get(Scene, scene_id)
-            user = s.get(User, session['user_id'])
+        if status:
+            with Session(db.engine) as s:
+                next_scene = s.get(Scene, scene_id)
+                user = s.get(User, session['user_id'])
 
-            return jsonify({
-                'success': status,
-                'message': msg,
-                'scene_id': scene_id,
-                'chapter_id': chapter_id,
-                'next_scene': {
-                    'character_image': next_scene.character_image,
-                    'character_name': next_scene.character_name,
-                    'background': next_scene.background_image,
-                    'dialogue': next_scene.dialogue_text,
-                    'choices': [Choice.as_dict(choice) for choice in next_scene.choices],
-                    'current_user_diamonds': user.diamonds
-                }
-            }), 200
+                return jsonify({
+                    'success': status,
+                    'message': msg,
+                    'scene_id': scene_id,
+                    'chapter_id': chapter_id,
+                    'next_scene': {
+                        'character_image': next_scene.character_image,
+                        'character_name': next_scene.character_name,
+                        'background': next_scene.background_image,
+                        'dialogue': next_scene.dialogue_text,
+                        'choices': [Choice.as_dict(choice) for choice in next_scene.choices],
+                        'current_user_diamonds': user.diamonds
+                    }
+                }), 200
+        else:
+            return jsonify({'success': status, 'message': msg})
 
     except Exception as e:
         print(e)
