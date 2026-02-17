@@ -737,6 +737,41 @@
     }
   }
 
+  async function goToNextScene() {
+    try {
+      const response = await fetch(`/api/games/${storyId}/to_next_scene`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          choice_id: choiceId,
+          slot: 1
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        sceneData = data.next_scene;
+
+        const bubble = document.querySelector('.bubble');
+        bubble.style.transition = 'opacity 0.2s, transform 0.2s';
+        bubble.style.opacity = '0';
+        bubble.style.transform = 'translateY(15px)';
+
+        document.querySelector('.choices').innerHTML = '';
+
+        loadScene();
+      } else {
+        alert(data.message || 'Ошибка при совершении выбора');
+      }
+    } catch (error) {
+      console.error('Ошибка:', error);
+      alert('Ошибка подключения к серверу');
+    }
+  }
+
   async function saveGame() {
     try {
       const response = await fetch(`/api/games/${gameKey}/save`, {
@@ -761,11 +796,6 @@
       console.error('Ошибка:', error);
       alert('Ошибка подключения к серверу');
     }
-  }
-
-  function goToNextScene() {
-    sceneData.scene = (sceneData.scene || 1) + 1;
-    loadScene();
   }
 
   function goBack() {

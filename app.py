@@ -441,9 +441,9 @@ def api_get_progress():
         return jsonify({'error': f'Ошибка получения прогресса: {str(e)}'}), 500
 
 
-@app.route('/api/games/<story_id>/get_next_scene', methods=['GET'])
+@app.route('/api/games/<story_id>/to_next_scene', methods=['GET'])
 @api_login_required
-def api_get_next_scene(story_id: int):
+def to_next_scene(story_id: int):
     with Session(db.engine) as s:
         user = s.get(User, session['user_id'])
 
@@ -451,6 +451,8 @@ def api_get_next_scene(story_id: int):
         scenes = s.query(Scene).filter(Scene.id >= user_save.scene_id).all()
 
         scene = scenes[1] if len(scenes) > 1 else scenes[0]
+
+        db.save_game(user.id, story_id, scene.id, scene.chapter_id, 0, 0, 0)
 
         return jsonify({
             'success': True,
