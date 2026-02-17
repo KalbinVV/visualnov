@@ -191,9 +191,9 @@
       background: var(--choice-bg);
       color: #1a1a2e;
       position: relative;
-      overflow: auto;
       box-shadow: 0 8px 24px rgba(0,0,0,0.35);
       overflow-wrap: break-word;
+      overflow: hidden;
       hyphens: auto;
       -webkit-hyphens: auto;
       -ms-hyphens: auto;
@@ -218,7 +218,7 @@
       transition: all 0.22s cubic-bezier(0.4, 0.0, 0.2, 1);
       color: white;
       position: relative;
-      overflow: auto;
+      overflow: hidden;
       box-shadow: 0 8px 24px rgba(0,0,0,0.35);
       overflow-wrap: break-word;
       hyphens: auto;
@@ -709,7 +709,7 @@
 
       if(choice.is_available) {
         choiceBtn.className = `choice`;
-        choiceBtn.onclick = () => makeChoice(choice.id);
+        choiceBtn.onclick = () => makeChoice(choice.data.id);
       } else {
         const lockedIcon = document.createElement('span')
 
