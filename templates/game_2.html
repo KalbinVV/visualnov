@@ -575,6 +575,8 @@
   });
 
   function loadScene() {
+    console.log(sceneData)
+
     if (sceneData.background) {
       document.body.style.backgroundImage = `url('${sceneData.background}')`;
       document.body.style.backgroundSize = 'cover';
