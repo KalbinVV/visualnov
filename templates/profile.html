@@ -97,7 +97,6 @@
               <div class="stat-game">{{ stat.game_name }}</div>
               <div class="stat-detail">Сыграно: {{ stat.games_played }} раз</div>
               <div class="stat-detail">Завершено: {{ stat.completed_count }}</div>
-              <div class="stat-detail">Время: {{ (stat.total_time|float / 3600)|round(1) }} ч</div>
             </div>
           {% endfor %}
         {% else %}
