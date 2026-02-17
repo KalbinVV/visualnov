@@ -84,7 +84,7 @@ class Team(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String, nullable=False)
-    icon: Mapped[str] = mapped_column(String, nullable=False)
+    icon: Mapped[str] = mapped_column(String, nullable=True)
 
     users: Mapped[List[User]] = relationship()
 
