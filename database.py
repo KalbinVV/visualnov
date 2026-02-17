@@ -93,8 +93,8 @@ class GameSave(Base):
     __tablename__ = "game_saves"
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
-    story_id: Mapped[int] = mapped_column(Integer, nullable=False)
-    scene_id: Mapped[[int]] = mapped_column(Integer, nullable=False, default=1)
+    story_id: Mapped[int] = mapped_column(ForeignKey("stories.id", ondelete="CASCADE"), nullable=False)
+    scene_id: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
     chapter_id: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
 
 class GameStat(Base):
