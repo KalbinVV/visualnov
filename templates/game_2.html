@@ -713,12 +713,12 @@
       }
 
       if(choice.is_available) {
-        choiceBtn.className = `choice`;
+        choiceContainer.className = `choice`;
         choiceBtn.onclick = () => makeChoice(choice.id);
       } else {
         const lockedIcon = document.createElement('span')
 
-        choiceBtn.className = 'invalid-choice'
+        choiceContainer.className = 'invalid-choice'
         lockedIcon.className = 'locked-icon'
         lockedIcon.innerHTML = '🔒'
 
