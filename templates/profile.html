@@ -61,8 +61,13 @@
         Редактировать профиль
       </button>
     </div>
-    
-    <!-- Достижения -->
+
+
+    <div class="section">
+      <h3>👥 Команда</h3>
+      <h4>{{ user.team.name if user.team else "Вы пока не назначены в команду!" }}</h4>
+    </div>
+
     <div class="section">
       <h3>🏆 Мои достижения</h3>
       <div class="achievements-grid">
@@ -85,10 +90,6 @@
           </div>
         {% endif %}
       </div>
-    </div>
-
-    <div class="section">
-      <h3>👥 Команда</h3>
     </div>
 
     <div class="section">
