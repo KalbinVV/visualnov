@@ -689,17 +689,17 @@
       choiceStatusContainer.className = 'choice-status-container'
 
       const choiceBtn = document.createElement('div');
-      choiceBtn.innerHTML = choice.text
+      choiceBtn.innerHTML = choice.data.text
 
-      if(choice.premium) {
+      if(choice.data.premium) {
         const diamondIcon = document.createElement('span');
         diamondIcon.className = 'status-icon'
-        diamondIcon.innerHTML = `${choice.diamonds_cost} 💎`
+        diamondIcon.innerHTML = `${choice.data.diamonds_cost} 💎`
 
         choiceStatusContainer.appendChild(diamondIcon)
       }
 
-      if(choice.only_leader) {
+      if(choice.data.only_leader) {
         const onlyLeaderIcon = document.createElement('span');
         onlyLeaderIcon.className = 'status-icon'
         onlyLeaderIcon.innerHTML = '👥'

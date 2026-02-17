@@ -190,18 +190,8 @@ class GameService:
                 'scale': scene.scale,
                 'choices': [
                     {
-                        'id': choice.id,
-                        'text': choice.choice_text,
-                        'premium': choice.premium,
-                        'diamonds_cost': choice.diamonds_cost,
-                        'next_scene_id': choice.next_scene_id,
-                        'next_chapter_id': choice.next_chapter_id,
-                        'effects': {
-                            'affection': choice.affection_change,
-                            'trust': choice.trust_change,
-                            'passion': choice.passion_change
-                        },
-                        'is_available': self.is_choice_available(user_id, choice.id)[0]
+                        'data': Choice.as_dict(choice),
+                        'is_available': self.is_choice_available(choice.id, user.id)
                     }
                     for choice in scene.choices
                 ]
