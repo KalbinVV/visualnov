@@ -400,6 +400,7 @@ def api_make_choice(story_id: int):
 
         with Session(db.engine) as s:
             next_scene = s.get(Scene, scene_id)
+            user = s.get(User, session['user_id'])
 
             return jsonify({
                 'success': status,
@@ -411,7 +412,8 @@ def api_make_choice(story_id: int):
                     'character_name': next_scene.character_name,
                     'background': next_scene.background_image,
                     'dialogue': next_scene.dialogue_text,
-                    'choices': [Choice.as_dict(choice) for choice in next_scene.choices]
+                    'choices': [Choice.as_dict(choice) for choice in next_scene.choices],
+                    'current_user_diamonds': user.diamonds
                 }
             }), 200
 

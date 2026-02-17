@@ -137,11 +137,24 @@ class GameService:
                     choice_id: int) -> tuple[bool, str, int, int]:
 
         with Session(self.db.engine) as s:
+            user = s.get(User, user_id)
             choice = s.get(Choice, choice_id)
+
+            if self.is_choice_available(user_id, choice_id):
+                if choice.premium:
+                    user.diamonds -= choice.diamonds_cost
 
             self.db.save_game(user_id, story_id, choice.next_scene_id, choice.next_chapter_id)
 
             return True, '', choice.next_scene_id, choice.next_chapter_id
+
+    def is_choice_available(self, user_id: int, choice_id: int) -> bool:
+        with Session(self.db.engine) as s:
+            choice = s.get(Choice, choice_id)
+            user = s.get(User, user_id)
+
+            if choice.premium:
+                return user.diamonds >= choice.diamonds_cost
 
 
     @staticmethod
