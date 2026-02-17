@@ -226,6 +226,9 @@ class Choice(Base):
     only_leader: Mapped[Optional[bool]] = mapped_column(Boolean)
     is_locked: Mapped[bool] = mapped_column(default=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    is_legend_choice: Mapped[bool] = mapped_column(Boolean, default=False)
+    legend_title: Mapped[str] = mapped_column(String)
+    legend_icon: Mapped[str] = mapped_column(String)
 
     scene: Mapped["Scene"] = relationship(
         "Scene",

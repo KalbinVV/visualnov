@@ -1137,6 +1137,27 @@
             <label for="passionChange">Изменение страсти</label>
             <input type="number" id="passionChange" class="form-control" value="0">
           </div>
+
+          <div class="form-group" style="flex:1;">
+            <label for="legendChoice">Вариант для статистики (Будет отображаться в концовке)</label>
+            <input type="checkbox" id="legendChoice" class="form-control" value="false">
+          </div>
+          <div class="form-group" style="flex:1;">
+            <label for="legendTitle">Текст для концовки (если выбран прошлый пункт)</label>
+            <textarea  id="legendTitle" class="form-control"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="chapterBackground">Изображение для концовки</label>
+            <div style="display: flex; gap: 8px;">
+              <input type="text" id="legendBackground" class="form-control" placeholder="background1.jpg">
+              <button type="button" class="btn-upload" onclick="uploadImage('legendBackground')">
+                <svg style="width:18px;height:18px;" viewBox="0 0 24 24">
+                  <path fill="currentColor" d="M5,21H19A2,2 0 0,0 21,19V5A2,2 0 0,0 19,3H5A2,2 0 0,0 3,5V19A2,2 0 0,0 5,21M15,13H9V11H15M15,17H9V15H15M15,9H9V7H15M15,5H9V3H15M15,19H9V17H15" />
+                </svg>
+                Загрузить
+              </button>
+            </div>
+            <small class="form-hint">Изображение для концовки (Если выбран пункт 'вариант для статистики')</small>
         </div>
       </div>
 
@@ -1455,7 +1476,6 @@ function renderSceneEditor(scene) {
   });
 }
 
-// Показать пустой редактор
 function showEmptySceneEditor() {
   document.getElementById('sceneEditorContent').innerHTML = `
     <div class="empty-scene">
@@ -1469,7 +1489,6 @@ function showEmptySceneEditor() {
   document.getElementById('sceneEditorSubtitle').textContent = 'Нажмите на сцену в списке, чтобы отредактировать';
 }
 
-// Загрузка вариантов выбора
 async function loadChoices(sceneId) {
   try {
     const response = await fetch(`/api/scenes/${sceneId}/choices`);
