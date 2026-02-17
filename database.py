@@ -253,6 +253,9 @@ class Choice(Base):
                 'id': choice.id,
                 'only_leader': choice.only_leader,
                 'is_important': choice.is_important_choice,
+                'teasing_change': choice.teasing_change,
+                'friendship_change': choice.friendship_change,
+                'passion_change': choice.passion_change
                 }
 
 
