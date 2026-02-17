@@ -687,10 +687,7 @@
       choiceBtn.innerHTML = choice.text
 
       if(choice.is_premium) {
-        const diamondIcon = document.createElement('diamond_icon');
-        diamondIcon.className = 'diamond-icon'
-        diamondIcon.innerHTML = '💎'
-        choiceBtn.appendChild(diamondIcon)
+        choiceBtn.innerHTML += '<span class="diamond-icon">💎</span>'
       }
 
       if(choice.is_available) {
