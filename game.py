@@ -160,6 +160,7 @@ class GameService:
 
     def is_choice_available(self, user_id: int, choice_id: int) -> tuple[bool,str]:
         with Session(self.db.engine) as s:
+            print(user_id, choice_id)
             choice = s.get(Choice, choice_id)
             scene = s.query(Scene).filter_by(id=choice.scene_id).first()
             chapter = s.query(Chapter).filter_by(id=scene.chapter_id).first()
