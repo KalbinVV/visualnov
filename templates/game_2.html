@@ -435,7 +435,6 @@
       color: white;
     }
 
-    /* Mobile-only warning */
     .mobile-warning {
       position: fixed;
       top: 0;
@@ -487,7 +486,17 @@
 
     .diamonds {
       position: relative;
-      left: 20vh;
+      left: 1vh;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(176, 140, 255, 0.25);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.4, 0.0, 0.2, 1);
+      touch-action: manipulation;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     }
   </style>
 </head>
