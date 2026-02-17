@@ -683,6 +683,7 @@
     }
 
     sceneData.choices.forEach(choice => {
+      const choiceContainer = document.createElement('div')
       const choiceBtn = document.createElement('div');
       choiceBtn.innerHTML = choice.text
 
@@ -690,7 +691,7 @@
         const diamondIcon = document.createElement('span');
         diamondIcon.className = 'diamond-icon'
         diamondIcon.innerHTML = '💎'
-        choiceBtn.appendChild(diamondIcon)
+        choiceContainer.appendChild(diamondIcon)
       }
 
       if(choice.is_available) {
@@ -700,7 +701,9 @@
         choiceBtn.className = 'invalid-choice'
         choiceBtn.innerHTML += ' 🔒'
       }
-      choicesContainer.appendChild(choiceBtn);
+
+      choiceContainer.appendChild(choiceBtn)
+      choicesContainer.appendChild(choiceContainer);
     });
   }
 
