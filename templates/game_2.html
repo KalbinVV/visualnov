@@ -522,6 +522,24 @@
       top: 2vh;
       backdrop-filter: blur(32px);
     }
+
+    .diamond-icon {
+      position: absolute;
+      z-index: 10;
+      top: -18px;
+      left: 32px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+      color: white;
+      font-weight: 700;
+      font-size: 1.15rem;
+      padding: 6px 18px;
+      border-radius: 40px;
+      box-shadow: 0 4px 15px rgba(176,140,255,0.5),
+                  inset 0 -2px 0 rgba(255,255,255,0.3);
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+      font-family: 'Playfair Display', serif;
+    }
   </style>
 </head>
 <body>
@@ -666,7 +684,14 @@
 
     sceneData.choices.forEach(choice => {
       const choiceBtn = document.createElement('div');
-      choiceBtn.innerHTML = choice.text + (choice.premium ? ' <span class="premium-mark">' + choice.diamonds_cost + '💎</span>' : '');
+      choiceBtn.innerHTML = choice.text
+
+      if(choice.is_premium) {
+        const diamondIcon = document.createElement('diamond_icon');
+        diamondIcon.className = 'diamond-icon'
+        diamondIcon.innerHTML = '💎'
+        choiceBtn.appendChild(diamondIcon)
+      }
 
       if(choice.is_available) {
         choiceBtn.className = `choice`;
