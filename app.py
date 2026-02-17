@@ -10,7 +10,7 @@ import os
 from sqlalchemy.orm import Session
 
 from config import config
-from database import Database, User, Choice, Scene, Story
+from database import Database, User, Choice, Scene, Story, GameSave
 from auth import AuthService
 from game import GameService
 
@@ -1169,16 +1169,10 @@ def admin_users_page():
 @app.route('/api/admin/users/<int:user_id>/reset-progress', methods=['POST'])
 @admin_required
 def reset_user_progress(user_id):
-    """Сброс прогресса пользователя (для тестирования)"""
     try:
-        # Удаляем все сохранения
-        db.delete_user_saves(user_id)
-
-        # Удаляем статистику игр
-        db.delete_user_game_stats(user_id)
-
-        # Удаляем достижения
-        db.delete_user_achievements(user_id)
+        with Session(db.engine) as s:
+            s.query(GameSave).filter_by(user_id=session['user_id']).delete()
+            s.commit()
 
         return jsonify({
             'success': True,
