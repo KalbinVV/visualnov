@@ -140,24 +140,29 @@ class GameService:
             user = s.get(User, user_id)
             choice = s.get(Choice, choice_id)
 
-            if self.is_choice_available(user_id, choice_id):
+            success, msg = self.is_choice_available(user_id, choice_id)
+
+            if success:
                 if choice.premium:
-                    print(user.diamonds)
                     user.diamonds -= choice.diamonds_cost
-                    print(user.diamonds)
                     s.commit()
 
-            self.db.save_game(user_id, story_id, choice.next_scene_id, choice.next_chapter_id)
+                self.db.save_game(user_id, story_id, choice.next_scene_id, choice.next_chapter_id)
+            else:
+                return False, msg, -1, -1
 
             return True, '', choice.next_scene_id, choice.next_chapter_id
 
-    def is_choice_available(self, user_id: int, choice_id: int) -> bool:
+    def is_choice_available(self, user_id: int, choice_id: int) -> tuple[bool,str]:
         with Session(self.db.engine) as s:
             choice = s.get(Choice, choice_id)
             user = s.get(User, user_id)
 
             if choice.premium:
-                return user.diamonds >= choice.diamonds_cost
+                if user.diamonds < choice.diamonds_cost:
+                    return False, 'Недостаточно алмазов!'
+
+            return True, ''
 
 
     @staticmethod
