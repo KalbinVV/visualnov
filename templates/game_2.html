@@ -523,6 +523,13 @@
       backdrop-filter: blur(32px);
     }
 
+    .choice-status-container {
+      position: relative;
+      z-index: 20;
+      top: 10px;
+      left: 5px;
+    }
+
     .diamond-icon {
       position: relative;
       z-index: 20;
@@ -683,6 +690,10 @@
 
     sceneData.choices.forEach(choice => {
       const choiceContainer = document.createElement('div')
+      const choiceStatusContainer = document.createElement('div')
+
+      choiceStatusContainer.className = 'choice-status-container'
+
       const choiceBtn = document.createElement('div');
       choiceBtn.innerHTML = choice.text
 
@@ -690,7 +701,7 @@
         const diamondIcon = document.createElement('span');
         diamondIcon.className = 'diamond-icon'
         diamondIcon.innerHTML = `${choice.diamonds_cost} 💎`
-        choiceContainer.appendChild(diamondIcon)
+        choiceStatusContainer.appendChild(diamondIcon)
       }
 
       if(choice.is_available) {
@@ -701,6 +712,7 @@
         choiceBtn.innerHTML += ' 🔒'
       }
 
+      choiceContainer.appendChild(choiceStatusContainer)
       choiceContainer.appendChild(choiceBtn)
       choicesContainer.appendChild(choiceContainer);
     });
