@@ -487,10 +487,12 @@ class Database:
                 saved_game = GameSave(user_id=user_id,
                                       story_id=story_id)
 
-                first_chapter_in_story = s.query(Chapter).filter_by(story_id=story_id).first()
+                first_chapter_in_story = s.query(Chapter).filter_by(story_id=story_id
+                                                                    ).order_by(Chapter.id).first()
 
                 saved_game.chapter_id = first_chapter_in_story.id
-                saved_game.scene_id = s.query(Scene).filter_by(chapter_id=first_chapter_in_story.id).first().id
+                saved_game.scene_id = s.query(Scene).filter_by(chapter_id=first_chapter_in_story.id
+                                                               ).order_by(Scene.id).first().id
 
                 s.add(saved_game)
                 s.commit()
