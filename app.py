@@ -498,7 +498,8 @@ def to_next_scene(story_id: int):
         if not scene:
             return jsonify({
                 'success': False,
-                'message': 'Конец!'
+                'message': 'Конец!',
+                'is_ending': True
             })
 
         db.save_game(user.id, story_id, scene.id, scene.chapter_id, 0, 0, 0)
