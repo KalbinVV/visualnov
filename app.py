@@ -647,9 +647,25 @@ def admin_page():
     )
 
 
+@app.route('/ending/<story_id>')
+@login_required
+def ending_page(story_id: int):
+    with Session(db.engine) as s:
+        story = s.get(Story, story_id)
+
+        if not story:
+            return render_template('error.html', message='История не найдена!', code=404), 404
+
+
+        return render_template(
+            'ending.html',
+            legend_choices=game_service.get_player_legend_choices(session['user_id'], story_id),
+            story_title=story.title
+        )
+
+
 @app.route('/error')
 def error_page():
-    """Страница ошибки"""
     code = request.args.get('code', 404, type=int)
     message = request.args.get('message', 'Страница не найдена')
 

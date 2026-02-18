@@ -111,7 +111,8 @@ class GameService:
                                   passion_change=choice.passion_change)
 
                 choice_history = ChoiceHistory(choice_id=choice.id,
-                                               user_id=user.id)
+                                               user_id=user.id,
+                                               story_id=story_id)
                 s.add(choice_history)
                 s.commit()
             else:
@@ -187,8 +188,10 @@ class GameService:
                 ] if scene.scene_type != 'input' else []
             }
 
-    def get_player_legend_choices(self, user_id: int) -> list[Type[Choice]]:
+    def get_player_legend_choices(self, user_id: int, story_id: int) -> list[Type[Choice]]:
         with Session(self.db.engine) as s:
-            choices_ids = list(map(lambda ch: ch.id, s.query(ChoiceHistory).filter_by(user_id=user_id).all()))
+            choices_ids = list(map(lambda ch: ch.id, s.query(ChoiceHistory).filter_by(user_id=user_id,
+                                                                                      story_id=story_id).all()))
+
             return s.query(Choice).filter(Choice.id.in_(choices_ids),
                                           Choice.is_legend_choice == True).all()

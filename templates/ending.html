@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>Визуальная новелла — Финал истории</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap');
+
+    :root {
+      --accent: #b08cff;
+      --accent-dark: #7a4fd9;
+      --accent-light: #d4b4ff;
+      --text-primary: #f0f0f5;
+      --text-secondary: #b0b0c0;
+      --bg-dark: #0a0a1f;
+      --bg-overlay: rgba(10, 10, 31, 0.92);
+      --border-color: rgba(176, 140, 255, 0.35);
+      --card-bg: rgba(25, 25, 55, 0.85);
+      --choice-bg: rgba(35, 35, 70, 0.75);
+      --glow: 0 0 30px rgba(176, 140, 255, 0.55);
+      --success: #6ce9a6;
+      --transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--bg-dark);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+      background: linear-gradient(135deg, #0f0f2a 0%, #1a1a3d 40%, #0a0a1f 100%);
+      position: relative;
+      line-height: 1.5;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background:
+        radial-gradient(circle at 20% 30%, rgba(122, 79, 217, 0.12) 0%, transparent 40%),
+        radial-gradient(circle at 80% 70%, rgba(176, 140, 255, 0.08) 0%, transparent 45%);
+      z-index: -2;
+      pointer-events: none;
+    }
+
+    .particles {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: -1;
+      overflow: hidden;
+    }
+
+    .particle {
+      position: absolute;
+      border-radius: 50%;
+      background: var(--accent);
+      opacity: 0.15;
+      animation: float 15s infinite linear;
+    }
+
+    @keyframes float {
+      0% { transform: translateY(0) translateX(0) scale(0.8); opacity: 0.1; }
+      50% { opacity: 0.3; }
+      100% { transform: translateY(-100vh) translateX(30px) scale(1.2); opacity: 0; }
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+      position: relative;
+      z-index: 10;
+    }
+
+    /* Top Bar */
+    .top-bar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      backdrop-filter: blur(24px);
+      background: rgba(15, 15, 35, 0.85);
+      border-bottom: 1px solid var(--border-color);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+    }
+
+    .top-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .top-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .game-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.3px;
+      font-family: 'Playfair Display', serif;
+    }
+
+    .icon-btn {
+      width: 44px;
+      height: 44px;
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(176, 140, 255, 0.25);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: var(--transition);
+      touch-action: manipulation;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    }
+
+    .icon-btn:hover,
+    .icon-btn:active {
+      background: rgba(176, 140, 255, 0.18);
+      transform: scale(1.06) translateY(-1px);
+      box-shadow: var(--glow);
+      border-color: var(--accent);
+    }
+
+    .icon {
+      width: 20px;
+      height: 20px;
+      stroke: #e0e0ff;
+      stroke-width: 2.2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+      transition: stroke 0.25s ease;
+    }
+
+    .icon-btn:hover .icon {
+      stroke: #fff;
+    }
+
+    /* Ending Hero Section */
+    .ending-hero {
+      text-align: center;
+      padding: 40px 20px 30px;
+      position: relative;
+      animation: fadeInUp 0.7s ease-out forwards;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(25px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .ending-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.4rem;
+      font-weight: 800;
+      margin-bottom: 16px;
+      background: linear-gradient(90deg, var(--accent-light), var(--accent), #fff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      line-height: 1.2;
+      animation: titleGlow 3s ease-in-out infinite alternate;
+    }
+
+    @keyframes titleGlow {
+      from { text-shadow: 0 0 15px rgba(176, 140, 255, 0.6); }
+      to { text-shadow: 0 0 25px rgba(176, 140, 255, 0.9), 0 0 40px rgba(122, 79, 217, 0.7); }
+    }
+
+    .ending-subtitle {
+      font-size: 1.15rem;
+      color: var(--text-secondary);
+      max-width: 600px;
+      margin: 0 auto 30px;
+      font-weight: 400;
+    }
+
+    .ending-image-container {
+      position: relative;
+      max-width: 500px;
+      margin: 0 auto 35px;
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow:
+        var(--glow),
+        0 25px 50px rgba(0, 0, 0, 0.55),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15);
+      border: 2px solid var(--border-color);
+      animation: imageReveal 0.8s ease-out 0.2s forwards;
+      opacity: 0;
+      transform: scale(0.95);
+    }
+
+    @keyframes imageReveal {
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    .ending-image {
+      width: 100%;
+      height: auto;
+      display: block;
+      transition: transform 0.5s ease;
+    }
+
+    .ending-image-container:hover .ending-image {
+      transform: scale(1.03);
+    }
+
+    .image-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(10, 10, 31, 0.7) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    /* Music Player */
+    .music-player {
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 18px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      max-width: 480px;
+      margin: 0 auto 40px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      animation: fadeInUp 0.7s ease-out 0.3s forwards;
+      opacity: 0;
+    }
+
+    .music-info {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .music-icon {
+      width: 42px;
+      height: 42px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 6px 16px rgba(122, 79, 217, 0.45);
+    }
+
+    .music-icon svg {
+      width: 22px;
+      height: 22px;
+      stroke: white;
+      stroke-width: 2;
+    }
+
+    .music-details {
+      min-width: 0;
+    }
+
+    .music-title {
+      font-weight: 600;
+      font-size: 1.05rem;
+      margin-bottom: 3px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .music-artist {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+
+    .music-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .music-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(176, 140, 255, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: var(--transition);
+      color: var(--text-primary);
+    }
+
+    .music-btn:hover,
+    .music-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      transform: scale(1.08);
+      box-shadow: var(--glow);
+    }
+
+    .music-btn svg {
+      width: 18px;
+      height: 18px;
+      stroke: currentColor;
+      stroke-width: 2.2;
+      fill: none;
+    }
+
+    .progress-container {
+      position: absolute;
+      bottom: -8px;
+      left: 24px;
+      right: 24px;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.12);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 35%;
+      background: linear-gradient(90deg, var(--accent), var(--accent-light));
+      border-radius: 2px;
+      position: relative;
+      animation: progress 8s linear infinite;
+    }
+
+    @keyframes progress {
+      0% { width: 0%; }
+      100% { width: 100%; }
+    }
+
+    .progress-bar::after {
+      content: '';
+      position: absolute;
+      right: -4px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: white;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+    }
+
+    /* Choices Summary */
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.8rem;
+      text-align: center;
+      margin: 10px 0 30px;
+      position: relative;
+      display: inline-block;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .section-title::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60%;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      border-radius: 2px;
+    }
+
+    .choices-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 22px;
+      padding: 10px 5px 40px;
+      animation: fadeInUp 0.7s ease-out 0.4s forwards;
+      opacity: 0;
+    }
+
+    .choice-card {
+      background: var(--choice-bg);
+      backdrop-filter: blur(18px);
+      border: 1px solid var(--border-color);
+      border-radius: 22px;
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      box-shadow:
+        0 10px 30px rgba(0, 0, 0, 0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .choice-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-light));
+      opacity: 0.85;
+    }
+
+    .choice-card:hover {
+      transform: translateY(-6px);
+      border-color: var(--accent);
+      box-shadow:
+        var(--glow),
+        0 15px 40px rgba(0, 0, 0, 0.45),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    }
+
+    .choice-image {
+      width: 100%;
+      height: 140px;
+      border-radius: 16px;
+      object-fit: cover;
+      border: 2px solid var(--border-color);
+      background: linear-gradient(45deg, #1a1a3d, #2a2a5a);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3.5rem;
+      color: var(--accent-light);
+      flex-shrink: 0;
+    }
+
+    .choice-content {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      flex: 1;
+    }
+
+    .choice-text {
+      font-weight: 500;
+      font-size: 1.1rem;
+      line-height: 1.45;
+      color: var(--text-primary);
+    }
+
+    .choice-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+      color: white;
+      font-weight: 600;
+      font-size: 0.9rem;
+      padding: 5px 14px;
+      border-radius: 30px;
+      width: fit-content;
+      box-shadow: 0 4px 12px rgba(122, 79, 217, 0.4);
+    }
+
+    .choice-label svg {
+      width: 16px;
+      height: 16px;
+      stroke: white;
+      stroke-width: 2.5;
+    }
+
+    .stats-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 8px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      margin-top: 4px;
+    }
+
+    .players-agree {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+      font-size: 1.05rem;
+    }
+
+    .players-count {
+      background: linear-gradient(135deg, var(--success), #4ade80);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-weight: 700;
+      font-size: 1.3rem;
+    }
+
+    .players-icon {
+      width: 24px;
+      height: 24px;
+      stroke: var(--success);
+      stroke-width: 2.2;
+    }
+
+    .percentage {
+      background: rgba(108, 233, 166, 0.15);
+      color: var(--success);
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.95rem;
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 16px;
+      padding: 20px 10px 60px;
+      animation: fadeInUp 0.7s ease-out 0.5s forwards;
+      opacity: 0;
+    }
+
+    .action-btn {
+      min-width: 180px;
+      padding: 18px 28px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+      border: none;
+      border-radius: 20px;
+      color: white;
+      font-size: 1.05rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 0 10px 28px rgba(122, 79, 217, 0.45);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .action-btn::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+      transform: translateX(-150%);
+      transition: transform 0.5s;
+    }
+
+    .action-btn:hover::after {
+      transform: translateX(150%);
+    }
+
+    .action-btn:hover {
+      transform: translateY(-4px) scale(1.03);
+      box-shadow: 0 14px 35px rgba(122, 79, 217, 0.65), var(--glow);
+    }
+
+    .action-btn:active {
+      transform: scale(0.98);
+    }
+
+    .action-btn.secondary {
+      background: rgba(255, 255, 255, 0.09);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .action-btn.secondary:hover {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: var(--accent);
+    }
+
+    .action-btn svg {
+      width: 20px;
+      height: 20px;
+      stroke: currentColor;
+      stroke-width: 2.2;
+      fill: none;
+    }
+
+    /* Footer */
+    .footer-note {
+      text-align: center;
+      padding: 20px;
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      margin-top: 10px;
+      animation: fadeIn 1s ease-out 0.7s forwards;
+      opacity: 0;
+    }
+
+    @keyframes fadeIn {
+      to { opacity: 1; }
+    }
+
+    /* Mobile Optimizations */
+    @media (max-width: 768px) {
+      .top-bar {
+        padding: 0 16px;
+        height: 56px;
+      }
+
+      .game-title {
+        font-size: 1.15rem;
+      }
+
+      .icon-btn {
+        width: 40px;
+        height: 40px;
+      }
+
+      .ending-title {
+        font-size: 2rem;
+      }
+
+      .ending-subtitle {
+        font-size: 1.05rem;
+        padding: 0 10px;
+      }
+
+      .ending-image-container {
+        max-width: 95%;
+        margin: 0 auto 30px;
+      }
+
+      .music-player {
+        padding: 16px 20px;
+        margin: 0 auto 35px;
+        flex-wrap: wrap;
+        gap: 14px;
+      }
+
+      .music-info {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .music-controls {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .progress-container {
+        position: relative;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        margin-top: 12px;
+        width: 100%;
+      }
+
+      .section-title {
+        font-size: 1.6rem;
+      }
+
+      .choices-grid {
+        grid-template-columns: 1fr;
+        padding: 5px 0 35px;
+      }
+
+      .choice-card {
+        padding: 20px;
+      }
+
+      .choice-image {
+        height: 130px;
+        font-size: 3rem;
+      }
+
+      .action-buttons {
+        flex-direction: column;
+        align-items: center;
+        padding: 15px 10px 50px;
+      }
+
+      .action-btn {
+        width: 100%;
+        max-width: 320px;
+        padding: 17px 24px;
+        font-size: 1.02rem;
+      }
+    }
+
+    @media (max-width: 420px) {
+      .ending-title {
+        font-size: 1.8rem;
+      }
+
+      .section-title {
+        font-size: 1.5rem;
+      }
+
+      .choice-text {
+        font-size: 1.05rem;
+      }
+
+      .players-agree {
+        font-size: 1rem;
+      }
+
+      .players-count {
+        font-size: 1.2rem;
+      }
+
+      .music-title {
+        font-size: 1rem;
+      }
+
+      .music-artist {
+        font-size: 0.85rem;
+      }
+    }
+
+    /* Accessibility & Touch */
+    @media (hover: none) {
+      .icon-btn:hover,
+      .choice-card:hover,
+      .action-btn:hover {
+        transform: none;
+        box-shadow: 0 10px 28px rgba(122, 79, 217, 0.45);
+      }
+
+      .action-btn:active {
+        transform: scale(0.99);
+      }
+    }
+
+    .choice-card:nth-child(1) { animation-delay: 0.45s; }
+    .choice-card:nth-child(2) { animation-delay: 0.5s; }
+    .choice-card:nth-child(3) { animation-delay: 0.55s; }
+    .choice-card:nth-child(4) { animation-delay: 0.6s; }
+  </style>
+</head>
+<body>
+  <div class="particles" id="particles"></div>
+
+  <div class="top-bar">
+    <div class="top-left">
+      <button class="icon-btn" onclick="goBack()" aria-label="Назад">
+        <svg class="icon" viewBox="0 0 24 24">
+          <path d="M15 18l-6-6 6-6"/>
+        </svg>
+      </button>
+      <div class="game-title">{{ story_title }}</div>
+    </div>
+    <div class="top-right">
+      <button class="icon-btn" onclick="toggleMusic()" aria-label="Музыка">
+        <svg class="icon" viewBox="0 0 24 24">
+          <path d="M9 18V5l12-2v13"/>
+          <circle cx="6" cy="18" r="3"/>
+          <circle cx="18" cy="16" r="3"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="container">
+    <section class="ending-hero">
+      <h1 class="ending-title">История завершена</h1>
+      <p class="ending-subtitle">Вы прошли путь до конца и приняли решения, которые определили судьбу героев. Спасибо, что были с нами.</p>
+
+      <div class="ending-image-container">
+        <div class="ending-image">🌅</div>
+        <div class="image-overlay"></div>
+      </div>
+
+      <div class="music-player" id="musicPlayer">
+        <div class="music-info">
+          <div class="music-icon">
+            <svg viewBox="0 0 24 24">
+              <path d="M9 18V5l12-2v13"/>
+              <circle cx="6" cy="18" r="3"/>
+              <circle cx="18" cy="16" r="3"/>
+            </svg>
+          </div>
+          <div class="music-details">
+            <div class="music-title">Эпилог: Новые горизонты</div>
+            <div class="music-artist">Атмосферная тема финала</div>
+          </div>
+        </div>
+        <div class="music-controls">
+          <button class="music-btn" id="playPauseBtn" onclick="toggleMusicPlayback()">
+            <svg viewBox="0 0 24 24" id="playIcon">
+              <path d="M5 3l14 9-14 9V3z"/>
+            </svg>
+            <svg viewBox="0 0 24 24" id="pauseIcon" style="display:none">
+              <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
+            </svg>
+          </button>
+          <button class="music-btn" onclick="skipTrack()">
+            <svg viewBox="0 0 24 24">
+              <path d="M5 4l10 8-10 8V4zm10 0v16h4V4h-4z"/>
+            </svg>
+          </button>
+        </div>
+        <div class="progress-container">
+          <div class="progress-bar"></div>
+        </div>
+      </div>
+    </section>
+
+    <h2 class="section-title">Ваши ключевые решения</h2>
+    <div class="choices-grid">
+    {% for choice in legend_choices %}
+      <div class="choice-card">
+        <div class="choice-image">{{choice.legend_icon}}</div>
+        <div class="choice-content">
+          <div class="choice-label">
+            <svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
+            Вы выбрали этот вариант
+          </div>
+          <div class="choice-text">{{choice.legend_title}}</div>
+          <div class="stats-container">
+            <div class="players-agree">
+              <svg class="players-icon" viewBox="0 0 24 24">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+              </svg>
+              <span class="players-count">12 483</span> игрока согласны с вами
+            </div>
+            <div class="percentage">78%</div>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+    </div>
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+      <button class="action-btn" onclick="restartStory()">
+        <svg viewBox="0 0 24 24">
+          <path d="M21 2v6h-6M3 22v-6h6M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2z"/>
+          <path d="M12 8v4l3 3"/>
+        </svg>
+        Начать заново
+      </button>
+    </div>
+
+    <!-- Footer Note -->
+    <div class="footer-note">
+      Спасибо за игру! Ваши решения уникальны — поделитесь своей историей с друзьями.
+    </div>
+  </div>
+
+  <script>
+    // Initialize particles background
+    function initParticles() {
+      const container = document.getElementById('particles');
+      const particleCount = Math.min(25, Math.floor(window.innerWidth / 40));
+
+      for (let i = 0; i < particleCount; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+
+        // Random properties
+        const size = Math.random() * 6 + 2;
+        const posX = Math.random() * 100;
+        const delay = Math.random() * 15;
+        const duration = Math.random() * 10 + 15;
+
+        particle.style.width = `${size}px`;
+        particle.style.height = `${size}px`;
+        particle.style.left = `${posX}%`;
+        particle.style.bottom = `-${size}px`;
+        particle.style.animationDelay = `${delay}s`;
+        particle.style.animationDuration = `${duration}s`;
+
+        container.appendChild(particle);
+      }
+    }
+
+    // Music player functionality
+    let isPlaying = false;
+    const playIcon = document.getElementById('playIcon');
+    const pauseIcon = document.getElementById('pauseIcon');
+
+    function toggleMusicPlayback() {
+      isPlaying = !isPlaying;
+
+      if (isPlaying) {
+        playIcon.style.display = 'none';
+        pauseIcon.style.display = 'block';
+        // In real implementation: audio.play()
+        console.log('Music started playing');
+      } else {
+        playIcon.style.display = 'block';
+        pauseIcon.style.display = 'none';
+        // In real implementation: audio.pause()
+        console.log('Music paused');
+      }
+    }
+
+    function toggleMusic() {
+      const player = document.getElementById('musicPlayer');
+      player.style.transition = 'all 0.3s ease';
+
+      if (player.style.opacity === '0.5' || player.style.opacity === '') {
+        player.style.opacity = '1';
+        player.style.transform = 'scale(1)';
+      } else {
+        player.style.opacity = '0.5';
+        player.style.transform = 'scale(0.98)';
+      }
+    }
+
+    function skipTrack() {
+      // In real implementation: load next track
+      console.log('Skipping to next track');
+      // Visual feedback
+      const btn = event.currentTarget;
+      btn.style.transform = 'scale(0.9)';
+      setTimeout(() => {
+        btn.style.transform = '';
+      }, 150);
+    }
+
+    // Navigation functions
+    function goBack() {
+      // In real implementation: navigate to dashboard
+      console.log('Navigating back to dashboard');
+      if (window.history.length > 1) {
+        window.history.back();
+      } else {
+        window.location.href = '/dashboard';
+      }
+    }
+
+    function showMenu() {
+      // In real implementation: show game menu modal
+      console.log('Showing game menu');
+      alert('Меню игры:\n• Продолжить\n• Сохранить\n• Загрузить\n• Настройки\n• Выйти в меню');
+    }
+
+    function restartStory() {
+      if (confirm('Вы уверены, что хотите начать историю заново? Все прогресс будет сброшен.')) {
+        console.log('Restarting story');
+        window.location.reload();
+      }
+    }
+
+
+    // Initialize on load
+    document.addEventListener('DOMContentLoaded', function() {
+      initParticles();
+
+      // Auto-play music after user interaction (browser policy)
+      document.body.addEventListener('click', function initAudio() {
+        // In real implementation: initialize audio context
+        document.body.removeEventListener('click', initAudio);
+      }, { once: true });
+
+      // Add touch feedback for mobile
+      document.querySelectorAll('.action-btn, .icon-btn, .music-btn').forEach(btn => {
+        btn.addEventListener('touchstart', function() {
+          this.style.transform = 'scale(0.97)';
+        });
+        btn.addEventListener('touchend', function() {
+          this.style.transform = '';
+        });
+      });
+    });
+
+    // Handle window resize for particles
+    window.addEventListener('resize', function() {
+      const container = document.getElementById('particles');
+      container.innerHTML = '';
+      initParticles();
+    });
+  </script>
+</body>
+</html>
