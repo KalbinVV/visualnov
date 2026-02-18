@@ -1632,7 +1632,7 @@ function removeScene(sceneId) {
         headers: { 'Content-Type': 'application/json' }
     });
 
-  const data = response.json()
+  const data = await response.json()
 
   if (data.success) {
     alert('Сцена успешно удалена!')
