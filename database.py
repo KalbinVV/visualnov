@@ -7,6 +7,7 @@
 from datetime import datetime
 from typing import Optional, List, Dict, Any
 import json
+from uuid import uuid4
 
 from flask import session
 from sqlalchemy import (
@@ -22,7 +23,7 @@ from sqlalchemy import (
     select,
     update,
     delete,
-    UniqueConstraint, Connection,
+    UniqueConstraint, Connection, UUID,
 )
 from sqlalchemy.orm import (
     DeclarativeBase,
@@ -77,6 +78,15 @@ class User(Base):
     )
 
     team: Mapped["Team"] = relationship()
+
+
+class DiamondCodesHistory(Base):
+    __tablename__ = 'diamond_codes_history'
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+
+    user_id: Mapped[int] = mapped_column(ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
+    diamond_code_uuid: Mapped[UUID] = mapped_column(ForeignKey('diamond_codes.code', ondelete='CASCADE'), nullable=False)
 
 
 class Team(Base):
@@ -541,6 +551,13 @@ class Database:
                 }
                 for row in results
             ]
+
+    def generate_diamond_code(self, amount: int) -> DiamondCode:
+        with Session(self.engine) as s:
+            diamond_code = DiamondCode(amount=amount)
+
+            return diamond_code
+
 
 if __name__ == "__main__":
     db = Database()

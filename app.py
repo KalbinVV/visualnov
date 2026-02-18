@@ -9,7 +9,7 @@ import sys
 from sqlalchemy.orm import Session
 
 from config import config
-from database import Database, User, Choice, Scene, Story, GameSave
+from database import Database, User, Choice, Scene, Story, GameSave, DiamondCode
 from auth import AuthService
 from game import GameService
 
@@ -486,7 +486,6 @@ def index():
 
 @app.route('/login')
 def login_page():
-    """Страница авторизации"""
     if 'user_id' in session:
         return redirect(url_for('dashboard'))
     return render_template('login.html')
@@ -494,7 +493,6 @@ def login_page():
 
 @app.route('/register')
 def register_page():
-    """Страница регистрации"""
     if 'user_id' in session:
         return redirect(url_for('dashboard'))
     return render_template('register.html')
@@ -838,7 +836,6 @@ def api_create_chapter():
 @app.route('/api/chapters/<int:chapter_id>', methods=['PUT'])
 @admin_required
 def api_update_chapter(chapter_id):
-    """API обновления главы"""
     try:
         data = request.get_json()
 
@@ -865,7 +862,6 @@ def api_update_chapter(chapter_id):
 @app.route('/api/chapters/<int:chapter_id>', methods=['DELETE'])
 @admin_required
 def api_delete_chapter(chapter_id):
-    """API удаления главы"""
     try:
         success = story_service.delete_chapter(chapter_id)
 
@@ -960,7 +956,6 @@ def api_update_scene(scene_id):
 @app.route('/api/scenes/<int:scene_id>', methods=['DELETE'])
 @admin_required
 def api_delete_scene(scene_id):
-    """API удаления сцены"""
     try:
         success = story_service.delete_scene(scene_id)
 
@@ -978,7 +973,6 @@ def api_delete_scene(scene_id):
 @app.route('/api/scenes/<int:scene_id>/choices', methods=['GET'])
 @admin_required
 def api_get_choices(scene_id):
-    """API получения вариантов выбора сцены"""
     try:
         choices = story_service.get_choices_by_scene(scene_id)
 
@@ -1064,7 +1058,6 @@ def api_update_choice(choice_id):
 @app.route('/api/choices/<int:choice_id>', methods=['DELETE'])
 @admin_required
 def api_delete_choice(choice_id):
-    """API удаления варианта выбора"""
     try:
         success = story_service.delete_choice(choice_id)
 
@@ -1090,7 +1083,6 @@ def admin_stories_page():
 @app.route('/admin/stories/editor/<int:story_id>')
 @admin_required
 def admin_story_editor_page(story_id):
-    """Страница редактора истории"""
     user = db.get_user_by_id(session['user_id'])
     story = story_service.get_story_by_id(story_id)
 
@@ -1103,7 +1095,6 @@ def admin_story_editor_page(story_id):
 @app.route('/admin/stories/create')
 @admin_required
 def admin_story_create_page():
-    """Страница создания новой истории"""
     user = db.get_user_by_id(session['user_id'])
     return render_template('admin/story_create.html', user=user)
 
@@ -1127,7 +1118,6 @@ def api_get_choice(choice_id):
 @app.route('/api/upload/image', methods=['POST'])
 @admin_required
 def upload_image():
-    """Загрузка изображений в редакторе"""
     if 'image' not in request.files:
         return jsonify({'error': 'Нет файла изображения'}), 400
 
@@ -1136,15 +1126,12 @@ def upload_image():
         return jsonify({'error': 'Файл не выбран'}), 400
 
     if file and allowed_file(file.filename):
-        # Создаем директорию, если не существует
         os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
-        # Генерируем безопасное имя файла
         filename = secure_filename(file.filename)
         file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         file.save(file_path)
 
-        # Возвращаем URL изображения
         return jsonify({
             'success': True,
             'url': f'/static/images/{filename}'
@@ -1153,22 +1140,23 @@ def upload_image():
     return jsonify({'error': 'Недопустимый формат файла'}), 400
 
 
-@app.route('/admin/users')
-@admin_required
-def admin_users_page():
-    """Страница управления пользователями"""
-    user = db.get_user_by_id(session['user_id'])
+@app.route('/codes/diamond/<uuid>')
+@login_required
+def activate_diamond_code(uuid: str):
+    with Session(db.engine) as s:
+        diamond_code = s.get(DiamondCode, uuid)
 
-    # Получаем всех пользователей
-    with db.get_connection() as conn:
-        cursor = conn.cursor()
-        cursor.execute('''
-            SELECT * FROM users 
-            ORDER BY created_at DESC
-        ''')
-        users = [dict(row) for row in cursor.fetchall()]
+        if not diamond_code or diamond_code.amount < 0:
+            return 404
 
-    return render_template('admin/users.html', user=user, users=users)
+        user = s.get(User, session['user_id'])
+
+        user.diamonds += diamond_code
+        diamond_code.amount -= 1
+
+        s.commit()
+
+        return redirect('/dashboard')
 
 
 @app.route('/api/admin/users/<int:user_id>/reset-progress', methods=['POST'])
@@ -1187,8 +1175,6 @@ def reset_user_progress(user_id):
         return jsonify({'error': f'Ошибка сброса прогресса: {str(e)}'}), 500
 
 
-# ========== Обработчики ошибок ==========
-
 @app.errorhandler(404)
 def not_found_error(error):
     return render_template('error.html', message='Страница не найдена', code=404), 404
@@ -1198,8 +1184,6 @@ def not_found_error(error):
 def internal_error(error):
     return render_template('error.html', message='Внутренняя ошибка сервера', code=500), 500
 
-
-# ========== Запуск приложения ==========
 
 if __name__ == '__main__':
     port = int(sys.argv[1]) if sys.argv[1] else 5000
