@@ -712,11 +712,7 @@
 
         loadScene();
       } else {
-        if (data.is_ending) {
-          window.href = `/ending/${storyId}`
-        } else {
-          alert(data.message || 'Ошибка при совершении выбора');
-        }
+        alert(data.message || 'Ошибка при совершении выбора');
       }
     } catch (error) {
       console.error('Ошибка:', error);
@@ -785,7 +781,11 @@
 
         loadScene();
       } else {
-        alert(data.message || 'Ошибка при совершении выбора');
+        if (data.is_ending) {
+          window.href = `/ending/${storyId}/`
+        } else {
+          alert(data.message || 'Ошибка при совершении выбора');
+        }
       }
     } catch (error) {
       console.error('Ошибка:', error);
