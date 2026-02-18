@@ -447,8 +447,8 @@ def to_next_scene(story_id: int):
         user = s.get(User, session['user_id'])
 
         user_save = db.load_game_raw(user.id, story_id)
-        scene = s.query(Scene).filter(Scene.id > user_save.scene_id
-                                      & Scene.chapter_id == user_save.chapter_id
+        scene = s.query(Scene).filter(Scene.id > user_save.scene_id,
+                                      Scene.chapter_id == user_save.chapter_id
                                       ).order_by(Scene.id).first()
 
         if not scene:
