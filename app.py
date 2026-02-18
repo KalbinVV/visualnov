@@ -405,6 +405,7 @@ def api_make_choice(story_id: int):
                     'message': msg,
                     'scene_id': scene_id,
                     'chapter_id': chapter_id,
+                    'scene_type': next_scene.scene_type,
                     'next_scene': {
                         'character_image': next_scene.character_image,
                         'character_name': next_scene.character_name.replace('{name}', user.display_name),
@@ -412,7 +413,7 @@ def api_make_choice(story_id: int):
                         'dialogue': next_scene.dialogue_text.replace('{name}', user.display_name),
                         'choices': [{'data': Choice.as_dict(choice),
                                      'is_available': game_service.is_choice_available(user.id, choice_id)[0]}
-                                    for choice in next_scene.choices],
+                                    for choice in next_scene.choices] if next_scene.scene_type != "input" else [],
                         'current_user_diamonds': user.diamonds
                     }
                 }), 200
@@ -892,7 +893,8 @@ def api_get_scenes(chapter_id):
                         'dialogue_text': scene.dialogue_text,
                         'character_image': scene.character_image,
                         'background_image': scene.background_image,
-                        'chapter_id': scene.chapter_id
+                        'chapter_id': scene.chapter_id,
+                        'scene_type': scene.scene_type
                         } for scene in scenes]
         }), 200
 
@@ -919,7 +921,8 @@ def api_create_scene():
             music_track=data.get('music_track'),
             position_x=data.get('position_x', 0),
             position_y=data.get('position_y', 0),
-            scale=data.get('scale', 1.0)
+            scale=data.get('scale', 1.0),
+            scene_type=data.get('scene_type', 'simple')
         )
 
         if not scene_id:

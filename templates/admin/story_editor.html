@@ -1334,13 +1334,13 @@ function renderScenes() {
       <div class="scene-character">${scene.character_name}</div>
       <div class="scene-dialogue">${scene.dialogue_text.substring(0, 60)}${scene.dialogue_text.length > 60 ? '...' : ''}</div>
       <p>ID: ${scene.id}</p>
+      <p>Тип сцены: ${scene.scene_type}</p>
     `;
 
     container.appendChild(sceneEl);
   });
 }
 
-// Выбор сцены
 function selectScene(sceneId) {
   currentSceneId = sceneId;
   renderScenes();

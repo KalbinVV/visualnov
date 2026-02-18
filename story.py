@@ -15,18 +15,8 @@ from database import Database, Story, Chapter, Scene, Choice  # Импортир
 
 
 class StoryService:
-    """Сервис управления сюжетами на ORM"""
-
     def __init__(self, db: Database):
-        """
-        Инициализация сервиса
-
-        Args:
-            db: Объект базы данных (ORM)
-        """
         self.db = db
-
-    # ========== CRUD для историй ==========
 
     def create_story(
         self,
@@ -66,9 +56,6 @@ class StoryService:
                 return None
 
     def get_story_by_id(self, story_id: int) -> Optional[Story]:
-        """
-        Получить историю по ID
-        """
         with self.db.get_session() as s:
             return s.get(Story, story_id)
 
@@ -78,28 +65,15 @@ class StoryService:
 
 
     def get_all_stories(self, published_only: bool = False) -> List[Story]:
-        """
-        Получить все истории
-        """
         with self.db.get_session() as s:
             stmt = select(Story).order_by(Story.created_at.desc())
+
             if published_only:
                 stmt = stmt.where(Story.is_published == True)
             return s.scalars(stmt).all()
 
     def update_story(self, story_id: int, **kwargs) -> bool:
-        """
-        Обновить историю
-        """
-        allowed_fields = {
-            'title', 'description', 'cover_image', 'background_image',
-            'premium', 'diamonds_cost', 'chapters_count', 'scenes_count',
-            'is_published'
-        }
-        data = {k: v for k, v in kwargs.items() if k in allowed_fields}
-
-        if not data:
-            return False
+        data = {k: v for k, v in kwargs.items()}
 
         with self.db.get_session() as s:
             stmt = (
@@ -111,17 +85,12 @@ class StoryService:
             return result.rowcount > 0
 
     def delete_story(self, story_id: int) -> bool:
-        """
-        Удалить историю (каскадно удалит главы, сцены и т.д.)
-        """
         with self.db.get_session() as s:
             story = s.get(Story, story_id)
             if not story:
                 return False
             s.delete(story)
             return True
-
-    # ========== CRUD для глав ==========
 
     def create_chapter(
         self,
@@ -131,9 +100,6 @@ class StoryService:
         description: Optional[str] = None,
         background_image: Optional[str] = None
     ) -> Optional[int]:
-        """
-        Создать главу
-        """
         with self.db.get_session() as s:
             try:
                 chapter = Chapter(
@@ -146,7 +112,6 @@ class StoryService:
                 s.add(chapter)
                 s.flush()
 
-                # Обновить chapters_count в истории
                 s.execute(
                     update(Story)
                     .where(Story.id == story_id)
@@ -163,16 +128,10 @@ class StoryService:
                 return None
 
     def get_chapter_by_id(self, chapter_id: int) -> Optional[Chapter]:
-        """
-        Получить главу по ID
-        """
         with self.db.get_session() as s:
             return s.get(Chapter, chapter_id)
 
     def get_chapters_by_story(self, story_id: int) -> List[Chapter]:
-        """
-        Получить все главы истории
-        """
         with self.db.get_session() as s:
             return s.scalars(
                 select(Chapter)
@@ -181,11 +140,7 @@ class StoryService:
             ).all()
 
     def update_chapter(self, chapter_id: int, **kwargs) -> bool:
-        """
-        Обновить главу
-        """
-        allowed_fields = {'title', 'description', 'background_image'}
-        data = {k: v for k, v in kwargs.items() if k in allowed_fields}
+        data = {k: v for k, v in kwargs.items()}
 
         if not data:
             return False
@@ -200,9 +155,6 @@ class StoryService:
             return result.rowcount > 0
 
     def delete_chapter(self, chapter_id: int) -> bool:
-        """
-        Удалить главу (каскадно удалит сцены)
-        """
         with self.db.get_session() as s:
             chapter = s.get(Chapter, chapter_id)
             if not chapter:
@@ -210,9 +162,7 @@ class StoryService:
 
             story_id = chapter.story_id
             s.delete(chapter)
-            s.flush()  # Обеспечиваем удаление перед обновлением счётчика
-
-            # Обновить chapters_count
+            s.flush()
             s.execute(
                 update(Story)
                 .where(Story.id == story_id)
@@ -233,6 +183,7 @@ class StoryService:
         position_x: int = 0,
         position_y: int = 0,
         scale: float = 1.0,
+        scene_type: Optional[str] = None,
         effects: Optional[str] = None
     ) -> Optional[int]:
         with self.db.get_session() as s:
@@ -248,7 +199,8 @@ class StoryService:
                     position_x=position_x,
                     position_y=position_y,
                     scale=scale,
-                    effects=effects
+                    effects=effects,
+                    scene_type=scene_type
                 )
                 s.add(scene)
                 s.flush()
@@ -276,9 +228,6 @@ class StoryService:
                 return None
 
     def get_scene_by_id(self, scene_id: int) -> Optional[Scene]:
-        """
-        Получить сцену по ID
-        """
         with self.db.get_session() as s:
             return s.get(Scene, scene_id)
 
@@ -300,9 +249,6 @@ class StoryService:
             s.commit()
 
     def delete_scene(self, scene_id: int) -> bool:
-        """
-        Удалить сцену (каскадно удалит choices)
-        """
         with self.db.get_session() as s:
             scene = s.get(Scene, scene_id)
             if not scene:
@@ -311,9 +257,8 @@ class StoryService:
             chapter_id = scene.chapter_id
             story_id = s.scalar(select(Chapter.story_id).where(Chapter.id == chapter_id))
             s.delete(scene)
-            s.flush()  # Обеспечиваем удаление перед обновлением счётчика
+            s.flush()
 
-            # Обновить scenes_count
             scenes_count_sub = (
                 select(func.count(Scene.id))
                 .where(Scene.chapter_id.in_(select(Chapter.id).where(Chapter.story_id == Story.id)))
@@ -349,16 +294,10 @@ class StoryService:
                 return None
 
     def get_choice_by_id(self, choice_id: int) -> Optional[Choice]:
-        """
-        Получить вариант выбора по ID
-        """
         with self.db.get_session() as s:
             return s.get(Choice, choice_id)
 
     def get_choices_by_scene(self, scene_id: int) -> List[Choice]:
-        """
-        Получить все варианты выбора для сцены
-        """
         with self.db.get_session() as s:
             return s.scalars(
                 select(Choice)
@@ -382,9 +321,6 @@ class StoryService:
             return result.rowcount > 0
 
     def delete_choice(self, choice_id: int) -> bool:
-        """
-        Удалить вариант выбора
-        """
         with self.db.get_session() as s:
             choice = s.get(Choice, choice_id)
             if not choice:
@@ -392,12 +328,7 @@ class StoryService:
             s.delete(choice)
             return True
 
-    # ========== Экспорт/Импорт сюжета ==========
-
     def export_story(self, story_id: int) -> Optional[Dict[str, Any]]:
-        """
-        Экспортировать историю в JSON-структуру
-        """
         story = self.get_story_by_id(story_id)
         if not story:
             return None

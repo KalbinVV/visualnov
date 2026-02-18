@@ -209,6 +209,7 @@ class GameService:
                 'dialogue': scene.dialogue_text.replace('{name}', user.display_name),
                 'background': scene.background_image if scene.background_image else "",
                 'character_image': scene.character_image,
+                'scene_type': scene.scene_type,
                 'music': scene.music_track,
                 'position': {
                     'x': scene.position_x,
@@ -220,7 +221,7 @@ class GameService:
                         'data': Choice.as_dict(choice),
                         'is_available': self.is_choice_available(user.id, choice.id)[0]
                     }
-                    for choice in scene.choices
+                    for choice in scene.choices and scene.scene_type != 'input'
                 ]
             }
 
