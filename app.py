@@ -405,7 +405,6 @@ def api_make_choice(story_id: int):
                     'message': msg,
                     'scene_id': scene_id,
                     'chapter_id': chapter_id,
-                    'scene_type': next_scene.scene_type,
                     'next_scene': {
                         'character_image': next_scene.character_image,
                         'character_name': next_scene.character_name.replace('{name}', user.display_name),
@@ -414,7 +413,8 @@ def api_make_choice(story_id: int):
                         'choices': [{'data': Choice.as_dict(choice),
                                      'is_available': game_service.is_choice_available(user.id, choice_id)[0]}
                                     for choice in next_scene.choices] if next_scene.scene_type != "input" else [],
-                        'current_user_diamonds': user.diamonds
+                        'current_user_diamonds': user.diamonds,
+                        'scene_type': next_scene.scene_type
                     }
                 }), 200
         else:
