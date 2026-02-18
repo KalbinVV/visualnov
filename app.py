@@ -429,7 +429,6 @@ def api_make_choice(story_id: int):
 @app.route('/api/games/<story_id>/choice_input', methods=['POST'])
 @api_login_required
 def api_make_input_choice(story_id: int):
-    try:
         data = request.get_json()
 
         scene_id = int(data.get('scene_id'))
@@ -461,10 +460,6 @@ def api_make_input_choice(story_id: int):
                 }), 200
         else:
             return jsonify({'success': status, 'message': msg})
-
-    except Exception as e:
-        print(e)
-        return jsonify({'error': f'Ошибка выбора: {str(e)}'}), 500
 
 
 @app.route('/api/progress', methods=['GET'])
