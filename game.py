@@ -1,12 +1,6 @@
-# -*- coding: utf-8 -*-
-"""
-Логика игры (визуальная новелла)
-Любовный симулятор
-"""
-
 import json
 from datetime import datetime
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, Any, List, Type
 
 from flask import session
 from sqlalchemy.orm import Session
@@ -16,15 +10,7 @@ from story import StoryService
 
 
 class GameService:
-    """Сервис игры"""
-
     def __init__(self, db: Database):
-        """
-        Инициализация сервиса игры
-
-        Args:
-            db: Объект базы данных
-        """
         self.db = db
         self.story_service = StoryService(db)
 
@@ -201,80 +187,8 @@ class GameService:
                 ] if scene.scene_type != 'input' else []
             }
 
-
-    def update_game_stats(self, user_id: int, game_key: str,
-                          play_time: int = 0, choices_made: int = 0):
-        """
-        Обновление статистики игры
-
-        Args:
-            user_id: ID пользователя
-            game_key: Ключ игры/истории
-            play_time: Время игры в секундах
-            choices_made: Количество сделанных выборов
-        """
-        # Получение существующей статистики
-        with self.db.get_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute('''
-                SELECT id FROM game_stats
-                WHERE user_id = ? AND game_name = ?
-                ORDER BY id DESC LIMIT 1
-            ''', (user_id, game_key))
-
-            result = cursor.fetchone()
-
-            if result:
-                # Обновление существующей записи
-                cursor.execute('''
-                    UPDATE game_stats
-                    SET play_time = play_time + ?,
-                        choices_made = choices_made + ?
-                    WHERE id = ?
-                ''', (play_time, choices_made, result['id']))
-            else:
-                # Создание новой записи
-                self.db.create_game_stat(user_id, game_key)
-
-    def complete_game(self, user_id: int, game_key: str, rating: int = None):
-        """
-        Завершение игры
-
-        Args:
-            user_id: ID пользователя
-            game_key: Ключ игры/истории
-            rating: Рейтинг игры (1-5)
-        """
-        with self.db.get_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute('''
-                UPDATE game_stats
-                SET completed = 1,
-                    rating = ?
-                WHERE user_id = ? AND game_name = ?
-                ORDER BY id DESC LIMIT 1
-            ''', (rating, user_id, game_key))
-
-        # Разблокировка достижения
-        self.db.unlock_achievement(
-            user_id,
-            f'completed_{game_key}',
-            f'Завершена игра "{game_key}"'
-        )
-
-    def get_user_progress(self, user_id: int) -> Dict[str, Any]:
-        saves = {}
-
-        stories = self.story_service.get_all_stories(published_only=True)
-
-        for story in stories:
-            game_saves = self.db.get_user_saves(user_id, story['story_key'])
-            saves[story['story_key']] = game_saves
-
-        stats = self.db.get_user_stats(user_id)
-
-        return {
-            'saves': saves,
-            'stats': stats,
-            'achievements': self.db.get_user_achievements(user_id)
-        }
+    def get_player_legend_choices(self, user_id: int) -> list[Type[Choice]]:
+        with Session(self.db.engine) as s:
+            choices_ids = list(map(lambda ch: ch.id, s.query(ChoiceHistory).filter_by(user_id=user_id).all()))
+            return s.query(Choice).filter(Choice.id.in_(choices_ids),
+                                          Choice.is_legend_choice == True).all()
