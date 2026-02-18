@@ -1626,8 +1626,8 @@ async function saveChapter(e) {
   }
 }
 
-function removeScene(sceneId) {
-  response = fetch(`/api/scenes/${sceneId}`, {
+async function removeScene(sceneId) {
+  response = await fetch(`/api/scenes/${sceneId}`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' }
     });
