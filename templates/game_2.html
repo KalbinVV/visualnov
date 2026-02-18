@@ -603,6 +603,7 @@
   }
 
   function renderInputChoice() {
+     const choicesContainer = document.querySelector('.choices')
      const choiceContainer = document.createElement('div')
      choiceContainer.style.display = 'grid'
 
@@ -615,9 +616,9 @@
      choiceInputSendBtn.innerHTML = 'Отправить'
 
      choiceContainer.appendChild(choiceInput)
-     choiceContainer.appendChild(choiceInputSendBtn)
 
-     document.querySelector('.choices').appendChild(choiceContainer);
+     choicesContainer.appendChild(choiceContainer)
+     choicesContainer.appendChild(choiceInputSendBtn)
   }
 
   function renderChoices() {
