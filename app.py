@@ -444,13 +444,19 @@ def api_get_progress():
 @app.route('/api/games/<story_id>/to_next_scene', methods=['POST'])
 @api_login_required
 def to_next_scene(story_id: int):
-    with Session(db.engine) as s:
+    with (Session(db.engine) as s):
         user = s.get(User, session['user_id'])
 
         user_save = db.load_game_raw(user.id, story_id)
-        scenes = s.query(Scene).filter(Scene.id >= user_save.scene_id).all()
+        scene = s.query(Scene).filter(Scene.id > user_save.scene_id
+                                      and Scene.chapter_id == user_save.chapter_id
+                                      ).order_by(Scene.id).first()
 
-        scene = scenes[1] if len(scenes) > 1 else scenes[0]
+        if not scene:
+            return jsonify({
+                'success': False,
+                'message': 'Конец!'
+            })
 
         db.save_game(user.id, story_id, scene.id, scene.chapter_id, 0, 0, 0)
 
