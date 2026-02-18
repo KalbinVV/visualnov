@@ -544,7 +544,7 @@
   </div>
 
   <div class="scene">
-    <div class="character"></div>
+    <image class="character">
 
     <div class="dialogue-container">
 
@@ -590,7 +590,7 @@
 
     const characterImage = document.querySelector('.character');
     if (sceneData.character_image) {
-      characterImage.style.backgroundImage = `url('${sceneData.character_image}')`;
+      characterImage.src = `${sceneData.character_image}`;
       characterImage.style.opacity = '1';
     } else {
       characterImage.style.opacity = '0';
