@@ -1785,7 +1785,6 @@ function openChoiceModal(sceneId = null, choiceId = null) {
   modal.classList.add('active');
 }
 
-// Сохранить вариант выбора
 async function saveChoice(e) {
   e.preventDefault();
 
@@ -1804,6 +1803,9 @@ async function saveChoice(e) {
   const requiredPassionLevel = parseInt(document.getElementById('requiredPassionLevel').value) || 0;
   const requiredTeasingLevel = parseInt(document.getElementById('requiredTeasingLevel').value) || 0;
   const requiredFriendshipLevel = parseInt(document.getElementById('requiredFriendshipLevel').value) || 0;
+  const isLegendChoice = document.getElementById('legendChoice').value || false;
+  const legendTitle = document.getElementById('legendTitle').value || null;
+  const legendIcon = document.getElementById('legendBackground').value || null;
 
 
   if (!choiceText) {
@@ -1830,7 +1832,10 @@ async function saveChoice(e) {
           diamonds_cost: diamonds,
           required_passion_level: requiredPassionLevel,
           required_friendship_level: requiredFriendshipLevel,
-          required_teasing_level: requiredTeasingLevel
+          required_teasing_level: requiredTeasingLevel,
+          is_legend_choice: isLegendChoice,
+          legend_title: legendTitle,
+          legend_icon: legendIcon
         })
       });
     } else {
@@ -1851,7 +1856,10 @@ async function saveChoice(e) {
           diamonds_cost: diamonds,
           required_passion_level: requiredPassionLevel,
           required_friendship_level: requiredFriendshipLevel,
-          required_teasing_level: requiredTeasingLevel
+          required_teasing_level: requiredTeasingLevel,
+          is_legend_choice: isLegendChoice,
+          legend_title: legendTitle,
+          legend_icon: legendIcon
         })
       });
     }
@@ -1896,6 +1904,9 @@ async function editChoice(choiceId) {
         document.getElementById('requiredPassionLevel').value = data.choice.required_passion_level || 0;
         document.getElementById('requiredFriendshipLevel').value = data.choice.required_friendship_level || 0;
         document.getElementById('requiredTeasingLevel').value = data.choice.required_teasing_level || 0;
+        document.getElementById('legendChoice').value = data.choice.is_legend_choice || false;
+        document.getElementById('legendTitle').value = data.choice.legend_title || '';
+        document.getElementById('legendBackground').value = data.choice.legend_icon || '';
       }, 100);
     } else {
       alert(data.error || 'Ошибка загрузки варианта');

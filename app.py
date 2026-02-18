@@ -1035,7 +1035,10 @@ def api_get_choices(scene_id):
                          'choice_text': choice.choice_text,
                          'required_passion_level': choice.required_passion_level,
                          'required_friendship_level': choice.required_friendship_level,
-                         'required_teasing_level': choice.required_teasing_level} for choice in choices]
+                         'required_teasing_level': choice.required_teasing_level,
+                         'is_legend_choice': choice.is_legend_choice,
+                         'legend_title': choice.legend_title,
+                         'legend_icon': choice.legend_icon} for choice in choices]
         }), 200
 
     except Exception as e:
