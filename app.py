@@ -566,6 +566,7 @@ def profile_page():
             'profile.html',
             user=user,
             team_info=user.team,
+            is_team_leader=user.is_leader,
             stats=stats,
             achievements=achievements
         )

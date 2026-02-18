@@ -65,7 +65,7 @@
 
     <div class="section">
       <h3>👥 Команда</h3>
-      <h4>{{ team_info.name if team_info else "Вы пока не назначены в команду!" }}</h4>
+      <h4>{{ team_info.name if team_info else "Вы пока не назначены в команду!" }}  {{ "👑" if is_team_leader else "" }}</h4>
     </div>
 
     <div class="section">
