@@ -193,7 +193,5 @@ class GameService:
             choices_ids = list(map(lambda ch: ch.choice_id, s.query(ChoiceHistory).filter_by(user_id=user_id,
                                                                                       story_id=story_id).all()))
 
-            print(choices_ids)
-
             return s.query(Choice).filter(Choice.id.in_(choices_ids),
                                           Choice.is_legend_choice == True).all()
