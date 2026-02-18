@@ -205,8 +205,8 @@ class GameService:
 
             return {
                 'current_user_diamonds': user.diamonds,
-                'character_name': scene.character_name,
-                'dialogue': scene.dialogue_text,
+                'character_name': scene.character_name.replace('{name}', user.display_name),
+                'dialogue': scene.dialogue_text.replace('{name}', user.display_name),
                 'background': scene.background_image if scene.background_image else "",
                 'character_image': scene.character_image,
                 'music': scene.music_track,
