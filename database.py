@@ -80,6 +80,17 @@ class User(Base):
     team: Mapped["Team"] = relationship()
 
 
+class DiamondCode(Base):
+    __tablename__ = 'diamond_codes'
+
+    code: Mapped[UUID] = mapped_column(UUID, primary_key=True, default=uuid4)
+    amount: Mapped[int] = mapped_column(Integer, nullable=False)
+
+    @classmethod
+    def as_url(cls) -> str:
+        return f'diamond_code?id={cls.code}'
+
+
 class DiamondCodesHistory(Base):
     __tablename__ = 'diamond_codes_history'
 
@@ -551,12 +562,6 @@ class Database:
                 }
                 for row in results
             ]
-
-    def generate_diamond_code(self, amount: int) -> DiamondCode:
-        with Session(self.engine) as s:
-            diamond_code = DiamondCode(amount=amount)
-
-            return diamond_code
 
 
 if __name__ == "__main__":
