@@ -602,12 +602,28 @@
     renderChoices();
   }
 
+  function renderInputChoice() {
+     const choiceContainer = document.createElement('div')
+     choiceContainer.style.display = 'grid'
+
+     const choiceInput = document.createElement('input')
+     const choiceInputSendBtn = document.createElement('button')
+
+     choiceInput.className = 'choice'
+     choiceInputSendBtn = 'choice'
+
+     choiceContainer.appendChild(choiceInput)
+     choiceContainer.appendChild(choiceInputSendBtn)
+
+     document.querySelector('.choices').appendChild(choiceContainer);
+  }
+
   function renderChoices() {
     const choicesContainer = document.querySelector('.choices');
     choicesContainer.innerHTML = '';
 
     if (sceneData.scene_type == 'input') {
-      alert('Сцена с вариантом ответа!')
+      renderInputChoice()
     }else if (!sceneData.choices || sceneData.choices.length === 0) {
       const continueBtn = document.createElement('div');
       continueBtn.className = `choice`;
