@@ -1627,12 +1627,12 @@ async function saveChapter(e) {
 }
 
 function removeScene(sceneId) {
-  response = await fetch(`/api/scenes/${sceneId}`, {
+  response = fetch(`/api/scenes/${sceneId}`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' }
     });
 
-  const data = await response.json()
+  const data = response.json()
 
   if (data.success) {
     alert('Сцена успешно удалена!')
