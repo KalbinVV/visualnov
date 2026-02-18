@@ -1140,7 +1140,7 @@ def upload_image():
     return jsonify({'error': 'Недопустимый формат файла'}), 400
 
 
-@app.route('/codes/generate/<amount>/<value>')
+@app.route('/admin/codes/diamond/generate/<amount>/<value>')
 @admin_required
 def generate_diamond_code(amount: int, value: int) -> str:
     with Session(db.engine) as s:
