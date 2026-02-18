@@ -594,9 +594,6 @@
     const characterImage = document.querySelector('.character');
     if (sceneData.character_image) {
       characterImage.src = `${sceneData.character_image}`;
-      characterImage.style.opacity = '1';
-    } else {
-      characterImage.style.opacity = '0';
     }
 
     document.querySelector('.name').innerHTML = sceneData.character_name;
