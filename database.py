@@ -288,7 +288,10 @@ class Choice(Base):
                 'passion_change': choice.passion_change,
                 'required_teasing_level': choice.required_teasing_level,
                 'required_passion_level': choice.required_passion_level,
-                'required_friendship_level': choice.required_friendship_level
+                'required_friendship_level': choice.required_friendship_level,
+                'is_legend_choice': choice.is_legend_choice,
+                'legend_title': choice.legend_title,
+                'legend_icon': choice.legend_icon
                 }
 
 
