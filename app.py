@@ -1161,7 +1161,7 @@ def generate_team_code(team_id: int) -> str:
         return str(team_code.code)
 
 
-@app.route('/code/teams/<uuid>')
+@app.route('/codes/teams/<uuid>')
 @login_required
 def activate_team_code(uuid: str):
     with Session(db.engine) as s:
