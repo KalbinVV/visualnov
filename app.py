@@ -648,7 +648,7 @@ def admin_page():
     )
 
 
-@app.route('/ending/<story_id>')
+@app.route('/ending/<story_id>/')
 @login_required
 def ending_page(story_id: int):
     with Session(db.engine) as s:
