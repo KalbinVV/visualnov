@@ -84,6 +84,7 @@ class DiamondCode(Base):
     __tablename__ = 'diamond_codes'
 
     code: Mapped[UUID] = mapped_column(UUID, primary_key=True, default=uuid4)
+    value: Mapped[int] = mapped_column(Integer, nullable=False)
     amount: Mapped[int] = mapped_column(Integer, nullable=False)
 
     @classmethod

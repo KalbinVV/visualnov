@@ -1151,7 +1151,7 @@ def activate_diamond_code(uuid: str):
 
         user = s.get(User, session['user_id'])
 
-        user.diamonds += diamond_code
+        user.diamonds += diamond_code.value
         diamond_code.amount -= 1
 
         s.commit()
