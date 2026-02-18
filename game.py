@@ -98,8 +98,6 @@ class GameService:
             choice = s.query(Choice).filter(Choice.scene_id == scene_id,
                                              Choice.choice_text == value).first()
 
-            print(choice)
-
             if not choice:
                 return False, 'Неправильный ответ!', -1, -1
 
