@@ -1160,7 +1160,7 @@
             <svg style="width:18px;height:18px;" viewBox="0 0 24 24">
               <path fill="currentColor" d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z" />
             </svg>
-            Концовки (еще не готово)
+            Концовки
           </div>
 
           <div class="form-group" style="flex:1;">
@@ -1904,7 +1904,7 @@ async function editChoice(choiceId) {
         document.getElementById('requiredPassionLevel').value = data.choice.required_passion_level || 0;
         document.getElementById('requiredFriendshipLevel').value = data.choice.required_friendship_level || 0;
         document.getElementById('requiredTeasingLevel').value = data.choice.required_teasing_level || 0;
-        document.getElementById('legendChoice').value = data.choice.is_legend_choice || false;
+        document.getElementById('legendChoice').checked = data.choice.is_legend_choice || false;
         document.getElementById('legendTitle').value = data.choice.legend_title || '';
         document.getElementById('legendBackground').value = data.choice.legend_icon || '';
       }, 100);
