@@ -1156,6 +1156,7 @@ def generate_team_code(team_id: int) -> str:
         team_code = TeamCode(team_id=team_id)
 
         s.add(team_code)
+        s.commit()
 
         return team_code.code
 
