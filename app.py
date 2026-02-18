@@ -1146,7 +1146,7 @@ def generate_diamond_code(amount: int, value: int) -> str:
     with Session(db.engine) as s:
         diamond_code = db.generate_diamond_code(amount, value)
 
-        return diamond_code.code
+        return str(diamond_code.code)
 
 
 @app.route('/admin/codes/teams/generate/<team_id>')
@@ -1158,7 +1158,7 @@ def generate_team_code(team_id: int) -> str:
         s.add(team_code)
         s.commit()
 
-        return team_code.code
+        return str(team_code.code)
 
 
 @app.route('/code/teams/<uuid>')
@@ -1178,7 +1178,7 @@ def activate_team_code(uuid: str):
 
         s.commit()
 
-        return team_code.code
+        return redirect('/profile')
 
 
 @app.route('/codes/diamond/<uuid>')
