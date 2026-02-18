@@ -225,6 +225,7 @@ class Scene(Base):
     position_y: Mapped[int] = mapped_column(default=0)
     scale: Mapped[float] = mapped_column(Float, default=1.0)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    scene_type: Mapped[Optional[str]] = mapped_column(String, nullable=True)
 
     chapter: Mapped["Chapter"] = relationship("Chapter", back_populates="scenes")
 
