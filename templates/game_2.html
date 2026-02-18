@@ -606,7 +606,9 @@
     const choicesContainer = document.querySelector('.choices');
     choicesContainer.innerHTML = '';
 
-    if (!sceneData.choices || sceneData.choices.length === 0) {
+    if (sceneData.scene_type == 'input') {
+      alert('Сцена с вариантом ответа!')
+    }else if (!sceneData.choices || sceneData.choices.length === 0) {
       const continueBtn = document.createElement('div');
       continueBtn.className = `choice`;
       continueBtn.innerHTML = 'Продолжить';

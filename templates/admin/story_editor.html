@@ -1656,18 +1656,17 @@ function openSceneModal(sceneId = null) {
   const form = document.getElementById('sceneForm');
   const title = document.getElementById('sceneModalTitle');
 
-  // Сброс формы
   form.reset();
   document.getElementById('sceneId').value = '';
   document.getElementById('sceneChapterId').value = currentChapterId || '';
 
   if (sceneId) {
-    // Редактирование существующей сцены
     const scene = scenes.find(s => s.id === sceneId);
     if (scene) {
       title.textContent = 'Редактировать сцену';
       document.getElementById('sceneId').value = scene.id;
       document.getElementById('sceneNumber').value = scene.scene_number;
+      document.getElementById('sceneType').value = scene.scene_type || 'simple';
       document.getElementById('characterName').value = scene.character_name;
       document.getElementById('dialogueText').value = scene.dialogue_text;
       document.getElementById('characterImage').value = scene.character_image || '';
@@ -1678,9 +1677,8 @@ function openSceneModal(sceneId = null) {
       document.getElementById('scale').value = scene.scale || 1.0;
     }
   } else {
-    // Создание новой сцены
     title.textContent = 'Новая сцена';
-    // Установить номер следующей сцены
+
     const nextNumber = scenes.length > 0 ? Math.max(...scenes.map(s => s.scene_number)) + 1 : 1;
     document.getElementById('sceneNumber').value = nextNumber;
     document.getElementById('characterName').value = 'Виксария';
@@ -1689,7 +1687,6 @@ function openSceneModal(sceneId = null) {
   modal.classList.add('active');
 }
 
-// Сохранить сцену
 async function saveScene(e) {
   e.preventDefault();
 
@@ -1704,6 +1701,7 @@ async function saveScene(e) {
   const positionX = parseInt(document.getElementById('positionX').value) || 0;
   const positionY = parseInt(document.getElementById('positionY').value) || 0;
   const scale = parseFloat(document.getElementById('scale').value) || 1.0;
+  const sceneType = document.getElementById('sceneType').value || 'simple'
 
   if (!characterName || !dialogueText) {
     alert('Заполните имя персонажа и текст диалога');
@@ -1713,7 +1711,6 @@ async function saveScene(e) {
   try {
     let response;
     if (sceneId) {
-      // Обновление
       response = await fetch(`/api/scenes/${sceneId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -1725,11 +1722,11 @@ async function saveScene(e) {
           music_track: music || null,
           position_x: positionX,
           position_y: positionY,
-          scale: scale
+          scale: scale,
+          scene_type: sceneType
         })
       });
     } else {
-      // Создание
       response = await fetch('/api/scenes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1743,7 +1740,8 @@ async function saveScene(e) {
           music_track: music || null,
           position_x: positionX,
           position_y: positionY,
-          scale: scale
+          scale: scale,
+          scene_type: sceneType
         })
       });
     }
