@@ -9,7 +9,7 @@ import sys
 from sqlalchemy.orm import Session
 
 from config import config
-from database import Database, User, Choice, Scene, Story, GameSave, DiamondCode, DiamondCodesHistory
+from database import Database, User, Choice, Scene, Story, GameSave, DiamondCode, DiamondCodesHistory, TeamCode
 from auth import AuthService
 from game import GameService
 
@@ -1146,7 +1146,36 @@ def generate_diamond_code(amount: int, value: int) -> str:
     with Session(db.engine) as s:
         diamond_code = db.generate_diamond_code(amount, value)
 
-        return diamond_code.as_url()
+        return diamond_code.code
+
+
+@app.route('/admin/codes/teams/generate/<team_id>')
+@admin_required
+def generate_team_code(team_id: int) -> str:
+    with Session(db.engine) as s:
+        team_code = TeamCode(team_id=team_id)
+
+        s.add(team_code)
+
+        return team_code.code
+
+
+@app.route('/code/teams/<uuid>')
+@login_required
+def activate_team_code(uuid: str):
+    with Session(db.engine) as s:
+        team_code = s.get(TeamCode, uuid)
+
+        if not team_code:
+            return render_template('error.html', message='Код не найден!', code=404), 404
+
+        s.query(User).filter_by(team_id=team_code.team_id).update({"is_leader": False})
+        s.commit()
+
+        current_user = s.get(User, session['user_id'])
+        current_user.is_leader = True
+
+        s.commit()
 
 
 @app.route('/codes/diamond/<uuid>')

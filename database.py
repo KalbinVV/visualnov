@@ -87,10 +87,6 @@ class DiamondCode(Base):
     value: Mapped[int] = mapped_column(Integer, nullable=False)
     amount: Mapped[int] = mapped_column(Integer, nullable=False)
 
-    @classmethod
-    def as_url(cls) -> str:
-        return f'/codes/diamond/{cls.code}'
-
 
 class DiamondCodesHistory(Base):
     __tablename__ = 'diamond_codes_history'
@@ -99,6 +95,13 @@ class DiamondCodesHistory(Base):
 
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
     diamond_code_uuid: Mapped[UUID] = mapped_column(ForeignKey('diamond_codes.code', ondelete='CASCADE'), nullable=False)
+
+
+class TeamCode(Base):
+    __tablename__ = 'team_codes'
+
+    code: Mapped[UUID] = mapped_column(UUID, primary_key=True, default=uuid4)
+    team_id: Mapped[int] = mapped_column(ForeignKey('teams.id', ondelete='CASCADE'), nullable=False)
 
 
 class Team(Base):
