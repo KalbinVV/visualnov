@@ -1177,6 +1177,8 @@ def activate_team_code(uuid: str):
 
         s.commit()
 
+        return team_code.code
+
 
 @app.route('/codes/diamond/<uuid>')
 @login_required
