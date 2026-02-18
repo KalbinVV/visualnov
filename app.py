@@ -9,7 +9,8 @@ import sys
 from sqlalchemy.orm import Session
 
 from config import config
-from database import Database, User, Choice, Scene, Story, GameSave, DiamondCode, DiamondCodesHistory, TeamCode
+from database import Database, User, Choice, Scene, Story, GameSave, DiamondCode, DiamondCodesHistory, TeamCode, \
+    ChoiceHistory
 from auth import AuthService
 from game import GameService
 
@@ -1256,6 +1257,7 @@ def reset_user_progress(user_id):
     try:
         with Session(db.engine) as s:
             s.query(GameSave).filter_by(user_id=user_id).delete()
+            s.query(ChoiceHistory).filter_by(user_id=user_id).delete()
             s.commit()
 
         return jsonify({

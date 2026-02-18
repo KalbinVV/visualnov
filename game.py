@@ -11,7 +11,7 @@ from typing import Optional, Dict, Any, List
 from flask import session
 from sqlalchemy.orm import Session
 
-from database import Database, Story, Scene, Chapter, User, Choice
+from database import Database, Story, Scene, Chapter, User, Choice, ChoiceHistory
 from story import StoryService
 
 
@@ -123,6 +123,11 @@ class GameService:
                                   teasing_change=choice.teasing_change,
                                   friendship_change=choice.friendship_change,
                                   passion_change=choice.passion_change)
+
+                choice_history = ChoiceHistory(choice_id=choice.id,
+                                               user_id=user.id)
+                s.add(choice_history)
+                s.commit()
             else:
                 return False, msg, -1, -1
 
