@@ -406,6 +406,48 @@ def api_make_choice(story_id: int):
                     'scene_id': scene_id,
                     'chapter_id': chapter_id,
                     'next_scene': {
+                        'id': next_scene.id,
+                        'character_image': next_scene.character_image,
+                        'character_name': next_scene.character_name.replace('{name}', user.display_name),
+                        'background': next_scene.background_image,
+                        'dialogue': next_scene.dialogue_text.replace('{name}', user.display_name),
+                        'choices': [{'data': Choice.as_dict(choice),
+                                     'is_available': game_service.is_choice_available(user.id, choice_id)[0]}
+                                    for choice in next_scene.choices] if next_scene.scene_type != "input" else [],
+                        'current_user_diamonds': user.diamonds,
+                        'scene_type': next_scene.scene_type
+                    }
+                }), 200
+        else:
+            return jsonify({'success': status, 'message': msg})
+
+    except Exception as e:
+        print(e)
+        return jsonify({'error': f'Ошибка выбора: {str(e)}'}), 500
+
+
+@app.route('/api/games/<story_id>/choice_input', methods=['POST'])
+@api_login_required
+def api_make_input_choice(story_id: int):
+    try:
+        data = request.get_json()
+
+        scene_id = int(data.get('scene_id'))
+        choice_value = data.get('value')
+
+        status, msg, scene_id, chapter_id = game_service.make_input_choice(session['user_id'], story_id, scene_id, choice_value)
+
+        if status:
+            with Session(db.engine) as s:
+                next_scene = s.get(Scene, scene_id)
+                user = s.get(User, session['user_id'])
+
+                return jsonify({
+                    'success': status,
+                    'message': msg,
+                    'scene_id': scene_id,
+                    'chapter_id': chapter_id,
+                    'next_scene': {
                         'character_image': next_scene.character_image,
                         'character_name': next_scene.character_name.replace('{name}', user.display_name),
                         'background': next_scene.background_image,

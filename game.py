@@ -92,46 +92,16 @@ class GameService:
         return True, 'Игра доступна за алмазы'
 
 
-    def load_game_state(self, user_id: int, story_id: int) -> Optional[Dict[str, Any]]:
 
-        game_state = self.db.load_game(user_id, story_id)
+    def make_input_choice(self, user_id: int, story_id: int, scene_id: int, value: str) -> tuple[bool, str, int, int]:
+        with Session(self.db.engine) as s:
+            choice = s.query(Choice).filter(Choice.scene_id == scene_id,
+                                             Choice.choice_text == value).first()
 
-        if not game_state:
-            game_state = {
-                'chapter': 1,
-                'scene': 1,
-                'choices': [],
-                'stats': {
-                    'affection': 0,
-                    'trust': 0,
-                    'passion': 0
-                },
-                'unlocked': True,
-                'created_at': datetime.now().isoformat()
-            }
+            if not choice:
+                return False, 'Неправильный ответ!', -1, -1
 
-            self.db.save_game(user_id, game_key, save_slot, game_state)
-
-        return game_state
-
-    def save_game_state(self, user_id: int, game_key: str,
-                        game_state: Dict[str, Any], save_slot: int = 1) -> bool:
-        """
-        Сохранение состояния игры
-
-        Args:
-            user_id: ID пользователя
-            game_key: Ключ игры/истории
-            game_state: Состояние игры
-            save_slot: Слот сохранения
-
-        Returns:
-            True если успешно
-        """
-        # Обновление времени сохранения
-        game_state['updated_at'] = datetime.now().isoformat()
-
-        return self.db.save_game(user_id, game_key, save_slot, game_state)
+            return self.make_choice(user_id, story_id, choice.id)
 
     def make_choice(self, user_id: int, story_id: int,
                     choice_id: int) -> tuple[bool, str, int, int]:
@@ -210,6 +180,7 @@ class GameService:
                 'background': scene.background_image if scene.background_image else "",
                 'character_image': scene.character_image,
                 'scene_type': scene.scene_type,
+                'scene_id': scene.id,
                 'music': scene.music_track,
                 'position': {
                     'x': scene.position_x,
@@ -224,7 +195,6 @@ class GameService:
                     for choice in scene.choices
                 ] if scene.scene_type != 'input' else []
             }
-
 
 
     def update_game_stats(self, user_id: int, game_key: str,
