@@ -1155,7 +1155,7 @@ def activate_diamond_code(uuid: str):
     with Session(db.engine) as s:
         diamond_code = s.get(DiamondCode, uuid)
 
-        if not diamond_code or diamond_code.amount < 0:
+        if not diamond_code or diamond_code.amount <= 0:
             return render_template('error.html', message='Код не найден!', code=404), 404
 
         user = s.get(User, session['user_id'])
