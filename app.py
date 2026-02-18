@@ -1164,7 +1164,7 @@ def activate_diamond_code(uuid: str):
 def reset_user_progress(user_id):
     try:
         with Session(db.engine) as s:
-            s.query(GameSave).filter_by(user_id=session['user_id']).delete()
+            s.query(GameSave).filter_by(user_id=user_id).delete()
             s.commit()
 
         return jsonify({
