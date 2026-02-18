@@ -221,8 +221,8 @@ class GameService:
                         'data': Choice.as_dict(choice),
                         'is_available': self.is_choice_available(user.id, choice.id)[0]
                     }
-                    for choice in scene.choices and scene.scene_type != 'input'
-                ]
+                    for choice in scene.choices
+                ] if scene.scene_type != 'input' else []
             }
 
 
