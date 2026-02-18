@@ -466,9 +466,9 @@ def to_next_scene(story_id: int):
             'chapter_id': scene.chapter_id,
             'next_scene': {
                 'character_image': scene.character_image,
-                'character_name': scene.character_name,
+                'character_name': scene.character_name.replace("{name}", user.display_name),
                 'background': scene.background_image,
-                'dialogue': scene.dialogue_text,
+                'dialogue': scene.dialogue_text.replace("{name}", user.display_name),
                 'choices': [{'data': Choice.as_dict(choice),
                              'is_available': game_service.is_choice_available(user.id, choice.id)[0]}
                             for choice in scene.choices],
