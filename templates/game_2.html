@@ -610,7 +610,7 @@
     if (!sceneData.choices || sceneData.choices.length === 0) {
       const continueBtn = document.createElement('div');
       continueBtn.className = `choice`;
-      continueBtn.innerHTML = 'Продолжить';
+      continueBtn.innerHTML = '...';
       continueBtn.onclick = () => goToNextScene();
       choicesContainer.appendChild(continueBtn);
       return;
