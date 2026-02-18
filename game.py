@@ -190,7 +190,7 @@ class GameService:
 
     def get_player_legend_choices(self, user_id: int, story_id: int) -> list[Type[Choice]]:
         with Session(self.db.engine) as s:
-            choices_ids = list(map(lambda ch: ch.id, s.query(ChoiceHistory).filter_by(user_id=user_id,
+            choices_ids = list(map(lambda ch: ch.choice_id, s.query(ChoiceHistory).filter_by(user_id=user_id,
                                                                                       story_id=story_id).all()))
 
             return s.query(Choice).filter(Choice.id.in_(choices_ids),
