@@ -1803,7 +1803,7 @@ async function saveChoice(e) {
   const requiredPassionLevel = parseInt(document.getElementById('requiredPassionLevel').value) || 0;
   const requiredTeasingLevel = parseInt(document.getElementById('requiredTeasingLevel').value) || 0;
   const requiredFriendshipLevel = parseInt(document.getElementById('requiredFriendshipLevel').value) || 0;
-  const isLegendChoice = document.getElementById('legendChoice').value || false;
+  const isLegendChoice = document.getElementById('legendChoice').checked || false;
   const legendTitle = document.getElementById('legendTitle').value || null;
   const legendIcon = document.getElementById('legendBackground').value || null;
 
@@ -1857,7 +1857,7 @@ async function saveChoice(e) {
           required_passion_level: requiredPassionLevel,
           required_friendship_level: requiredFriendshipLevel,
           required_teasing_level: requiredTeasingLevel,
-          is_legend_choice: isLegendChoice,
+          is_legend_choice: true ? isLegendChoice ==',
           legend_title: legendTitle,
           legend_icon: legendIcon
         })
