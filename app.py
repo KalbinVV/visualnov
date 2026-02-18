@@ -4,8 +4,7 @@
 
 from flask import Flask, request, jsonify, session, render_template, redirect, url_for, make_response
 from functools import wraps
-from datetime import datetime
-import os
+import sys
 
 from sqlalchemy.orm import Session
 
@@ -1203,13 +1202,14 @@ def internal_error(error):
 # ========== Запуск приложения ==========
 
 if __name__ == '__main__':
+    port = int(sys.argv[1]) if sys.argv[1] else 5000
+
     print("=" * 60)
     print("🎮 Любовный симулятор - Веб приложение")
     print("=" * 60)
     print(f"✓ База данных: {app.config['DATABASE_PATH']}")
-    print(f"✓ Тестовый админ: admin / admin")
-    print(f"✓ Сервер запущен на: http://localhost:5000")
+    print(f"✓ Сервер запущен на: http://localhost:{port}")
     print(f"✓ Режим отладки: {app.debug}")
     print("=" * 60)
 
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=True, host='0.0.0.0', port=port)
