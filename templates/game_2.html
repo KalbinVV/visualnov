@@ -769,8 +769,6 @@
 
       const data = await response.json();
 
-      console.log(data)
-
       if (response.ok && data.success) {
         sceneData = data.next_scene;
 
@@ -784,7 +782,7 @@
         loadScene();
       } else {
         if (data.is_ending) {
-          window.href = `/ending/${storyId}/`
+          window.location.href = `/ending/${storyId}/`
         } else {
           alert(data.message || 'Ошибка при совершении выбора');
         }
