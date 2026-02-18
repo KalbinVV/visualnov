@@ -406,7 +406,7 @@ def api_make_choice(story_id: int):
                     'scene_id': scene_id,
                     'chapter_id': chapter_id,
                     'next_scene': {
-                        'id': next_scene.id,
+                        'scene_id': next_scene.id,
                         'character_image': next_scene.character_image,
                         'character_name': next_scene.character_name.replace('{name}', user.display_name),
                         'background': next_scene.background_image,
