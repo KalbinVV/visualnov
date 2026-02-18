@@ -9,7 +9,7 @@ import sys
 from sqlalchemy.orm import Session
 
 from config import config
-from database import Database, User, Choice, Scene, Story, GameSave, DiamondCode
+from database import Database, User, Choice, Scene, Story, GameSave, DiamondCode, DiamondCodesHistory
 from auth import AuthService
 from game import GameService
 
@@ -1153,6 +1153,10 @@ def activate_diamond_code(uuid: str):
 
         user.diamonds += diamond_code.value
         diamond_code.amount -= 1
+
+        diamond_code_history = DiamondCodesHistory(user_id=user.id,
+                                                   diamond_code_uuid=diamond_code.code)
+        s.add(diamond_code_history)
 
         s.commit()
 
