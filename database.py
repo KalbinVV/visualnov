@@ -89,7 +89,7 @@ class DiamondCode(Base):
 
     @classmethod
     def as_url(cls) -> str:
-        return f'diamond_code?id={cls.code}'
+        return f'/codes/diamond/{cls.code}'
 
 
 class DiamondCodesHistory(Base):
@@ -563,6 +563,16 @@ class Database:
                 }
                 for row in results
             ]
+
+    def generate_diamond_code(self, amount: int, value: int) -> DiamondCode:
+        with Session(self.engine) as s:
+            diamond_code = DiamondCode(amount=amount,
+                                           value=value)
+
+            s.add(diamond_code)
+            s.commit()
+
+            return diamond_code
 
 
 if __name__ == "__main__":
