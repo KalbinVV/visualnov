@@ -616,25 +616,21 @@
 
     const characterImage = document.querySelector('.character');
     if (sceneData.character_image) {
+      characterImage.onload = null
       characterImage.src = `${sceneData.character_image}`;
       characterImage.className = 'character'
-      characterImage.onload = null
     }
 
     let sceneEffect = null
 
     if (sceneData.scene_effect == 'character_appears') {
       sceneEffect = () => {
-        console.log('Персонаж появляется')
         characterImage.classList.add('hide')
-
         characterImage.classList.add('visible')
       }
     } else if(sceneData.scene_effect == 'character_disappears') {
       sceneEffect = () => {
-        console.log('Персонаж исчезает')
         characterImage.classList.add('visible')
-
         characterImage.classList.add('hide-w-animation')
       }
     }
