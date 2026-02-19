@@ -970,17 +970,19 @@
     }
 
     async function restartStory() {
-      const response = await fetch(`/api/stories/${storyId}/start_again`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
+      if (confirm('Вы уверены? Весь ваш результат будет потерян')) {
+        const response = await fetch(`/api/stories/${storyId}/start_again`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+          window.location.href = `/games/${storyId}`
         }
-      });
-
-      const data = await response.json();
-
-      if (response.ok && data.success) {
-        window.location.href = `/games/${storyId}`
       }
     }
 
