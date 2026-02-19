@@ -618,7 +618,7 @@
     if (sceneData.character_image) {
       characterImage.src = `${sceneData.character_image}`;
       characterImage.className = 'character'
-      characterImage.addEventListener('load', null)
+      characterImage.onload = null
     }
 
     let sceneEffect = null
@@ -643,7 +643,7 @@
       }
     }
 
-    characterImage.addEventListener('load', sceneEffect)
+    characterImage.onload = sceneEffect
 
     document.querySelector('.name').innerHTML = sceneData.character_name;
 
