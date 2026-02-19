@@ -220,7 +220,7 @@ class Scene(Base):
     dialogue_text: Mapped[str] = mapped_column(Text, nullable=False)
     background_image: Mapped[Optional[str]] = mapped_column(String(255))
     music_track: Mapped[Optional[str]] = mapped_column(String(255))
-    effects: Mapped[Optional[str]] = mapped_column(Text)  # JSON
+    scene_effect: Mapped[Optional[str]] = mapped_column(Text)
     position_x: Mapped[int] = mapped_column(default=0)
     position_y: Mapped[int] = mapped_column(default=0)
     scale: Mapped[float] = mapped_column(Float, default=1.0)

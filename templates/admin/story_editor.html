@@ -967,7 +967,6 @@
   </div>
 </div>
 
-<!-- Модальное окно для редактирования сцены -->
 <div class="modal" id="sceneModal">
   <div class="modal-content">
     <h3 class="modal-title" id="sceneModalTitle">Новая сцена</h3>
@@ -984,7 +983,16 @@
         <label for="sceneType">Тип сцены</label>
         <select name="sceneType" id="sceneType">
           <option value="simple">Обычная сцена</option>
-          <option value="input">Сцена с вариантом ответа</option>
+          <option value="input">Сцена с вводом ответа</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="sceneEffect">Эффект сцены"</label>
+        <select name="sceneEffect" id="sceneEffect">
+          <option value="simple">Обычная сцена</option>
+          <option value="character_appears">Персонаж появляется</option>
+          <option value="character_disappears">Персонаж исчезает</option>
         </select>
       </div>
 
@@ -1073,7 +1081,6 @@
   </div>
 </div>
 
-<!-- Модальное окно для редактирования выбора -->
 <div class="modal" id="choiceModal">
   <div class="modal-content">
     <h3 class="modal-title" id="choiceModalTitle">Новый вариант выбора</h3>
@@ -1675,6 +1682,7 @@ function openSceneModal(sceneId = null) {
       document.getElementById('positionX').value = scene.position_x || 0;
       document.getElementById('positionY').value = scene.position_y || 0;
       document.getElementById('scale').value = scene.scale || 1.0;
+      document.getElementById('sceneEffect').value = scene.scene_effect || 'simple';
     }
   } else {
     title.textContent = 'Новая сцена';
@@ -1702,6 +1710,7 @@ async function saveScene(e) {
   const positionY = parseInt(document.getElementById('positionY').value) || 0;
   const scale = parseFloat(document.getElementById('scale').value) || 1.0;
   const sceneType = document.getElementById('sceneType').value || 'simple'
+  const sceneEffect = document.getElementById('sceneEffect).value || 'simple';
 
   if (!characterName || !dialogueText) {
     alert('Заполните имя персонажа и текст диалога');
@@ -1723,7 +1732,8 @@ async function saveScene(e) {
           position_x: positionX,
           position_y: positionY,
           scale: scale,
-          scene_type: sceneType
+          scene_type: sceneType,
+          scene_effect: sceneEffect
         })
       });
     } else {
@@ -1741,7 +1751,8 @@ async function saveScene(e) {
           position_x: positionX,
           position_y: positionY,
           scale: scale,
-          scene_type: sceneType
+          scene_type: sceneType,
+          scene_effect: sceneEffect
         })
       });
     }

@@ -983,7 +983,8 @@ def api_create_scene():
             position_x=data.get('position_x', 0),
             position_y=data.get('position_y', 0),
             scale=data.get('scale', 1.0),
-            scene_type=data.get('scene_type', 'simple')
+            scene_type=data.get('scene_type', 'simple'),
+            scene_effect=data.get('scene_effect', None)
         )
 
         if not scene_id:

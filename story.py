@@ -184,7 +184,7 @@ class StoryService:
         position_y: int = 0,
         scale: float = 1.0,
         scene_type: Optional[str] = None,
-        effects: Optional[str] = None
+        scene_effect: Optional[str] = None
     ) -> Optional[int]:
         with self.db.get_session() as s:
             try:
@@ -199,7 +199,7 @@ class StoryService:
                     position_x=position_x,
                     position_y=position_y,
                     scale=scale,
-                    effects=effects,
+                    scene_effect=scene_effect,
                     scene_type=scene_type
                 )
                 s.add(scene)
