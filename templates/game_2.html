@@ -628,18 +628,14 @@
         console.log('Персонаж появляется')
         characterImage.classList.add('hide')
 
-        setTimeout(() => {
-          characterImage.classList.add('visible')
-        }, 500)
+        characterImage.classList.add('visible')
       }
     } else if(sceneData.scene_effect == 'character_disappears') {
       sceneEffect = () => {
         console.log('Персонаж исчезает')
         characterImage.classList.add('visible')
 
-        setTimeout(() => {
-          characterImage.classList.add('hide-w-animation')
-        }, 1000)
+        characterImage.classList.add('hide-w-animation')
       }
     }
 
