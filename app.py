@@ -661,7 +661,8 @@ def ending_page(story_id: int):
         return render_template(
             'ending.html',
             legend_choices=game_service.get_player_legend_choices(session['user_id'], story_id),
-            story_title=story.title
+            story_title=story.title,
+            story_id=story.id
         )
 
 

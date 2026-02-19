@@ -887,7 +887,8 @@
   </div>
 
   <script>
-    // Initialize particles background
+    let storyId = {{ storyId }}
+
     function initParticles() {
       const container = document.getElementById('particles');
       const particleCount = Math.min(25, Math.floor(window.innerWidth / 40));
