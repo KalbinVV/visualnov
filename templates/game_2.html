@@ -618,6 +618,7 @@
     if (sceneData.character_image) {
       characterImage.src = `${sceneData.character_image}`;
       characterImage.className = 'character'
+      characterImage.addEventListener('load', null)
     }
 
     let sceneEffect = null
