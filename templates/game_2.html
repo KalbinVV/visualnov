@@ -568,7 +568,7 @@
   </span>
 
   <div class="scene">
-    <image class="character">
+    <img class="character">
 
     <div class="dialogue-container">
 
@@ -618,19 +618,29 @@
       characterImage.className = 'character'
     }
 
+    let sceneEffect = null
+
     if (sceneData.scene_effect == 'character_appears') {
-      characterImage.classList.add('hide')
+      sceneEffect = () => {
+        console.log('Персонаж появляется')
+        characterImage.classList.add('hide')
 
-      setTimeout(() => {
-        characterImage.classList.add('visible')
-      }, 2000)
+        setTimeout(() => {
+          characterImage.classList.add('visible')
+        }, 2000)
+      }
     } else if(sceneData.scene_effect == 'character_disappears') {
-      characterImage.classList.add('visible')
+      sceneEffect = () => {
+        console.log('Персонаж исчезает')
+        characterImage.classList.add('visible')
 
-      setTimeout(() => {
-        characterImage.classList.add('hide-w-animation')
-      }, 1000)
+        setTimeout(() => {
+          characterImage.classList.add('hide-w-animation')
+        }, 1000)
+      }
     }
+
+    characterImage.addEventListener('load', sceneEffect)
 
     document.querySelector('.name').innerHTML = sceneData.character_name;
 
