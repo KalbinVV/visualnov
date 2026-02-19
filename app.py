@@ -517,7 +517,9 @@ def to_next_scene(story_id: int):
                 'choices': [{'data': Choice.as_dict(choice),
                              'is_available': game_service.is_choice_available(user.id, choice.id)[0]}
                             for choice in scene.choices],
-                'current_user_diamonds': user.diamonds
+                'current_user_diamonds': user.diamonds,
+                'scene_type': scene.scene_type,
+                'scene_effect': scene.scene_effect
             }
         }), 200
 

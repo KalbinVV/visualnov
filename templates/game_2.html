@@ -476,6 +476,41 @@
       letter-spacing: 0.4px;
       text-transform: uppercase;
     }
+
+    .hide{
+      opacity: 0;
+    }
+
+    .hide {
+      opacity: 0;
+    }
+
+    .hide.visible {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      filter: blur(0);
+      box-shadow: var(--shadow-end);
+      transition:
+        opacity var(--duration) var(--easing),
+        transform var(--duration) var(--easing),
+        filter calc(var(--duration) * 0.9) var(--easing),
+        box-shadow calc(var(--duration) * 0.7) var(--easing);
+      transform: translateY(18px) scale(0.98);
+    }
+
+    .visible.hide-w-animation {
+      opacity: 0;
+      transform: translateY(0) scale(1);
+      filter: blur(0);
+      box-shadow: var(--shadow-end);
+      transition:
+        opacity var(--duration) var(--easing),
+        transform var(--duration) var(--easing),
+        filter calc(var(--duration) * 0.9) var(--easing),
+        box-shadow calc(var(--duration) * 0.7) var(--easing);
+      transform: translateY(18px) scale(0.98);
+    }
+
   </style>
 </head>
 <body>
@@ -580,6 +615,21 @@
     const characterImage = document.querySelector('.character');
     if (sceneData.character_image) {
       characterImage.src = `${sceneData.character_image}`;
+      characterImage.className = 'character'
+    }
+
+    if (sceneData.scene_effect == 'character_appears') {
+      characterImage.classList.add('hide')
+
+      setTimeout(() => {
+        characterImage.classList.add('visible')
+      }, 1000)
+    } else if(sceneData.scene_effect == 'character_disappears') {
+      characterImage.classList.add('visible')
+
+      setTimeout(() => {
+        characterImage.classList.add('hide-w-animation')
+      }, 1000)
     }
 
     document.querySelector('.name').innerHTML = sceneData.character_name;

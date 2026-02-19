@@ -179,6 +179,7 @@ class GameService:
                     'y': scene.position_y
                 },
                 'scale': scene.scale,
+                'scene_effect': scene.scene_effect,
                 'choices': [
                     {
                         'data': Choice.as_dict(choice),
