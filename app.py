@@ -955,7 +955,8 @@ def api_get_scenes(chapter_id):
                         'character_image': scene.character_image,
                         'background_image': scene.background_image,
                         'chapter_id': scene.chapter_id,
-                        'scene_type': scene.scene_type
+                        'scene_type': scene.scene_type,
+                        'scene_effect': scene.scene_effect
                         } for scene in scenes]
         }), 200
 
