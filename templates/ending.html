@@ -969,16 +969,18 @@
       }
     }
 
-    function showMenu() {
-      // In real implementation: show game menu modal
-      console.log('Showing game menu');
-      alert('Меню игры:\n• Продолжить\n• Сохранить\n• Загрузить\n• Настройки\n• Выйти в меню');
-    }
+    async function restartStory() {
+      const response = await fetch(`/api/stories/${storyId}/start_again`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
 
-    function restartStory() {
-      if (confirm('Вы уверены, что хотите начать историю заново? Все прогресс будет сброшен.')) {
-        console.log('Restarting story');
-        window.location.reload();
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        window.location.href = `/games/${storyId}`
       }
     }
 

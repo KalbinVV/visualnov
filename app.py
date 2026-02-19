@@ -1271,6 +1271,20 @@ def activate_diamond_code(uuid: str):
         return redirect('/dashboard')
 
 
+@app.route('/api/stories/<int:story_id>/start_again', methods=['POST'])
+@login_required
+def start_story_again(story_id: int):
+    with Session(db.engine) as s:
+        user_id = session['user_id']
+
+        s.query(GameSave).filter_by(user_id=user_id, story_id=story_id).delete()
+        s.query(ChoiceHistory).filter_by(user_id=user_id, story_id=story_id).delete()
+
+        s.commit()
+
+        return {'success': True}
+
+
 @app.route('/api/admin/users/<int:user_id>/reset-progress', methods=['POST'])
 @admin_required
 def reset_user_progress(user_id):
