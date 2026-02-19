@@ -1085,7 +1085,10 @@ def api_create_choice():
             passion_change=data.get('passion_change', 0),
             required_passion_level=data.get('required_passion_level'),
             required_friendship_level=data.get('required_friendship_level'),
-            required_teasing_level=data.get('required_teasing_level')
+            required_teasing_level=data.get('required_teasing_level'),
+            is_legend_choice=data.get('isLegendChoice'),
+            legend_title=data.get('legendTitle'),
+            legend_icon=data.get('legend_icon')
         )
 
         if not choice_id:

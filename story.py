@@ -467,7 +467,7 @@ class StoryService:
                         passion_change=choice_data.get('stats_changes', {}).get('passion', 0),
                         unlock_condition=choice_data.get('unlock_condition'),
                         only_leader=choice_data.get('only_leader'),
-                        is_locked=choice_data.get('is_locked', False)
+                        is_locked=choice_data.get('is_locked', False),
                     )
 
         return story_id
