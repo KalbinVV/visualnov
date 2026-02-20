@@ -416,7 +416,8 @@ def api_make_choice(story_id: int):
                                      'is_available': game_service.is_choice_available(user.id, choice_id)[0]}
                                     for choice in next_scene.choices] if next_scene.scene_type != "input" else [],
                         'current_user_diamonds': user.diamonds,
-                        'scene_type': next_scene.scene_type
+                        'scene_type': next_scene.scene_type,
+                        'scene_effect': next_scene.scene_effect
                     }
                 }), 200
         else:
