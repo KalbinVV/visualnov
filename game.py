@@ -201,6 +201,8 @@ class GameService:
             choices_stats = []
 
             for choice in choices:
+                print(total_players_count, quantity_of_players)
+
                 quantity_of_players = s.query(ChoiceHistory).filter_by(id=choice.id).count()
                 percent = total_players_count / quantity_of_players
 
