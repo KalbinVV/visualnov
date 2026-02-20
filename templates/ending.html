@@ -852,7 +852,7 @@
             <svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
             Вы выбрали этот вариант
           </div>
-          <div class="choice-text">{{choice.legend_title}}</div>
+          <div class="choice-text">{{choice.data.legend_title}}</div>
           <div class="stats-container">
             <div class="players-agree">
               <svg class="players-icon" viewBox="0 0 24 24">
@@ -861,15 +861,15 @@
                 <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
                 <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
               </svg>
-              <span class="players-count">12 483</span> игрока согласны с вами
+              <span class="players-count">{{ choice.quantity_of_player }}</span> игрока согласны с вами
             </div>
-            <div class="percentage">78%</div>
+            <div class="percentage">{{ choice.percent }}%</div>
           </div>
         </div>
       </div>
     {% endfor %}
     </div>
-    <!-- Action Buttons -->
+
     <div class="action-buttons">
       <button class="action-btn" onclick="restartStory()">
         <svg viewBox="0 0 24 24">

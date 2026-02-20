@@ -189,10 +189,23 @@ class GameService:
                 ] if scene.scene_type != 'input' else []
             }
 
-    def get_player_legend_choices(self, user_id: int, story_id: int) -> list[Type[Choice]]:
+    def get_player_legend_choices(self, user_id: int, story_id: int) -> list[dict]:
         with Session(self.db.engine) as s:
             choices_ids = list(map(lambda ch: ch.choice_id, s.query(ChoiceHistory).filter_by(user_id=user_id,
                                                                                       story_id=story_id).all()))
 
-            return s.query(Choice).filter(Choice.id.in_(choices_ids),
+            choices = s.query(Choice).filter(Choice.id.in_(choices_ids),
                                           Choice.is_legend_choice == True).all()
+            total_players_count = s.query(User).count()
+
+            choices_stats = []
+
+            for choice in choices:
+                quantity_of_players = s.query(ChoiceHistory).filter_by(id=choice.id).count()
+                percent = total_players_count / quantity_of_players
+
+                choices_stats.append({'data': Choice.as_dict(choice),
+                                      'quantity_of_player': quantity_of_players,
+                                      'percent': percent})
+
+            return choices_stats
