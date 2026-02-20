@@ -1286,7 +1286,6 @@ def start_story_again(story_id: int):
         user_id = session['user_id']
 
         s.query(GameSave).filter_by(user_id=user_id, story_id=story_id).delete()
-        s.query(ChoiceHistory).filter_by(user_id=user_id, story_id=story_id).delete()
 
         s.commit()
 
@@ -1299,7 +1298,6 @@ def reset_user_progress(user_id):
     try:
         with Session(db.engine) as s:
             s.query(GameSave).filter_by(user_id=user_id).delete()
-            s.query(ChoiceHistory).filter_by(user_id=user_id).delete()
             s.commit()
 
         return jsonify({
