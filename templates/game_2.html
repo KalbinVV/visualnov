@@ -513,6 +513,10 @@
       transform: translateY(18px) scale(0.98);
     }
 
+    .blackout {
+      opacity: 0.7;
+    }
+
   </style>
 </head>
 <body>
@@ -632,6 +636,10 @@
       sceneEffect = () => {
         characterImage.classList.add('visible')
         characterImage.classList.add('hide-w-animation')
+      }
+    } else if(sceneData.scene_effect == 'blackout') {
+      sceneEffect = () => {
+        characterImage.classList.add('blackout')
       }
     }
 
