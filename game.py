@@ -1,5 +1,6 @@
 import json
 from datetime import datetime
+from math import floor
 from typing import Optional, Dict, Any, List, Type
 
 from flask import session
@@ -202,7 +203,7 @@ class GameService:
 
             for choice in choices:
                 quantity_of_players = s.query(ChoiceHistory).filter_by(choice_id=choice.id).count()
-                percent = quantity_of_players / total_players_count * 100
+                percent = floor(quantity_of_players / total_players_count * 100)
 
                 choices_stats.append({'data': Choice.as_dict(choice),
                                       'quantity_of_player': quantity_of_players,
