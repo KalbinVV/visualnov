@@ -303,6 +303,7 @@ class ChoiceHistory(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
     choice_id: Mapped[int] = mapped_column(ForeignKey('choices.id', ondelete='CASCADE'), nullable=False)
     story_id: Mapped[int] = mapped_column(ForeignKey('stories.id', ondelete='CASCADE'), nullable=False)
+    scene_id: Mapped[int] = mapped_column(ForeignKey('scenes.id', ondelete='CASCADE'), nullable=False)
 
 
 class Character(Base):

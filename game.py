@@ -79,6 +79,26 @@ class GameService:
         return True, 'Игра доступна за алмазы'
 
 
+    def save_choice(self, user_id: int, story_id: int, choice_id: int, scene_id: int):
+        with Session(self.db.engine) as s:
+            user = s.get(User, user_id)
+            choice = s.get(Choice, choice_id)
+
+            choice_history = s.query(ChoiceHistory).filter_by(scene_id=scene_id,
+                                                              choice_id=choice_id,
+                                                              user_id=user.id).first()
+
+            if not choice_history:
+                choice_history = ChoiceHistory(choice_id=choice.id,
+                                               user_id=user.id,
+                                               story_id=story_id,
+                                               scene_id=scene_id)
+                s.add(choice_history)
+            else:
+                choice_history.choice_id = choice_id
+
+            s.commit()
+
 
     def make_input_choice(self, user_id: int, story_id: int, scene_id: int, value: str) -> tuple[bool, str, int, int]:
         with Session(self.db.engine) as s:
@@ -111,11 +131,7 @@ class GameService:
                                   friendship_change=choice.friendship_change,
                                   passion_change=choice.passion_change)
 
-                choice_history = ChoiceHistory(choice_id=choice.id,
-                                               user_id=user.id,
-                                               story_id=story_id)
-                s.add(choice_history)
-                s.commit()
+                self.save_choice(user.id, story_id, choice.id, choice.scene_id)
             else:
                 return False, msg, -1, -1
 
