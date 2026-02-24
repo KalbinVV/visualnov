@@ -13,10 +13,9 @@
     </div>
     
     <div class="top-right">
-      <div class="diamond-counter" onclick="showDiamondModal()">
+      <div class="diamond-counter">
         <span class="diamond-icon">💎</span>
         <span class="diamond-amount" id="diamondAmount">{{ user.diamonds }}</span>
-        <span class="diamond-info-icon">ℹ️</span>
       </div>
 
       <div class="user-menu">
@@ -38,87 +37,6 @@
     </div>
   </div>
 
-  <!-- Diamond Info Modal -->
-  <div class="modal-overlay" id="diamondModal">
-    <div class="modal-content diamond-modal">
-      <div class="modal-header">
-        <div class="modal-icon">💎</div>
-        <h2>Алмазы</h2>
-        <button class="modal-close" onclick="hideDiamondModal()">✕</button>
-      </div>
-
-      <div class="modal-balance">
-        <span class="balance-amount" id="modalDiamondAmount">{{ user.diamonds }}</span>
-        <span class="balance-label">алмазов доступно</span>
-      </div>
-
-      <div class="modal-section">
-        <h3>Для чего нужны алмазы</h3>
-        <ul class="feature-list">
-          <li>
-            <span class="feature-icon">🔓</span>
-            <div class="feature-text">
-              <strong>Премиум-выборы</strong>
-              <span>Открывайте эксклюзивные сюжетные линии</span>
-            </div>
-          </li>
-          <li>
-            <span class="feature-icon">🎁</span>
-            <div class="feature-text">
-              <strong>Подарки персонажам</strong>
-              <span>Повышайте отношения с героями</span>
-            </div>
-          </li>
-          <li>
-            <span class="feature-icon">👔</span>
-            <div class="feature-text">
-              <strong>Наряды и аксессуары</strong>
-              <span>Создавайте уникальный образ</span>
-            </div>
-          </li>
-          <li>
-            <span class="feature-icon">⭐</span>
-            <div class="feature-text">
-              <strong>Эксклюзивные концовки</strong>
-              <span>Получайте особые финалы историй</span>
-            </div>
-          </li>
-        </ul>
-      </div>
-
-      <div class="modal-section">
-        <h3>Как получить алмазы</h3>
-        <div class="get-diamonds-grid">
-          <div class="get-item">
-            <div class="get-icon">📅</div>
-            <div class="get-text">
-              <strong>Ежедневный вход</strong>
-              <span>Получайте бонусы каждый день</span>
-            </div>
-          </div>
-          <div class="get-item">
-            <div class="get-icon">🏆</div>
-            <div class="get-text">
-              <strong>Достижения</strong>
-              <span>Выполняйте задания в играх</span>
-            </div>
-          </div>
-          <div class="get-item">
-            <div class="get-icon">💳</div>
-            <div class="get-text">
-              <strong>Покупка</strong>
-              <span>Приобретайте в магазине</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="modal-footer">
-        <p>💡 Алмазы сохраняются между сессиями и не пропадают при загрузке сохранений</p>
-      </div>
-    </div>
-  </div>
-
   <!-- Основной контент -->
   <div class="main-content">
     <div class="welcome-section">
@@ -126,23 +44,8 @@
       <p>Выберите игру и начните свое романтическое приключение</p>
     </div>
 
-    <!-- Games Slider - Works on ALL devices -->
-    <div class="games-slider-container">
-      <div class="slider-header">
-        <h3>Доступные истории</h3>
-        <div class="slider-controls">
-          <button class="slider-btn prev" id="sliderPrev" aria-label="Назад">‹</button>
-          <button class="slider-btn next" id="sliderNext" aria-label="Вперёд">›</button>
-        </div>
-      </div>
-
-      <div class="games-slider-track">
-        <div class="games-slider" id="gamesSlider">
-          <!-- Игры будут загружены через JavaScript -->
-        </div>
-      </div>
-
-      <div class="slider-dots" id="sliderDots"></div>
+    <div class="games-grid" id="gamesGrid">
+      <!-- Игры будут загружены через JavaScript -->
     </div>
   </div>
 </div>
@@ -154,13 +57,10 @@
     --bg-gradient-end: #1a1a2e;
     --accent: #6366f1;
     --accent-dark: #4f46e5;
-    --accent-light: #818cf8;
     --text-primary: #f1f5f9;
     --text-secondary: #cbd5e1;
     --card-bg: rgba(20, 20, 40, 0.7);
     --card-border: rgba(99, 102, 241, 0.3);
-    --modal-bg: rgba(15, 15, 35, 0.98);
-    --slider-track-bg: rgba(15, 15, 35, 0.5);
   }
 
   [data-theme="orange"] {
@@ -169,13 +69,10 @@
     --bg-gradient-end: #1a1208;
     --accent: #f97316;
     --accent-dark: #ea580c;
-    --accent-light: #fb923c;
     --text-primary: #fef3c7;
     --text-secondary: #fcd34d;
     --card-bg: rgba(40, 20, 10, 0.7);
     --card-border: rgba(249, 115, 22, 0.3);
-    --modal-bg: rgba(25, 15, 5, 0.98);
-    --slider-track-bg: rgba(25, 15, 5, 0.5);
   }
 
   [data-theme="purple"] {
@@ -184,13 +81,10 @@
     --bg-gradient-end: #1a082e;
     --accent: #8b5cf6;
     --accent-dark: #7c3aed;
-    --accent-light: #a78bfa;
     --text-primary: #e0e7ff;
     --text-secondary: #cbd5e1;
     --card-bg: rgba(30, 15, 40, 0.7);
     --card-border: rgba(139, 92, 246, 0.3);
-    --modal-bg: rgba(20, 10, 35, 0.98);
-    --slider-track-bg: rgba(20, 10, 35, 0.5);
   }
 
   [data-theme="dark-green"] {
@@ -199,13 +93,10 @@
     --bg-gradient-end: #122014;
     --accent: #10b981;
     --accent-dark: #059669;
-    --accent-light: #34d399;
     --text-primary: #d1fae5;
     --text-secondary: #6ee7b7;
     --card-bg: rgba(10, 40, 25, 0.7);
     --card-border: rgba(16, 185, 129, 0.3);
-    --modal-bg: rgba(5, 25, 15, 0.98);
-    --slider-track-bg: rgba(5, 25, 15, 0.5);
   }
 
   * {
@@ -220,7 +111,6 @@
     color: var(--text-primary);
     min-height: 100vh;
     overflow-x: hidden;
-    -webkit-tap-highlight-color: transparent;
   }
 
   .dashboard-container {
@@ -261,38 +151,17 @@
   .diamond-counter {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     background: rgba(255, 215, 0, 0.1);
     border: 2px solid rgba(255, 215, 0, 0.3);
     border-radius: 12px;
-    padding: 8px 18px;
+    padding: 6px 16px;
     font-weight: 600;
     font-size: 16px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    position: relative;
-  }
-
-  .diamond-counter:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(255, 215, 0, 0.3);
-    border-color: rgba(255, 215, 0, 0.5);
   }
 
   .diamond-icon {
     font-size: 20px;
-    animation: sparkle 2s infinite;
-  }
-
-  @keyframes sparkle {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.8; transform: scale(1.1); }
-  }
-
-  .diamond-info-icon {
-    font-size: 14px;
-    opacity: 0.7;
-    margin-left: 4px;
   }
 
   .user-menu {
@@ -311,13 +180,6 @@
     font-weight: 700;
     font-size: 18px;
     overflow: hidden;
-    border: 2px solid var(--accent-light);
-    transition: all 0.3s ease;
-  }
-
-  .user-avatar:hover {
-    transform: scale(1.05);
-    box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
   }
 
   .user-avatar img {
@@ -373,10 +235,6 @@
     font-size: 32px;
     font-weight: 700;
     margin-bottom: 12px;
-    background: linear-gradient(90deg, var(--text-primary), var(--accent-light));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
   }
 
   .welcome-section p {
@@ -385,320 +243,13 @@
     opacity: 0.9;
   }
 
-  /* Diamond Modal Styles */
-  .modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.8);
-    backdrop-filter: blur(8px);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-    padding: 20px;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-  }
-
-  .modal-overlay.show {
-    display: flex;
-    opacity: 1;
-  }
-
-  .modal-content {
-    background: var(--modal-bg);
-    border: 2px solid var(--card-border);
-    border-radius: 24px;
-    max-width: 600px;
-    width: 100%;
-    max-height: 90vh;
-    overflow-y: auto;
-    box-shadow: 0 25px 80px rgba(0, 0, 0, 0.6),
-                0 0 40px rgba(99, 102, 241, 0.2);
-    transform: scale(0.9) translateY(20px);
-    transition: transform 0.3s ease;
-  }
-
-  .modal-overlay.show .modal-content {
-    transform: scale(1) translateY(0);
-  }
-
-  .modal-header {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    padding: 24px 28px;
-    border-bottom: 1px solid var(--card-border);
-    position: sticky;
-    top: 0;
-    background: var(--modal-bg);
-    z-index: 10;
-  }
-
-  .modal-icon {
-    font-size: 32px;
-    animation: float 3s ease-in-out infinite;
-  }
-
-  @keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-5px); }
-  }
-
-  .modal-header h2 {
-    font-size: 24px;
-    font-weight: 700;
-    flex: 1;
-    background: linear-gradient(90deg, var(--accent), var(--accent-light));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  .modal-close {
-    width: 36px;
-    height: 36px;
-    border-radius: 10px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid var(--card-border);
-    color: var(--text-secondary);
-    font-size: 20px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s;
-  }
-
-  .modal-close:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: var(--text-primary);
-    transform: rotate(90deg);
-  }
-
-  .modal-balance {
-    text-align: center;
-    padding: 32px 28px;
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(99, 102, 241, 0.05));
-    border-bottom: 1px solid var(--card-border);
-  }
-
-  .balance-amount {
-    display: block;
-    font-size: 48px;
-    font-weight: 800;
-    background: linear-gradient(90deg, #ffd700, #ffed4e);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin-bottom: 8px;
-    text-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
-  }
-
-  .balance-label {
-    color: var(--text-secondary);
-    font-size: 16px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-  }
-
-  .modal-section {
-    padding: 28px;
-  }
-
-  .modal-section h3 {
-    font-size: 18px;
-    font-weight: 600;
-    margin-bottom: 20px;
-    color: var(--accent-light);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .feature-list {
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
-
-  .feature-list li {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    padding: 16px;
-    background: rgba(255, 255, 255, 0.03);
-    border-radius: 12px;
-    border: 1px solid var(--card-border);
-    transition: all 0.3s ease;
-  }
-
-  .feature-list li:hover {
-    background: rgba(255, 255, 255, 0.06);
-    transform: translateX(5px);
-    border-color: var(--accent);
-  }
-
-  .feature-icon {
-    font-size: 24px;
-    width: 48px;
-    height: 48px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(99, 102, 241, 0.1);
-    border-radius: 12px;
-    border: 1px solid var(--card-border);
-  }
-
-  .feature-text {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-
-  .feature-text strong {
-    color: var(--text-primary);
-    font-size: 15px;
-  }
-
-  .feature-text span {
-    color: var(--text-secondary);
-    font-size: 13px;
-  }
-
-  .get-diamonds-grid {
+  .games-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 16px;
-  }
-
-  .get-item {
-    text-align: center;
-    padding: 20px;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid var(--card-border);
-    border-radius: 16px;
-    transition: all 0.3s ease;
-  }
-
-  .get-item:hover {
-    transform: translateY(-5px);
-    background: rgba(255, 255, 255, 0.06);
-    border-color: var(--accent);
-    box-shadow: 0 10px 30px rgba(99, 102, 241, 0.2);
-  }
-
-  .get-icon {
-    font-size: 32px;
-    margin-bottom: 12px;
-  }
-
-  .get-text strong {
-    display: block;
-    color: var(--text-primary);
-    margin-bottom: 4px;
-    font-size: 14px;
-  }
-
-  .get-text span {
-    color: var(--text-secondary);
-    font-size: 12px;
-  }
-
-  .modal-footer {
-    padding: 20px 28px;
-    border-top: 1px solid var(--card-border);
-    text-align: center;
-  }
-
-  .modal-footer p {
-    color: var(--text-secondary);
-    font-size: 14px;
-    line-height: 1.6;
-  }
-
-  /* Games Slider - Works on ALL devices including mobile */
-  .games-slider-container {
-    margin-bottom: 40px;
-    display: block;
-    position: relative;
-  }
-
-  .slider-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 24px;
-    padding: 0 8px;
-  }
-
-  .slider-header h3 {
-    font-size: 24px;
-    font-weight: 700;
-    color: var(--text-primary);
-  }
-
-  .slider-controls {
-    display: flex;
-    gap: 12px;
-  }
-
-  .slider-btn {
-    width: 44px;
-    height: 44px;
-    border-radius: 12px;
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
-    color: var(--text-primary);
-    font-size: 24px;
-    font-weight: 300;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s ease;
-    user-select: none;
-    -webkit-tap-highlight-color: transparent;
-  }
-
-  .slider-btn:hover {
-    background: var(--accent);
-    border-color: var(--accent);
-    transform: scale(1.05);
-  }
-
-  .slider-btn:active {
-    transform: scale(0.95);
-  }
-
-  .games-slider-track {
-    position: relative;
-    overflow: hidden;
-    border-radius: 20px;
-    padding: 10px 4px;
-    background: var(--slider-track-bg);
-    border: 1px solid var(--card-border);
-    touch-action: pan-y pinch-zoom;
-  }
-
-  .games-slider {
-    display: flex;
-    gap: 20px;
-    transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    will-change: transform;
-    padding: 5px;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 24px;
   }
 
   .game-card {
-    flex: 0 0 auto;
-    width: calc(33.333% - 14px);
-    min-width: 280px;
-    max-width: 400px;
     background: var(--card-bg);
     backdrop-filter: blur(15px);
     border: 2px solid var(--card-border);
@@ -708,18 +259,12 @@
     cursor: pointer;
     position: relative;
     overflow: hidden;
-    user-select: none;
-    -webkit-tap-highlight-color: transparent;
   }
 
   .game-card:hover {
     transform: translateY(-8px);
     border-color: var(--accent);
     box-shadow: 0 12px 40px rgba(99, 102, 241, 0.3);
-  }
-
-  .game-card:active {
-    transform: scale(0.98);
   }
 
   .game-card::before {
@@ -747,17 +292,14 @@
     font-size: 22px;
     font-weight: 700;
     margin-bottom: 8px;
-    line-height: 1.3;
   }
 
   .game-badge {
-    display: inline-block;
     padding: 4px 12px;
     border-radius: 12px;
     font-size: 12px;
     font-weight: 600;
     text-transform: uppercase;
-    margin-bottom: 12px;
   }
 
   .game-badge.premium {
@@ -810,7 +352,6 @@
 
   .game-action:hover {
     transform: scale(1.05);
-    box-shadow: 0 5px 20px rgba(99, 102, 241, 0.4);
   }
 
   .game-action.secondary {
@@ -831,50 +372,11 @@
     font-weight: 600;
   }
 
-  .slider-dots {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin-top: 20px;
-    padding: 0 8px;
-  }
-
-  .slider-dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: var(--card-border);
-    cursor: pointer;
-    transition: all 0.3s ease;
-    border: none;
-    padding: 0;
-    -webkit-tap-highlight-color: transparent;
-  }
-
-  .slider-dot:hover {
-    background: var(--accent-light);
-    transform: scale(1.2);
-  }
-
-  .slider-dot:active {
-    transform: scale(0.9);
-  }
-
-  .slider-dot.active {
-    background: var(--accent);
-    width: 28px;
-    border-radius: 6px;
-  }
-
-  /* Mobile Responsive Styles */
-  @media (max-width: 1200px) {
-    .game-card {
-      width: calc(50% - 10px);
-      min-width: 260px;
-    }
-  }
-
   @media (max-width: 768px) {
+    .games-grid {
+      grid-template-columns: 1fr;
+    }
+
     .top-bar {
       padding: 0 16px;
       height: 60px;
@@ -892,131 +394,20 @@
       font-size: 26px;
     }
 
-    .welcome-section p {
-      font-size: 16px;
-    }
-
-    /* Mobile slider - 1 card visible */
     .game-card {
-      width: calc(100% - 20px);
-      min-width: calc(100% - 20px);
-      max-width: none;
       padding: 20px;
     }
 
     .game-title {
       font-size: 20px;
-    }
-
-    .game-description {
-      font-size: 14px;
-      min-height: 50px;
-    }
-
-    .slider-header h3 {
-      font-size: 20px;
-    }
-
-    .slider-btn {
-      width: 40px;
-      height: 40px;
-      font-size: 20px;
-    }
-
-    .modal-content {
-      margin: 10px;
-      max-height: 95vh;
-    }
-
-    .modal-header {
-      padding: 20px;
-    }
-
-    .modal-section {
-      padding: 20px;
-    }
-
-    .balance-amount {
-      font-size: 36px;
-    }
-
-    .get-diamonds-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .diamond-counter {
-      padding: 6px 14px;
-      font-size: 14px;
-    }
-
-    .diamond-icon {
-      font-size: 18px;
-    }
-  }
-
-  @media (max-width: 480px) {
-    .game-card {
-      padding: 16px;
-    }
-
-    .game-title {
-      font-size: 18px;
-    }
-
-    .game-badge {
-      font-size: 11px;
-      padding: 3px 10px;
-    }
-
-    .game-action {
-      padding: 8px 16px;
-      font-size: 13px;
-    }
-
-    .slider-btn {
-      width: 36px;
-      height: 36px;
-    }
-
-    .diamond-counter {
-      padding: 5px 12px;
-      font-size: 13px;
-    }
-
-    .diamond-amount {
-      font-size: 14px;
     }
   }
 </style>
 
 <script>
-let gamesData = [];
-let sliderState = {
-  currentIndex: 0,
-  cardWidth: 0,
-  gap: 20,
-  visibleCards: 3,
-  totalCards: 0,
-  isTransitioning: false
-};
-
 document.addEventListener('DOMContentLoaded', function() {
   loadGames();
-  setupSliderControls();
-  window.addEventListener('resize', debounce(handleResize, 150));
 });
-
-function debounce(func, wait) {
-  let timeout;
-  return function executedFunction(...args) {
-    const later = () => {
-      clearTimeout(timeout);
-      func(...args);
-    };
-    clearTimeout(timeout);
-    timeout = setTimeout(later, wait);
-  };
-}
 
 async function loadGames() {
   try {
@@ -1024,12 +415,7 @@ async function loadGames() {
     const data = await response.json();
 
     if (data.success && data.games) {
-      gamesData = data.games;
       renderGames(data.games);
-      // Wait for DOM to render before initializing slider
-      setTimeout(() => {
-        initSlider();
-      }, 100);
     }
   } catch (error) {
     console.error('Ошибка загрузки игр:', error);
@@ -1037,243 +423,39 @@ async function loadGames() {
 }
 
 function renderGames(games) {
-  const gamesSlider = document.getElementById('gamesSlider');
-  gamesSlider.innerHTML = '';
+  const gamesGrid = document.getElementById('gamesGrid');
+  gamesGrid.innerHTML = '';
 
   if (games.length === 0) {
-    gamesSlider.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 40px; width: 100%;">Нет доступных игр</p>';
+    gamesGrid.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">Нет доступных игр</p>';
     return;
   }
 
   games.forEach(game => {
-    const gameCard = createGameCard(game);
-    gamesSlider.appendChild(gameCard);
-  });
+    const gameCard = document.createElement('div');
+    gameCard.className = `game-card ${game.premium ? 'premium' : ''}`;
+    gameCard.onclick = () => handleGameClick(game);
 
-  sliderState.totalCards = games.length;
-}
+    const hasSave = game.saves && game.saves.length > 0;
+    const actionText = hasSave ? 'Продолжить' : (game.premium ? 'Купить' : 'Начать');
 
-function createGameCard(game) {
-  const gameCard = document.createElement('div');
-  gameCard.className = `game-card ${game.premium ? 'premium' : ''}`;
-  gameCard.onclick = () => handleGameClick(game);
-  gameCard.dataset.gameId = game.id;
-
-  const hasSave = game.saves && game.saves.length > 0;
-  const actionText = hasSave ? 'Продолжить' : (game.premium ? 'Купить' : 'Начать');
-  const actionClass = hasSave ? '' : 'secondary';
-
-  gameCard.innerHTML = `
-    <div class="game-card-header">
-      <div>
-        <div class="game-title">${game.title}</div>
-        <div class="game-badge ${game.premium ? 'premium' : 'free'}">
-          ${game.premium ? 'Премиум' : 'Бесплатно'}
+    gameCard.innerHTML = `
+      <div class="game-card-header">
+        <div>
+          <div class="game-title">${game.title}</div>
+          <div class="game-badge ${game.premium ? 'premium' : 'free'}">
+            ${game.premium ? 'Премиум' : 'Бесплатно'}
+          </div>
         </div>
       </div>
-    </div>
-    <div class="game-description">${game.description}</div>
-    <div class="game-meta">
-      <div class="game-chapters">
-        <span>📖</span>
-        <span>${game.chapters || 0} глав</span>
+      <div class="game-description">${game.description}</div>
+      <div class="game-meta">
       </div>
-      <button class="game-action ${actionClass}" onclick="event.stopPropagation(); handleGameClick(${JSON.stringify(game).replace(/"/g, '&quot;')})">${actionText}</button>
-    </div>
-    ${hasSave ? `<div class="game-saves">Сохранений: <span>${game.saves.length}</span></div>` : ''}
-  `;
+    `;
 
-  return gameCard;
-}
-
-function initSlider() {
-  if (gamesData.length === 0) return;
-
-  updateSliderConfig();
-  updateSliderPosition();
-  updateSliderDots();
-}
-
-function updateSliderConfig() {
-  const slider = document.getElementById('gamesSlider');
-  const cards = slider.querySelectorAll('.game-card');
-
-  if (cards.length === 0) return;
-
-  // Determine visible cards based on screen width
-  if (window.innerWidth <= 768) {
-    sliderState.visibleCards = 1;
-  } else if (window.innerWidth <= 1200) {
-    sliderState.visibleCards = 2;
-  } else {
-    sliderState.visibleCards = 3;
-  }
-
-  // Calculate card width including gap
-  const card = cards[0];
-  const style = window.getComputedStyle(card);
-  const marginRight = parseInt(style.marginRight || 0);
-  sliderState.cardWidth = card.offsetWidth + marginRight + sliderState.gap;
-
-  // Ensure current index is valid
-  if (sliderState.currentIndex >= sliderState.totalCards) {
-    sliderState.currentIndex = 0;
-  }
-}
-
-function updateSliderPosition() {
-  const slider = document.getElementById('gamesSlider');
-  const offset = -(sliderState.currentIndex * sliderState.cardWidth);
-  slider.style.transform = `translateX(${offset}px)`;
-}
-
-function updateSliderDots() {
-  const dotsContainer = document.getElementById('sliderDots');
-
-  dotsContainer.innerHTML = '';
-
-  for (let i = 0; i < sliderState.totalCards; i++) {
-    const dot = document.createElement('button');
-    dot.className = `slider-dot ${i === sliderState.currentIndex ? 'active' : ''}`;
-    dot.setAttribute('aria-label', `Перейти к слайду ${i + 1}`);
-    dot.onclick = () => goToSlide(i);
-    dotsContainer.appendChild(dot);
-  }
-}
-
-// 🔄 INFINITE LOOP SLIDER - крутится слева и справа
-function slideGames(direction) {
-  if (sliderState.isTransitioning) return;
-  sliderState.isTransitioning = true;
-
-  sliderState.currentIndex += direction;
-
-  // 🔄 Циклическая прокрутка
-  if (sliderState.currentIndex >= sliderState.totalCards) {
-    sliderState.currentIndex = 0;
-  } else if (sliderState.currentIndex < 0) {
-    sliderState.currentIndex = sliderState.totalCards - 1;
-  }
-
-  updateSliderPosition();
-  updateSliderDots();
-
-  setTimeout(() => {
-    sliderState.isTransitioning = false;
-  }, 500);
-}
-
-function goToSlide(index) {
-  if (sliderState.isTransitioning) return;
-  sliderState.isTransitioning = true;
-
-  sliderState.currentIndex = index;
-  updateSliderPosition();
-  updateSliderDots();
-
-  setTimeout(() => {
-    sliderState.isTransitioning = false;
-  }, 500);
-}
-
-function setupSliderControls() {
-  document.getElementById('sliderPrev')?.addEventListener('click', () => slideGames(-1));
-  document.getElementById('sliderNext')?.addEventListener('click', () => slideGames(1));
-
-  // Keyboard navigation
-  document.addEventListener('keydown', (e) => {
-    if (document.getElementById('diamondModal')?.classList.contains('show')) return;
-
-    if (e.key === 'ArrowLeft') {
-      slideGames(-1);
-    } else if (e.key === 'ArrowRight') {
-      slideGames(1);
-    }
+    gamesGrid.appendChild(gameCard);
   });
-
-  // Touch/swipe support for mobile
-  let touchStartX = 0;
-  let touchEndX = 0;
-  let touchStartTime = 0;
-  let isDragging = false;
-
-  const sliderTrack = document.querySelector('.games-slider-track');
-  if (sliderTrack) {
-    sliderTrack.addEventListener('touchstart', (e) => {
-      touchStartX = e.changedTouches[0].screenX;
-      touchStartTime = Date.now();
-      isDragging = true;
-      sliderTrack.style.transition = 'none';
-    }, { passive: true });
-
-    sliderTrack.addEventListener('touchmove', (e) => {
-      if (!isDragging) return;
-      touchEndX = e.changedTouches[0].screenX;
-    }, { passive: true });
-
-    sliderTrack.addEventListener('touchend', (e) => {
-      if (!isDragging) return;
-      isDragging = false;
-      sliderTrack.style.transition = 'transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-      handleSwipe();
-    }, { passive: true });
-
-    sliderTrack.addEventListener('touchcancel', () => {
-      isDragging = false;
-      sliderTrack.style.transition = 'transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-    });
-  }
-
-  function handleSwipe() {
-    const diff = touchStartX - touchEndX;
-    const timeDiff = Date.now() - touchStartTime;
-    const threshold = 50;
-    const timeThreshold = 300;
-
-    // Check if it's a swipe (not a tap)
-    if (Math.abs(diff) > threshold || timeDiff < timeThreshold) {
-      if (diff > 0) {
-        slideGames(1); // swipe left -> next
-      } else if (diff < 0) {
-        slideGames(-1); // swipe right -> prev
-      }
-    }
-  }
 }
-
-function handleResize() {
-  updateSliderConfig();
-  updateSliderPosition();
-  updateSliderDots();
-}
-
-// Auto-play slider (pause on hover/touch)
-let autoPlayInterval;
-const sliderContainer = document.querySelector('.games-slider-container');
-
-function startAutoPlay() {
-  if (gamesData.length > 1) {
-    autoPlayInterval = setInterval(() => {
-      slideGames(1);
-    }, 5000);
-  }
-}
-
-function stopAutoPlay() {
-  if (autoPlayInterval) {
-    clearInterval(autoPlayInterval);
-  }
-}
-
-if (sliderContainer) {
-  sliderContainer.addEventListener('mouseenter', stopAutoPlay);
-  sliderContainer.addEventListener('mouseleave', startAutoPlay);
-  sliderContainer.addEventListener('touchstart', stopAutoPlay);
-  sliderContainer.addEventListener('touchend', startAutoPlay);
-}
-
-// Start autoplay after initial load
-setTimeout(startAutoPlay, 2000);
 
 function handleGameClick(game) {
   if (game.premium && (!game.saves || game.saves.length === 0)) {
@@ -1289,12 +471,11 @@ async function checkGameAccess(gameId) {
     const data = await response.json();
 
     if (data.accessible) {
-      window.location.href = `/game/${gameId}`;
+      window.location.href = `/game/${gameKey}`;
     } else {
       if (data.message.includes('Недостаточно алмазов')) {
-        const price = gameId === 'midnight_encounter' ? 50 : 100;
-        if (confirm(`Купить игру за ${price} алмазов?`)) {
-          purchaseGame(gameId);
+        if (confirm(`Купить игру за ${gameKey === 'midnight_encounter' ? 50 : 100} алмазов?`)) {
+          purchaseGame(gameKey);
         }
       } else {
         alert(data.message);
@@ -1315,7 +496,9 @@ async function purchaseGame(gameKey) {
     const data = await response.json();
 
     if (response.ok && data.success) {
+      // Обновить количество алмазов
       document.getElementById('diamondAmount').textContent = data.user.diamonds;
+      // Перейти к игре
       window.location.href = `/game/${gameKey}`;
     } else {
       alert(data.error || 'Ошибка покупки');
@@ -1342,34 +525,5 @@ async function logout() {
     window.location.href = '/login';
   }
 }
-
-/* Diamond Modal Functions */
-function showDiamondModal() {
-  const modal = document.getElementById('diamondModal');
-  const balance = {{ user.diamonds }};
-  document.getElementById('modalDiamondAmount').textContent = balance;
-  modal.classList.add('show');
-  document.body.style.overflow = 'hidden';
-  stopAutoPlay();
-}
-
-function hideDiamondModal() {
-  const modal = document.getElementById('diamondModal');
-  modal.classList.remove('show');
-  document.body.style.overflow = '';
-  startAutoPlay();
-}
-
-document.getElementById('diamondModal')?.addEventListener('click', function(e) {
-  if (e.target === this) {
-    hideDiamondModal();
-  }
-});
-
-document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape') {
-    hideDiamondModal();
-  }
-});
 </script>
 {% endblock %}
