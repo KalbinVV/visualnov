@@ -626,7 +626,7 @@
     line-height: 1.6;
   }
 
-  /* Games Slider - Working Implementation */
+  /* Games Slider - Infinite Loop Carousel */
   .games-slider-container {
     margin-bottom: 40px;
     display: block;
@@ -668,19 +668,14 @@
     user-select: none;
   }
 
-  .slider-btn:hover:not(:disabled) {
+  .slider-btn:hover {
     background: var(--accent);
     border-color: var(--accent);
     transform: scale(1.05);
   }
 
-  .slider-btn:active:not(:disabled) {
+  .slider-btn:active {
     transform: scale(0.95);
-  }
-
-  .slider-btn:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
   }
 
   .games-slider-track {
@@ -695,7 +690,7 @@
   .games-slider {
     display: flex;
     gap: 20px;
-    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     will-change: transform;
     padding: 5px;
   }
@@ -1037,7 +1032,6 @@ function initSlider() {
   updateSliderConfig();
   updateSliderPosition();
   updateSliderDots();
-  updateSliderButtons();
 }
 
 function updateSliderConfig() {
@@ -1059,12 +1053,6 @@ function updateSliderConfig() {
   const card = cards[0];
   const style = window.getComputedStyle(card);
   sliderState.cardWidth = card.offsetWidth + parseInt(style.marginRight || 0) + sliderState.gap;
-
-  // Reset to start if needed
-  const maxIndex = Math.max(0, sliderState.totalCards - sliderState.visibleCards);
-  if (sliderState.currentIndex > maxIndex) {
-    sliderState.currentIndex = maxIndex;
-  }
 }
 
 function updateSliderPosition() {
@@ -1075,11 +1063,10 @@ function updateSliderPosition() {
 
 function updateSliderDots() {
   const dotsContainer = document.getElementById('sliderDots');
-  const totalDots = Math.max(1, sliderState.totalCards - sliderState.visibleCards + 1);
 
   dotsContainer.innerHTML = '';
 
-  for (let i = 0; i < totalDots; i++) {
+  for (let i = 0; i < sliderState.totalCards; i++) {
     const dot = document.createElement('button');
     dot.className = `slider-dot ${i === sliderState.currentIndex ? 'active' : ''}`;
     dot.setAttribute('aria-label', `Перейти к слайду ${i + 1}`);
@@ -1088,35 +1075,27 @@ function updateSliderDots() {
   }
 }
 
-function updateSliderButtons() {
-  const prevBtn = document.getElementById('sliderPrev');
-  const nextBtn = document.getElementById('sliderNext');
-
-  if (!prevBtn || !nextBtn) return;
-
-  const maxIndex = Math.max(0, sliderState.totalCards - sliderState.visibleCards);
-  prevBtn.disabled = sliderState.currentIndex <= 0;
-  nextBtn.disabled = sliderState.currentIndex >= maxIndex;
-}
-
+// 🔄 INFINITE LOOP SLIDER - крутится слева и справа
 function slideGames(direction) {
-  const maxIndex = Math.max(0, sliderState.totalCards - sliderState.visibleCards);
-  const newIndex = sliderState.currentIndex + direction;
+  // direction: 1 = вправо (next), -1 = влево (prev)
 
-  if (newIndex >= 0 && newIndex <= maxIndex) {
-    sliderState.currentIndex = newIndex;
-    updateSliderPosition();
-    updateSliderDots();
-    updateSliderButtons();
+  sliderState.currentIndex += direction;
+
+  // 🔄 Циклическая прокрутка: если вышли за границы — возвращаемся на другую сторону
+  if (sliderState.currentIndex >= sliderState.totalCards) {
+    sliderState.currentIndex = 0;
+  } else if (sliderState.currentIndex < 0) {
+    sliderState.currentIndex = sliderState.totalCards - 1;
   }
+
+  updateSliderPosition();
+  updateSliderDots();
 }
 
 function goToSlide(index) {
-  const maxIndex = Math.max(0, sliderState.totalCards - sliderState.visibleCards);
-  sliderState.currentIndex = Math.max(0, Math.min(index, maxIndex));
+  sliderState.currentIndex = index;
   updateSliderPosition();
   updateSliderDots();
-  updateSliderButtons();
 }
 
 function setupSliderControls() {
@@ -1168,7 +1147,6 @@ function handleResize() {
   updateSliderConfig();
   updateSliderPosition();
   updateSliderDots();
-  updateSliderButtons();
 }
 
 // Auto-play slider (pause on hover)
@@ -1176,17 +1154,9 @@ let autoPlayInterval;
 const sliderContainer = document.querySelector('.games-slider-container');
 
 function startAutoPlay() {
-  if (gamesData.length > sliderState.visibleCards) {
+  if (gamesData.length > 1) {
     autoPlayInterval = setInterval(() => {
-      const maxIndex = Math.max(0, sliderState.totalCards - sliderState.visibleCards);
-      if (sliderState.currentIndex >= maxIndex) {
-        sliderState.currentIndex = 0;
-      } else {
-        sliderState.currentIndex++;
-      }
-      updateSliderPosition();
-      updateSliderDots();
-      updateSliderButtons();
+      slideGames(1); // 🔄 всегда крутим вперёд с циклом
     }, 5000);
   }
 }
