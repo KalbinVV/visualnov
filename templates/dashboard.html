@@ -126,7 +126,7 @@
       <p>Выберите игру и начните свое романтическое приключение</p>
     </div>
 
-    <!-- Games Slider -->
+    <!-- Games Slider - Works on ALL devices -->
     <div class="games-slider-container">
       <div class="slider-header">
         <h3>Доступные истории</h3>
@@ -143,11 +143,6 @@
       </div>
 
       <div class="slider-dots" id="sliderDots"></div>
-    </div>
-
-    <!-- Games Grid (fallback for mobile) -->
-    <div class="games-grid" id="gamesGrid">
-      <!-- Игры будут загружены через JavaScript -->
     </div>
   </div>
 </div>
@@ -225,6 +220,7 @@
     color: var(--text-primary);
     min-height: 100vh;
     overflow-x: hidden;
+    -webkit-tap-highlight-color: transparent;
   }
 
   .dashboard-container {
@@ -626,10 +622,11 @@
     line-height: 1.6;
   }
 
-  /* Games Slider - Infinite Loop Carousel */
+  /* Games Slider - Works on ALL devices including mobile */
   .games-slider-container {
     margin-bottom: 40px;
     display: block;
+    position: relative;
   }
 
   .slider-header {
@@ -666,6 +663,7 @@
     justify-content: center;
     transition: all 0.3s ease;
     user-select: none;
+    -webkit-tap-highlight-color: transparent;
   }
 
   .slider-btn:hover {
@@ -685,6 +683,7 @@
     padding: 10px 4px;
     background: var(--slider-track-bg);
     border: 1px solid var(--card-border);
+    touch-action: pan-y pinch-zoom;
   }
 
   .games-slider {
@@ -709,12 +708,18 @@
     cursor: pointer;
     position: relative;
     overflow: hidden;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
   }
 
   .game-card:hover {
     transform: translateY(-8px);
     border-color: var(--accent);
     box-shadow: 0 12px 40px rgba(99, 102, 241, 0.3);
+  }
+
+  .game-card:active {
+    transform: scale(0.98);
   }
 
   .game-card::before {
@@ -843,11 +848,16 @@
     transition: all 0.3s ease;
     border: none;
     padding: 0;
+    -webkit-tap-highlight-color: transparent;
   }
 
   .slider-dot:hover {
     background: var(--accent-light);
     transform: scale(1.2);
+  }
+
+  .slider-dot:active {
+    transform: scale(0.9);
   }
 
   .slider-dot.active {
@@ -856,12 +866,7 @@
     border-radius: 6px;
   }
 
-  .games-grid {
-    display: none;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 24px;
-  }
-
+  /* Mobile Responsive Styles */
   @media (max-width: 1200px) {
     .game-card {
       width: calc(50% - 10px);
@@ -870,14 +875,6 @@
   }
 
   @media (max-width: 768px) {
-    .games-slider-container {
-      display: none;
-    }
-
-    .games-grid {
-      display: grid;
-    }
-
     .top-bar {
       padding: 0 16px;
       height: 60px;
@@ -895,13 +892,34 @@
       font-size: 26px;
     }
 
+    .welcome-section p {
+      font-size: 16px;
+    }
+
+    /* Mobile slider - 1 card visible */
     .game-card {
+      width: calc(100% - 20px);
+      min-width: calc(100% - 20px);
+      max-width: none;
       padding: 20px;
-      min-width: 100%;
-      width: 100%;
     }
 
     .game-title {
+      font-size: 20px;
+    }
+
+    .game-description {
+      font-size: 14px;
+      min-height: 50px;
+    }
+
+    .slider-header h3 {
+      font-size: 20px;
+    }
+
+    .slider-btn {
+      width: 40px;
+      height: 40px;
       font-size: 20px;
     }
 
@@ -925,6 +943,49 @@
     .get-diamonds-grid {
       grid-template-columns: 1fr;
     }
+
+    .diamond-counter {
+      padding: 6px 14px;
+      font-size: 14px;
+    }
+
+    .diamond-icon {
+      font-size: 18px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .game-card {
+      padding: 16px;
+    }
+
+    .game-title {
+      font-size: 18px;
+    }
+
+    .game-badge {
+      font-size: 11px;
+      padding: 3px 10px;
+    }
+
+    .game-action {
+      padding: 8px 16px;
+      font-size: 13px;
+    }
+
+    .slider-btn {
+      width: 36px;
+      height: 36px;
+    }
+
+    .diamond-counter {
+      padding: 5px 12px;
+      font-size: 13px;
+    }
+
+    .diamond-amount {
+      font-size: 14px;
+    }
   }
 </style>
 
@@ -935,7 +996,8 @@ let sliderState = {
   cardWidth: 0,
   gap: 20,
   visibleCards: 3,
-  totalCards: 0
+  totalCards: 0,
+  isTransitioning: false
 };
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -964,7 +1026,10 @@ async function loadGames() {
     if (data.success && data.games) {
       gamesData = data.games;
       renderGames(data.games);
-      initSlider();
+      // Wait for DOM to render before initializing slider
+      setTimeout(() => {
+        initSlider();
+      }, 100);
     }
   } catch (error) {
     console.error('Ошибка загрузки игр:', error);
@@ -973,21 +1038,16 @@ async function loadGames() {
 
 function renderGames(games) {
   const gamesSlider = document.getElementById('gamesSlider');
-  const gamesGrid = document.getElementById('gamesGrid');
   gamesSlider.innerHTML = '';
-  gamesGrid.innerHTML = '';
 
   if (games.length === 0) {
-    const emptyMessage = '<p style="text-align: center; color: var(--text-secondary); padding: 40px; width: 100%;">Нет доступных игр</p>';
-    gamesSlider.innerHTML = emptyMessage;
-    gamesGrid.innerHTML = emptyMessage;
+    gamesSlider.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 40px; width: 100%;">Нет доступных игр</p>';
     return;
   }
 
   games.forEach(game => {
     const gameCard = createGameCard(game);
-    gamesSlider.appendChild(gameCard.cloneNode(true));
-    gamesGrid.appendChild(gameCard);
+    gamesSlider.appendChild(gameCard);
   });
 
   sliderState.totalCards = games.length;
@@ -1052,7 +1112,13 @@ function updateSliderConfig() {
   // Calculate card width including gap
   const card = cards[0];
   const style = window.getComputedStyle(card);
-  sliderState.cardWidth = card.offsetWidth + parseInt(style.marginRight || 0) + sliderState.gap;
+  const marginRight = parseInt(style.marginRight || 0);
+  sliderState.cardWidth = card.offsetWidth + marginRight + sliderState.gap;
+
+  // Ensure current index is valid
+  if (sliderState.currentIndex >= sliderState.totalCards) {
+    sliderState.currentIndex = 0;
+  }
 }
 
 function updateSliderPosition() {
@@ -1077,11 +1143,12 @@ function updateSliderDots() {
 
 // 🔄 INFINITE LOOP SLIDER - крутится слева и справа
 function slideGames(direction) {
-  // direction: 1 = вправо (next), -1 = влево (prev)
+  if (sliderState.isTransitioning) return;
+  sliderState.isTransitioning = true;
 
   sliderState.currentIndex += direction;
 
-  // 🔄 Циклическая прокрутка: если вышли за границы — возвращаемся на другую сторону
+  // 🔄 Циклическая прокрутка
   if (sliderState.currentIndex >= sliderState.totalCards) {
     sliderState.currentIndex = 0;
   } else if (sliderState.currentIndex < 0) {
@@ -1090,12 +1157,23 @@ function slideGames(direction) {
 
   updateSliderPosition();
   updateSliderDots();
+
+  setTimeout(() => {
+    sliderState.isTransitioning = false;
+  }, 500);
 }
 
 function goToSlide(index) {
+  if (sliderState.isTransitioning) return;
+  sliderState.isTransitioning = true;
+
   sliderState.currentIndex = index;
   updateSliderPosition();
   updateSliderDots();
+
+  setTimeout(() => {
+    sliderState.isTransitioning = false;
+  }, 500);
 }
 
 function setupSliderControls() {
@@ -1113,30 +1191,50 @@ function setupSliderControls() {
     }
   });
 
-  // Touch/swipe support
+  // Touch/swipe support for mobile
   let touchStartX = 0;
   let touchEndX = 0;
+  let touchStartTime = 0;
+  let isDragging = false;
 
   const sliderTrack = document.querySelector('.games-slider-track');
   if (sliderTrack) {
     sliderTrack.addEventListener('touchstart', (e) => {
       touchStartX = e.changedTouches[0].screenX;
+      touchStartTime = Date.now();
+      isDragging = true;
+      sliderTrack.style.transition = 'none';
+    }, { passive: true });
+
+    sliderTrack.addEventListener('touchmove', (e) => {
+      if (!isDragging) return;
+      touchEndX = e.changedTouches[0].screenX;
     }, { passive: true });
 
     sliderTrack.addEventListener('touchend', (e) => {
-      touchEndX = e.changedTouches[0].screenX;
+      if (!isDragging) return;
+      isDragging = false;
+      sliderTrack.style.transition = 'transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
       handleSwipe();
     }, { passive: true });
+
+    sliderTrack.addEventListener('touchcancel', () => {
+      isDragging = false;
+      sliderTrack.style.transition = 'transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+    });
   }
 
   function handleSwipe() {
-    const threshold = 50;
     const diff = touchStartX - touchEndX;
+    const timeDiff = Date.now() - touchStartTime;
+    const threshold = 50;
+    const timeThreshold = 300;
 
-    if (Math.abs(diff) > threshold) {
+    // Check if it's a swipe (not a tap)
+    if (Math.abs(diff) > threshold || timeDiff < timeThreshold) {
       if (diff > 0) {
         slideGames(1); // swipe left -> next
-      } else {
+      } else if (diff < 0) {
         slideGames(-1); // swipe right -> prev
       }
     }
@@ -1149,14 +1247,14 @@ function handleResize() {
   updateSliderDots();
 }
 
-// Auto-play slider (pause on hover)
+// Auto-play slider (pause on hover/touch)
 let autoPlayInterval;
 const sliderContainer = document.querySelector('.games-slider-container');
 
 function startAutoPlay() {
   if (gamesData.length > 1) {
     autoPlayInterval = setInterval(() => {
-      slideGames(1); // 🔄 всегда крутим вперёд с циклом
+      slideGames(1);
     }, 5000);
   }
 }
@@ -1170,6 +1268,8 @@ function stopAutoPlay() {
 if (sliderContainer) {
   sliderContainer.addEventListener('mouseenter', stopAutoPlay);
   sliderContainer.addEventListener('mouseleave', startAutoPlay);
+  sliderContainer.addEventListener('touchstart', stopAutoPlay);
+  sliderContainer.addEventListener('touchend', startAutoPlay);
 }
 
 // Start autoplay after initial load
