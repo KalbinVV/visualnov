@@ -13,11 +13,12 @@
     </div>
     
     <div class="top-right">
-      <div class="diamond-counter">
+      <div class="diamond-counter" onclick="showDiamondModal()">
         <span class="diamond-icon">💎</span>
         <span class="diamond-amount" id="diamondAmount">{{ user.diamonds }}</span>
+        <span class="diamond-info-icon">ℹ️</span>
       </div>
-      
+
       <div class="user-menu">
         <div class="user-avatar">
           {% if user.avatar_url %}
@@ -36,14 +37,115 @@
       </div>
     </div>
   </div>
-  
+
+  <!-- Diamond Info Modal -->
+  <div class="modal-overlay" id="diamondModal">
+    <div class="modal-content diamond-modal">
+      <div class="modal-header">
+        <div class="modal-icon">💎</div>
+        <h2>Алмазы</h2>
+        <button class="modal-close" onclick="hideDiamondModal()">✕</button>
+      </div>
+
+      <div class="modal-balance">
+        <span class="balance-amount" id="modalDiamondAmount">{{ user.diamonds }}</span>
+        <span class="balance-label">алмазов доступно</span>
+      </div>
+
+      <div class="modal-section">
+        <h3>Для чего нужны алмазы</h3>
+        <ul class="feature-list">
+          <li>
+            <span class="feature-icon">🔓</span>
+            <div class="feature-text">
+              <strong>Премиум-выборы</strong>
+              <span>Открывайте эксклюзивные сюжетные линии</span>
+            </div>
+          </li>
+          <li>
+            <span class="feature-icon">🎁</span>
+            <div class="feature-text">
+              <strong>Подарки персонажам</strong>
+              <span>Повышайте отношения с героями</span>
+            </div>
+          </li>
+          <li>
+            <span class="feature-icon">👔</span>
+            <div class="feature-text">
+              <strong>Наряды и аксессуары</strong>
+              <span>Создавайте уникальный образ</span>
+            </div>
+          </li>
+          <li>
+            <span class="feature-icon">⭐</span>
+            <div class="feature-text">
+              <strong>Эксклюзивные концовки</strong>
+              <span>Получайте особые финалы историй</span>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <div class="modal-section">
+        <h3>Как получить алмазы</h3>
+        <div class="get-diamonds-grid">
+          <div class="get-item">
+            <div class="get-icon">📅</div>
+            <div class="get-text">
+              <strong>Ежедневный вход</strong>
+              <span>Получайте бонусы каждый день</span>
+            </div>
+          </div>
+          <div class="get-item">
+            <div class="get-icon">🏆</div>
+            <div class="get-text">
+              <strong>Достижения</strong>
+              <span>Выполняйте задания в играх</span>
+            </div>
+          </div>
+          <div class="get-item">
+            <div class="get-icon">💳</div>
+            <div class="get-text">
+              <strong>Покупка</strong>
+              <span>Приобретайте в магазине</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <p>💡 Алмазы сохраняются между сессиями и не пропадают при загрузке сохранений</p>
+      </div>
+    </div>
+  </div>
+
   <!-- Основной контент -->
   <div class="main-content">
     <div class="welcome-section">
       <h2>Добро пожаловать, {{ user.display_name }}! 🎮</h2>
       <p>Выберите игру и начните свое романтическое приключение</p>
     </div>
-    
+
+    <!-- Games Slider -->
+    <div class="games-slider-container">
+      <div class="slider-header">
+        <h3>Доступные истории</h3>
+        <div class="slider-controls">
+          <button class="slider-btn prev" onclick="slideGames(-1)">‹</button>
+          <button class="slider-btn next" onclick="slideGames(1)">›</button>
+        </div>
+      </div>
+
+      <div class="games-slider-wrapper">
+        <div class="games-slider" id="gamesSlider">
+          <!-- Игры будут загружены через JavaScript -->
+        </div>
+      </div>
+
+      <div class="slider-dots" id="sliderDots"></div>
+    </div>
+
+    <!-- Games Grid (fallback for mobile) -->
     <div class="games-grid" id="gamesGrid">
       <!-- Игры будут загружены через JavaScript -->
     </div>
@@ -57,10 +159,12 @@
     --bg-gradient-end: #1a1a2e;
     --accent: #6366f1;
     --accent-dark: #4f46e5;
+    --accent-light: #818cf8;
     --text-primary: #f1f5f9;
     --text-secondary: #cbd5e1;
     --card-bg: rgba(20, 20, 40, 0.7);
     --card-border: rgba(99, 102, 241, 0.3);
+    --modal-bg: rgba(15, 15, 35, 0.98);
   }
 
   [data-theme="orange"] {
@@ -69,10 +173,12 @@
     --bg-gradient-end: #1a1208;
     --accent: #f97316;
     --accent-dark: #ea580c;
+    --accent-light: #fb923c;
     --text-primary: #fef3c7;
     --text-secondary: #fcd34d;
     --card-bg: rgba(40, 20, 10, 0.7);
     --card-border: rgba(249, 115, 22, 0.3);
+    --modal-bg: rgba(25, 15, 5, 0.98);
   }
 
   [data-theme="purple"] {
@@ -81,10 +187,12 @@
     --bg-gradient-end: #1a082e;
     --accent: #8b5cf6;
     --accent-dark: #7c3aed;
+    --accent-light: #a78bfa;
     --text-primary: #e0e7ff;
     --text-secondary: #cbd5e1;
     --card-bg: rgba(30, 15, 40, 0.7);
     --card-border: rgba(139, 92, 246, 0.3);
+    --modal-bg: rgba(20, 10, 35, 0.98);
   }
 
   [data-theme="dark-green"] {
@@ -93,10 +201,12 @@
     --bg-gradient-end: #122014;
     --accent: #10b981;
     --accent-dark: #059669;
+    --accent-light: #34d399;
     --text-primary: #d1fae5;
     --text-secondary: #6ee7b7;
     --card-bg: rgba(10, 40, 25, 0.7);
     --card-border: rgba(16, 185, 129, 0.3);
+    --modal-bg: rgba(5, 25, 15, 0.98);
   }
 
   * {
@@ -151,17 +261,38 @@
   .diamond-counter {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     background: rgba(255, 215, 0, 0.1);
     border: 2px solid rgba(255, 215, 0, 0.3);
     border-radius: 12px;
-    padding: 6px 16px;
+    padding: 8px 18px;
     font-weight: 600;
     font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+  }
+
+  .diamond-counter:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(255, 215, 0, 0.3);
+    border-color: rgba(255, 215, 0, 0.5);
   }
 
   .diamond-icon {
     font-size: 20px;
+    animation: sparkle 2s infinite;
+  }
+
+  @keyframes sparkle {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.8; transform: scale(1.1); }
+  }
+
+  .diamond-info-icon {
+    font-size: 14px;
+    opacity: 0.7;
+    margin-left: 4px;
   }
 
   .user-menu {
@@ -180,6 +311,13 @@
     font-weight: 700;
     font-size: 18px;
     overflow: hidden;
+    border: 2px solid var(--accent-light);
+    transition: all 0.3s ease;
+  }
+
+  .user-avatar:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
   }
 
   .user-avatar img {
@@ -235,6 +373,10 @@
     font-size: 32px;
     font-weight: 700;
     margin-bottom: 12px;
+    background: linear-gradient(90deg, var(--text-primary), var(--accent-light));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 
   .welcome-section p {
@@ -243,13 +385,309 @@
     opacity: 0.9;
   }
 
-  .games-grid {
+  /* Diamond Modal Styles */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(8px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .modal-overlay.show {
+    display: flex;
+    opacity: 1;
+  }
+
+  .modal-content {
+    background: var(--modal-bg);
+    border: 2px solid var(--card-border);
+    border-radius: 24px;
+    max-width: 600px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 25px 80px rgba(0, 0, 0, 0.6),
+                0 0 40px rgba(99, 102, 241, 0.2);
+    transform: scale(0.9) translateY(20px);
+    transition: transform 0.3s ease;
+  }
+
+  .modal-overlay.show .modal-content {
+    transform: scale(1) translateY(0);
+  }
+
+  .modal-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 24px 28px;
+    border-bottom: 1px solid var(--card-border);
+    position: sticky;
+    top: 0;
+    background: var(--modal-bg);
+    z-index: 10;
+  }
+
+  .modal-icon {
+    font-size: 32px;
+    animation: float 3s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+  }
+
+  .modal-header h2 {
+    font-size: 24px;
+    font-weight: 700;
+    flex: 1;
+    background: linear-gradient(90deg, var(--accent), var(--accent-light));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .modal-close {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--card-border);
+    color: var(--text-secondary);
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+  }
+
+  .modal-close:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+    transform: rotate(90deg);
+  }
+
+  .modal-balance {
+    text-align: center;
+    padding: 32px 28px;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(99, 102, 241, 0.05));
+    border-bottom: 1px solid var(--card-border);
+  }
+
+  .balance-amount {
+    display: block;
+    font-size: 48px;
+    font-weight: 800;
+    background: linear-gradient(90deg, #ffd700, #ffed4e);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 8px;
+    text-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
+  }
+
+  .balance-label {
+    color: var(--text-secondary);
+    font-size: 16px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .modal-section {
+    padding: 28px;
+  }
+
+  .modal-section h3 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: var(--accent-light);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .feature-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .feature-list li {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 12px;
+    border: 1px solid var(--card-border);
+    transition: all 0.3s ease;
+  }
+
+  .feature-list li:hover {
+    background: rgba(255, 255, 255, 0.06);
+    transform: translateX(5px);
+    border-color: var(--accent);
+  }
+
+  .feature-icon {
+    font-size: 24px;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(99, 102, 241, 0.1);
+    border-radius: 12px;
+    border: 1px solid var(--card-border);
+  }
+
+  .feature-text {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .feature-text strong {
+    color: var(--text-primary);
+    font-size: 15px;
+  }
+
+  .feature-text span {
+    color: var(--text-secondary);
+    font-size: 13px;
+  }
+
+  .get-diamonds-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 16px;
+  }
+
+  .get-item {
+    text-align: center;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    transition: all 0.3s ease;
+  }
+
+  .get-item:hover {
+    transform: translateY(-5px);
+    background: rgba(255, 255, 255, 0.06);
+    border-color: var(--accent);
+    box-shadow: 0 10px 30px rgba(99, 102, 241, 0.2);
+  }
+
+  .get-icon {
+    font-size: 32px;
+    margin-bottom: 12px;
+  }
+
+  .get-text strong {
+    display: block;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+    font-size: 14px;
+  }
+
+  .get-text span {
+    color: var(--text-secondary);
+    font-size: 12px;
+  }
+
+  .modal-footer {
+    padding: 20px 28px;
+    border-top: 1px solid var(--card-border);
+    text-align: center;
+  }
+
+  .modal-footer p {
+    color: var(--text-secondary);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  /* Games Slider */
+  .games-slider-container {
+    margin-bottom: 40px;
+    display: block;
+  }
+
+  .slider-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+
+  .slider-header h3 {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+
+  .slider-controls {
+    display: flex;
+    gap: 12px;
+  }
+
+  .slider-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    color: var(--text-primary);
+    font-size: 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+  }
+
+  .slider-btn:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+    transform: scale(1.05);
+  }
+
+  .slider-btn:active {
+    transform: scale(0.95);
+  }
+
+  .games-slider-wrapper {
+    position: relative;
+    overflow: hidden;
+    border-radius: 20px;
+    padding: 10px 0;
+  }
+
+  .games-slider {
+    display: flex;
     gap: 24px;
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 10px;
   }
 
   .game-card {
+    flex: 0 0 calc(33.333% - 16px);
+    min-width: 320px;
     background: var(--card-bg);
     backdrop-filter: blur(15px);
     border: 2px solid var(--card-border);
@@ -262,7 +700,7 @@
   }
 
   .game-card:hover {
-    transform: translateY(-8px);
+    transform: translateY(-8px) scale(1.02);
     border-color: var(--accent);
     box-shadow: 0 12px 40px rgba(99, 102, 241, 0.3);
   }
@@ -292,14 +730,17 @@
     font-size: 22px;
     font-weight: 700;
     margin-bottom: 8px;
+    line-height: 1.3;
   }
 
   .game-badge {
+    display: inline-block;
     padding: 4px 12px;
     border-radius: 12px;
     font-size: 12px;
     font-weight: 600;
     text-transform: uppercase;
+    margin-bottom: 12px;
   }
 
   .game-badge.premium {
@@ -352,6 +793,7 @@
 
   .game-action:hover {
     transform: scale(1.05);
+    box-shadow: 0 5px 20px rgba(99, 102, 241, 0.4);
   }
 
   .game-action.secondary {
@@ -372,9 +814,52 @@
     font-weight: 600;
   }
 
+  .slider-dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 20px;
+  }
+
+  .slider-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--card-border);
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .slider-dot.active {
+    background: var(--accent);
+    width: 30px;
+    border-radius: 5px;
+  }
+
+  .slider-dot:hover {
+    background: var(--accent-light);
+  }
+
+  .games-grid {
+    display: none;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 24px;
+  }
+
+  @media (max-width: 1024px) {
+    .game-card {
+      flex: 0 0 calc(50% - 12px);
+      min-width: 280px;
+    }
+  }
+
   @media (max-width: 768px) {
+    .games-slider-container {
+      display: none;
+    }
+
     .games-grid {
-      grid-template-columns: 1fr;
+      display: grid;
     }
 
     .top-bar {
@@ -396,15 +881,40 @@
 
     .game-card {
       padding: 20px;
+      min-width: 100%;
     }
 
     .game-title {
       font-size: 20px;
     }
+
+    .modal-content {
+      margin: 10px;
+      max-height: 95vh;
+    }
+
+    .modal-header {
+      padding: 20px;
+    }
+
+    .modal-section {
+      padding: 20px;
+    }
+
+    .balance-amount {
+      font-size: 36px;
+    }
+
+    .get-diamonds-grid {
+      grid-template-columns: 1fr;
+    }
   }
 </style>
 
 <script>
+let currentSlide = 0;
+let gamesData = [];
+
 document.addEventListener('DOMContentLoaded', function() {
   loadGames();
 });
@@ -413,9 +923,11 @@ async function loadGames() {
   try {
     const response = await fetch('/api/games');
     const data = await response.json();
-    
+
     if (data.success && data.games) {
+      gamesData = data.games;
       renderGames(data.games);
+      updateSliderDots();
     }
   } catch (error) {
     console.error('Ошибка загрузки игр:', error);
@@ -423,39 +935,120 @@ async function loadGames() {
 }
 
 function renderGames(games) {
+  const gamesSlider = document.getElementById('gamesSlider');
   const gamesGrid = document.getElementById('gamesGrid');
+  gamesSlider.innerHTML = '';
   gamesGrid.innerHTML = '';
-  
+
   if (games.length === 0) {
-    gamesGrid.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">Нет доступных игр</p>';
+    const emptyMessage = '<p style="text-align: center; color: var(--text-secondary); padding: 40px;">Нет доступных игр</p>';
+    gamesSlider.innerHTML = emptyMessage;
+    gamesGrid.innerHTML = emptyMessage;
     return;
   }
-  
+
   games.forEach(game => {
-    const gameCard = document.createElement('div');
-    gameCard.className = `game-card ${game.premium ? 'premium' : ''}`;
-    gameCard.onclick = () => handleGameClick(game);
-    
-    const hasSave = game.saves && game.saves.length > 0;
-    const actionText = hasSave ? 'Продолжить' : (game.premium ? 'Купить' : 'Начать');
-    
-    gameCard.innerHTML = `
-      <div class="game-card-header">
-        <div>
-          <div class="game-title">${game.title}</div>
-          <div class="game-badge ${game.premium ? 'premium' : 'free'}">
-            ${game.premium ? 'Премиум' : 'Бесплатно'}
-          </div>
-        </div>
-      </div>
-      <div class="game-description">${game.description}</div>
-      <div class="game-meta">
-      </div>
-    `;
-    
+    const gameCard = createGameCard(game);
+    gamesSlider.appendChild(gameCard.cloneNode(true));
     gamesGrid.appendChild(gameCard);
   });
 }
+
+function createGameCard(game) {
+  const gameCard = document.createElement('div');
+  gameCard.className = `game-card ${game.premium ? 'premium' : ''}`;
+  gameCard.onclick = () => handleGameClick(game);
+
+  const hasSave = game.saves && game.saves.length > 0;
+  const actionText = hasSave ? 'Продолжить' : (game.premium ? 'Купить' : 'Начать');
+  const actionClass = hasSave ? '' : 'secondary';
+
+  gameCard.innerHTML = `
+    <div class="game-card-header">
+      <div>
+        <div class="game-title">${game.title}</div>
+        <div class="game-badge ${game.premium ? 'premium' : 'free'}">
+          ${game.premium ? 'Премиум' : 'Бесплатно'}
+        </div>
+      </div>
+    </div>
+    <div class="game-description">${game.description}</div>
+    <div class="game-meta">
+      <div class="game-chapters">
+        <span>📖</span>
+        <span>${game.chapters || 0} глав</span>
+      </div>
+      <button class="game-action ${actionClass}">${actionText}</button>
+    </div>
+    ${hasSave ? `<div class="game-saves">Сохранений: <span>${game.saves.length}</span></div>` : ''}
+  `;
+
+  return gameCard;
+}
+
+function slideGames(direction) {
+  const slider = document.getElementById('gamesSlider');
+  const cards = slider.querySelectorAll('.game-card');
+  const totalSlides = Math.ceil(cards.length / getCardsPerSlide());
+
+  currentSlide += direction;
+
+  if (currentSlide < 0) currentSlide = totalSlides - 1;
+  if (currentSlide >= totalSlides) currentSlide = 0;
+
+  const cardWidth = cards[0].offsetWidth + 24; // width + gap
+  const offset = -(currentSlide * cardWidth * getCardsPerSlide());
+
+  slider.style.transform = `translateX(${offset}px)`;
+  updateSliderDots();
+}
+
+function getCardsPerSlide() {
+  if (window.innerWidth <= 768) return 1;
+  if (window.innerWidth <= 1024) return 2;
+  return 3;
+}
+
+function updateSliderDots() {
+  const dotsContainer = document.getElementById('sliderDots');
+  const cards = document.querySelectorAll('#gamesSlider .game-card');
+  const totalDots = Math.ceil(cards.length / getCardsPerSlide());
+
+  dotsContainer.innerHTML = '';
+
+  for (let i = 0; i < totalDots; i++) {
+    const dot = document.createElement('div');
+    dot.className = `slider-dot ${i === currentSlide ? 'active' : ''}`;
+    dot.onclick = () => goToSlide(i);
+    dotsContainer.appendChild(dot);
+  }
+}
+
+function goToSlide(index) {
+  currentSlide = index;
+  const slider = document.getElementById('gamesSlider');
+  const cards = slider.querySelectorAll('.game-card');
+  const cardWidth = cards[0].offsetWidth + 24;
+  const offset = -(currentSlide * cardWidth * getCardsPerSlide());
+
+  slider.style.transform = `translateX(${offset}px)`;
+  updateSliderDots();
+}
+
+// Auto-play slider
+setInterval(() => {
+  if (gamesData.length > 0) {
+    slideGames(1);
+  }
+}, 6000);
+
+// Handle window resize
+window.addEventListener('resize', () => {
+  currentSlide = 0;
+  const slider = document.getElementById('gamesSlider');
+  slider.style.transform = 'translateX(0)';
+  updateSliderDots();
+});
 
 function handleGameClick(game) {
   if (game.premium && (!game.saves || game.saves.length === 0)) {
@@ -469,12 +1062,14 @@ async function checkGameAccess(gameId) {
   try {
     const response = await fetch(`/api/games/${gameId}/access`);
     const data = await response.json();
-    
+
     if (data.accessible) {
-      window.location.href = `/game/${gameKey}`;
+      window.location.href = `/game/${gameId}`;
     } else {
       if (data.message.includes('Недостаточно алмазов')) {
-        if (confirm(`Купить игру за ${gameKey === 'midnight_encounter' ? 50 : 100} алмазов?`)) {
+        const gameKey = gameId; // Assuming gameId is the key
+        const price = gameKey === 'midnight_encounter' ? 50 : 100;
+        if (confirm(`Купить игру за ${price} алмазов?`)) {
           purchaseGame(gameKey);
         }
       } else {
@@ -492,9 +1087,9 @@ async function purchaseGame(gameKey) {
     const response = await fetch(`/api/games/${gameKey}/purchase`, {
       method: 'POST'
     });
-    
+
     const data = await response.json();
-    
+
     if (response.ok && data.success) {
       // Обновить количество алмазов
       document.getElementById('diamondAmount').textContent = data.user.diamonds;
@@ -513,17 +1108,46 @@ async function logout() {
   if (!confirm('Вы уверены, что хотите выйти?')) {
     return;
   }
-  
+
   try {
     await fetch('/api/logout', {
       method: 'POST'
     });
-    
+
     window.location.href = '/login';
   } catch (error) {
     console.error('Ошибка выхода:', error);
     window.location.href = '/login';
   }
 }
+
+/* Diamond Modal Functions */
+function showDiamondModal() {
+  const modal = document.getElementById('diamondModal');
+  const balance = {{ user.diamonds }};
+  document.getElementById('modalDiamondAmount').textContent = balance;
+  modal.classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+
+function hideDiamondModal() {
+  const modal = document.getElementById('diamondModal');
+  modal.classList.remove('show');
+  document.body.style.overflow = '';
+}
+
+// Close modal on click outside
+document.getElementById('diamondModal').addEventListener('click', function(e) {
+  if (e.target === this) {
+    hideDiamondModal();
+  }
+});
+
+// Close modal on Escape key
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    hideDiamondModal();
+  }
+});
 </script>
 {% endblock %}
