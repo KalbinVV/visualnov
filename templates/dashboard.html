@@ -131,12 +131,12 @@
       <div class="slider-header">
         <h3>Доступные истории</h3>
         <div class="slider-controls">
-          <button class="slider-btn prev" onclick="slideGames(-1)">‹</button>
-          <button class="slider-btn next" onclick="slideGames(1)">›</button>
+          <button class="slider-btn prev" id="sliderPrev" aria-label="Назад">‹</button>
+          <button class="slider-btn next" id="sliderNext" aria-label="Вперёд">›</button>
         </div>
       </div>
 
-      <div class="games-slider-wrapper">
+      <div class="games-slider-track">
         <div class="games-slider" id="gamesSlider">
           <!-- Игры будут загружены через JavaScript -->
         </div>
@@ -165,6 +165,7 @@
     --card-bg: rgba(20, 20, 40, 0.7);
     --card-border: rgba(99, 102, 241, 0.3);
     --modal-bg: rgba(15, 15, 35, 0.98);
+    --slider-track-bg: rgba(15, 15, 35, 0.5);
   }
 
   [data-theme="orange"] {
@@ -179,6 +180,7 @@
     --card-bg: rgba(40, 20, 10, 0.7);
     --card-border: rgba(249, 115, 22, 0.3);
     --modal-bg: rgba(25, 15, 5, 0.98);
+    --slider-track-bg: rgba(25, 15, 5, 0.5);
   }
 
   [data-theme="purple"] {
@@ -193,6 +195,7 @@
     --card-bg: rgba(30, 15, 40, 0.7);
     --card-border: rgba(139, 92, 246, 0.3);
     --modal-bg: rgba(20, 10, 35, 0.98);
+    --slider-track-bg: rgba(20, 10, 35, 0.5);
   }
 
   [data-theme="dark-green"] {
@@ -207,6 +210,7 @@
     --card-bg: rgba(10, 40, 25, 0.7);
     --card-border: rgba(16, 185, 129, 0.3);
     --modal-bg: rgba(5, 25, 15, 0.98);
+    --slider-track-bg: rgba(5, 25, 15, 0.5);
   }
 
   * {
@@ -622,7 +626,7 @@
     line-height: 1.6;
   }
 
-  /* Games Slider */
+  /* Games Slider - Working Implementation */
   .games-slider-container {
     margin-bottom: 40px;
     display: block;
@@ -633,6 +637,7 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 24px;
+    padding: 0 8px;
   }
 
   .slider-header h3 {
@@ -654,40 +659,52 @@
     border: 1px solid var(--card-border);
     color: var(--text-primary);
     font-size: 24px;
+    font-weight: 300;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.3s ease;
+    user-select: none;
   }
 
-  .slider-btn:hover {
+  .slider-btn:hover:not(:disabled) {
     background: var(--accent);
     border-color: var(--accent);
     transform: scale(1.05);
   }
 
-  .slider-btn:active {
+  .slider-btn:active:not(:disabled) {
     transform: scale(0.95);
   }
 
-  .games-slider-wrapper {
+  .slider-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .games-slider-track {
     position: relative;
     overflow: hidden;
     border-radius: 20px;
-    padding: 10px 0;
+    padding: 10px 4px;
+    background: var(--slider-track-bg);
+    border: 1px solid var(--card-border);
   }
 
   .games-slider {
     display: flex;
-    gap: 24px;
-    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-    padding: 10px;
+    gap: 20px;
+    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    will-change: transform;
+    padding: 5px;
   }
 
   .game-card {
-    flex: 0 0 calc(33.333% - 16px);
-    min-width: 320px;
+    flex: 0 0 auto;
+    width: calc(33.333% - 14px);
+    min-width: 280px;
+    max-width: 400px;
     background: var(--card-bg);
     backdrop-filter: blur(15px);
     border: 2px solid var(--card-border);
@@ -700,7 +717,7 @@
   }
 
   .game-card:hover {
-    transform: translateY(-8px) scale(1.02);
+    transform: translateY(-8px);
     border-color: var(--accent);
     box-shadow: 0 12px 40px rgba(99, 102, 241, 0.3);
   }
@@ -817,8 +834,9 @@
   .slider-dots {
     display: flex;
     justify-content: center;
-    gap: 8px;
+    gap: 10px;
     margin-top: 20px;
+    padding: 0 8px;
   }
 
   .slider-dot {
@@ -828,16 +846,19 @@
     background: var(--card-border);
     cursor: pointer;
     transition: all 0.3s ease;
-  }
-
-  .slider-dot.active {
-    background: var(--accent);
-    width: 30px;
-    border-radius: 5px;
+    border: none;
+    padding: 0;
   }
 
   .slider-dot:hover {
     background: var(--accent-light);
+    transform: scale(1.2);
+  }
+
+  .slider-dot.active {
+    background: var(--accent);
+    width: 28px;
+    border-radius: 6px;
   }
 
   .games-grid {
@@ -846,10 +867,10 @@
     gap: 24px;
   }
 
-  @media (max-width: 1024px) {
+  @media (max-width: 1200px) {
     .game-card {
-      flex: 0 0 calc(50% - 12px);
-      min-width: 280px;
+      width: calc(50% - 10px);
+      min-width: 260px;
     }
   }
 
@@ -882,6 +903,7 @@
     .game-card {
       padding: 20px;
       min-width: 100%;
+      width: 100%;
     }
 
     .game-title {
@@ -912,12 +934,32 @@
 </style>
 
 <script>
-let currentSlide = 0;
 let gamesData = [];
+let sliderState = {
+  currentIndex: 0,
+  cardWidth: 0,
+  gap: 20,
+  visibleCards: 3,
+  totalCards: 0
+};
 
 document.addEventListener('DOMContentLoaded', function() {
   loadGames();
+  setupSliderControls();
+  window.addEventListener('resize', debounce(handleResize, 150));
 });
+
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
 
 async function loadGames() {
   try {
@@ -927,7 +969,7 @@ async function loadGames() {
     if (data.success && data.games) {
       gamesData = data.games;
       renderGames(data.games);
-      updateSliderDots();
+      initSlider();
     }
   } catch (error) {
     console.error('Ошибка загрузки игр:', error);
@@ -941,7 +983,7 @@ function renderGames(games) {
   gamesGrid.innerHTML = '';
 
   if (games.length === 0) {
-    const emptyMessage = '<p style="text-align: center; color: var(--text-secondary); padding: 40px;">Нет доступных игр</p>';
+    const emptyMessage = '<p style="text-align: center; color: var(--text-secondary); padding: 40px; width: 100%;">Нет доступных игр</p>';
     gamesSlider.innerHTML = emptyMessage;
     gamesGrid.innerHTML = emptyMessage;
     return;
@@ -952,12 +994,15 @@ function renderGames(games) {
     gamesSlider.appendChild(gameCard.cloneNode(true));
     gamesGrid.appendChild(gameCard);
   });
+
+  sliderState.totalCards = games.length;
 }
 
 function createGameCard(game) {
   const gameCard = document.createElement('div');
   gameCard.className = `game-card ${game.premium ? 'premium' : ''}`;
   gameCard.onclick = () => handleGameClick(game);
+  gameCard.dataset.gameId = game.id;
 
   const hasSave = game.saves && game.saves.length > 0;
   const actionText = hasSave ? 'Продолжить' : (game.premium ? 'Купить' : 'Начать');
@@ -978,7 +1023,7 @@ function createGameCard(game) {
         <span>📖</span>
         <span>${game.chapters || 0} глав</span>
       </div>
-      <button class="game-action ${actionClass}">${actionText}</button>
+      <button class="game-action ${actionClass}" onclick="event.stopPropagation(); handleGameClick(${JSON.stringify(game).replace(/"/g, '&quot;')})">${actionText}</button>
     </div>
     ${hasSave ? `<div class="game-saves">Сохранений: <span>${game.saves.length}</span></div>` : ''}
   `;
@@ -986,69 +1031,179 @@ function createGameCard(game) {
   return gameCard;
 }
 
-function slideGames(direction) {
-  const slider = document.getElementById('gamesSlider');
-  const cards = slider.querySelectorAll('.game-card');
-  const totalSlides = Math.ceil(cards.length / getCardsPerSlide());
+function initSlider() {
+  if (gamesData.length === 0) return;
 
-  currentSlide += direction;
-
-  if (currentSlide < 0) currentSlide = totalSlides - 1;
-  if (currentSlide >= totalSlides) currentSlide = 0;
-
-  const cardWidth = cards[0].offsetWidth + 24; // width + gap
-  const offset = -(currentSlide * cardWidth * getCardsPerSlide());
-
-  slider.style.transform = `translateX(${offset}px)`;
+  updateSliderConfig();
+  updateSliderPosition();
   updateSliderDots();
+  updateSliderButtons();
 }
 
-function getCardsPerSlide() {
-  if (window.innerWidth <= 768) return 1;
-  if (window.innerWidth <= 1024) return 2;
-  return 3;
+function updateSliderConfig() {
+  const slider = document.getElementById('gamesSlider');
+  const cards = slider.querySelectorAll('.game-card');
+
+  if (cards.length === 0) return;
+
+  // Determine visible cards based on screen width
+  if (window.innerWidth <= 768) {
+    sliderState.visibleCards = 1;
+  } else if (window.innerWidth <= 1200) {
+    sliderState.visibleCards = 2;
+  } else {
+    sliderState.visibleCards = 3;
+  }
+
+  // Calculate card width including gap
+  const card = cards[0];
+  const style = window.getComputedStyle(card);
+  sliderState.cardWidth = card.offsetWidth + parseInt(style.marginRight || 0) + sliderState.gap;
+
+  // Reset to start if needed
+  const maxIndex = Math.max(0, sliderState.totalCards - sliderState.visibleCards);
+  if (sliderState.currentIndex > maxIndex) {
+    sliderState.currentIndex = maxIndex;
+  }
+}
+
+function updateSliderPosition() {
+  const slider = document.getElementById('gamesSlider');
+  const offset = -(sliderState.currentIndex * sliderState.cardWidth);
+  slider.style.transform = `translateX(${offset}px)`;
 }
 
 function updateSliderDots() {
   const dotsContainer = document.getElementById('sliderDots');
-  const cards = document.querySelectorAll('#gamesSlider .game-card');
-  const totalDots = Math.ceil(cards.length / getCardsPerSlide());
+  const totalDots = Math.max(1, sliderState.totalCards - sliderState.visibleCards + 1);
 
   dotsContainer.innerHTML = '';
 
   for (let i = 0; i < totalDots; i++) {
-    const dot = document.createElement('div');
-    dot.className = `slider-dot ${i === currentSlide ? 'active' : ''}`;
+    const dot = document.createElement('button');
+    dot.className = `slider-dot ${i === sliderState.currentIndex ? 'active' : ''}`;
+    dot.setAttribute('aria-label', `Перейти к слайду ${i + 1}`);
     dot.onclick = () => goToSlide(i);
     dotsContainer.appendChild(dot);
   }
 }
 
-function goToSlide(index) {
-  currentSlide = index;
-  const slider = document.getElementById('gamesSlider');
-  const cards = slider.querySelectorAll('.game-card');
-  const cardWidth = cards[0].offsetWidth + 24;
-  const offset = -(currentSlide * cardWidth * getCardsPerSlide());
+function updateSliderButtons() {
+  const prevBtn = document.getElementById('sliderPrev');
+  const nextBtn = document.getElementById('sliderNext');
 
-  slider.style.transform = `translateX(${offset}px)`;
-  updateSliderDots();
+  if (!prevBtn || !nextBtn) return;
+
+  const maxIndex = Math.max(0, sliderState.totalCards - sliderState.visibleCards);
+  prevBtn.disabled = sliderState.currentIndex <= 0;
+  nextBtn.disabled = sliderState.currentIndex >= maxIndex;
 }
 
-// Auto-play slider
-setInterval(() => {
-  if (gamesData.length > 0) {
-    slideGames(1);
-  }
-}, 6000);
+function slideGames(direction) {
+  const maxIndex = Math.max(0, sliderState.totalCards - sliderState.visibleCards);
+  const newIndex = sliderState.currentIndex + direction;
 
-// Handle window resize
-window.addEventListener('resize', () => {
-  currentSlide = 0;
-  const slider = document.getElementById('gamesSlider');
-  slider.style.transform = 'translateX(0)';
+  if (newIndex >= 0 && newIndex <= maxIndex) {
+    sliderState.currentIndex = newIndex;
+    updateSliderPosition();
+    updateSliderDots();
+    updateSliderButtons();
+  }
+}
+
+function goToSlide(index) {
+  const maxIndex = Math.max(0, sliderState.totalCards - sliderState.visibleCards);
+  sliderState.currentIndex = Math.max(0, Math.min(index, maxIndex));
+  updateSliderPosition();
   updateSliderDots();
-});
+  updateSliderButtons();
+}
+
+function setupSliderControls() {
+  document.getElementById('sliderPrev')?.addEventListener('click', () => slideGames(-1));
+  document.getElementById('sliderNext')?.addEventListener('click', () => slideGames(1));
+
+  // Keyboard navigation
+  document.addEventListener('keydown', (e) => {
+    if (document.getElementById('diamondModal')?.classList.contains('show')) return;
+
+    if (e.key === 'ArrowLeft') {
+      slideGames(-1);
+    } else if (e.key === 'ArrowRight') {
+      slideGames(1);
+    }
+  });
+
+  // Touch/swipe support
+  let touchStartX = 0;
+  let touchEndX = 0;
+
+  const sliderTrack = document.querySelector('.games-slider-track');
+  if (sliderTrack) {
+    sliderTrack.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+
+    sliderTrack.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      handleSwipe();
+    }, { passive: true });
+  }
+
+  function handleSwipe() {
+    const threshold = 50;
+    const diff = touchStartX - touchEndX;
+
+    if (Math.abs(diff) > threshold) {
+      if (diff > 0) {
+        slideGames(1); // swipe left -> next
+      } else {
+        slideGames(-1); // swipe right -> prev
+      }
+    }
+  }
+}
+
+function handleResize() {
+  updateSliderConfig();
+  updateSliderPosition();
+  updateSliderDots();
+  updateSliderButtons();
+}
+
+// Auto-play slider (pause on hover)
+let autoPlayInterval;
+const sliderContainer = document.querySelector('.games-slider-container');
+
+function startAutoPlay() {
+  if (gamesData.length > sliderState.visibleCards) {
+    autoPlayInterval = setInterval(() => {
+      const maxIndex = Math.max(0, sliderState.totalCards - sliderState.visibleCards);
+      if (sliderState.currentIndex >= maxIndex) {
+        sliderState.currentIndex = 0;
+      } else {
+        sliderState.currentIndex++;
+      }
+      updateSliderPosition();
+      updateSliderDots();
+      updateSliderButtons();
+    }, 5000);
+  }
+}
+
+function stopAutoPlay() {
+  if (autoPlayInterval) {
+    clearInterval(autoPlayInterval);
+  }
+}
+
+if (sliderContainer) {
+  sliderContainer.addEventListener('mouseenter', stopAutoPlay);
+  sliderContainer.addEventListener('mouseleave', startAutoPlay);
+}
+
+// Start autoplay after initial load
+setTimeout(startAutoPlay, 2000);
 
 function handleGameClick(game) {
   if (game.premium && (!game.saves || game.saves.length === 0)) {
@@ -1067,10 +1222,9 @@ async function checkGameAccess(gameId) {
       window.location.href = `/game/${gameId}`;
     } else {
       if (data.message.includes('Недостаточно алмазов')) {
-        const gameKey = gameId; // Assuming gameId is the key
-        const price = gameKey === 'midnight_encounter' ? 50 : 100;
+        const price = gameId === 'midnight_encounter' ? 50 : 100;
         if (confirm(`Купить игру за ${price} алмазов?`)) {
-          purchaseGame(gameKey);
+          purchaseGame(gameId);
         }
       } else {
         alert(data.message);
@@ -1091,9 +1245,7 @@ async function purchaseGame(gameKey) {
     const data = await response.json();
 
     if (response.ok && data.success) {
-      // Обновить количество алмазов
       document.getElementById('diamondAmount').textContent = data.user.diamonds;
-      // Перейти к игре
       window.location.href = `/game/${gameKey}`;
     } else {
       alert(data.error || 'Ошибка покупки');
@@ -1128,22 +1280,22 @@ function showDiamondModal() {
   document.getElementById('modalDiamondAmount').textContent = balance;
   modal.classList.add('show');
   document.body.style.overflow = 'hidden';
+  stopAutoPlay();
 }
 
 function hideDiamondModal() {
   const modal = document.getElementById('diamondModal');
   modal.classList.remove('show');
   document.body.style.overflow = '';
+  startAutoPlay();
 }
 
-// Close modal on click outside
-document.getElementById('diamondModal').addEventListener('click', function(e) {
+document.getElementById('diamondModal')?.addEventListener('click', function(e) {
   if (e.target === this) {
     hideDiamondModal();
   }
 });
 
-// Close modal on Escape key
 document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape') {
     hideDiamondModal();
