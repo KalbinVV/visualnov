@@ -980,6 +980,11 @@
       </div>
 
       <div class="form-group">
+        <label for="visibleOnlyForTeam">Доступно только для команды</label>
+        <input type="number" id="visibleOnlyForTeam" class="form-control">
+      </div>
+
+      <div class="form-group">
         <label for="sceneType">Тип сцены</label>
         <select name="sceneType" id="sceneType">
           <option value="simple">Обычная сцена</option>
@@ -1818,6 +1823,7 @@ async function saveChoice(e) {
   const isLegendChoice = document.getElementById('legendChoice').checked || false;
   const legendTitle = document.getElementById('legendTitle').value || null;
   const legendIcon = document.getElementById('legendBackground').value || null;
+  const visibleOnlyForTeam = document.getElementById('visibleOnlyForTeam').value || null;
 
 
   if (!choiceText) {
@@ -1847,7 +1853,8 @@ async function saveChoice(e) {
           required_teasing_level: requiredTeasingLevel,
           is_legend_choice: isLegendChoice,
           legend_title: legendTitle,
-          legend_icon: legendIcon
+          legend_icon: legendIcon,
+          visible_only_for_team: visibleOnlyForTeam
         })
       });
     } else {
@@ -1871,7 +1878,8 @@ async function saveChoice(e) {
           required_teasing_level: requiredTeasingLevel,
           is_legend_choice: isLegendChoice,
           legend_title: legendTitle,
-          legend_icon: legendIcon
+          legend_icon: legendIcon,
+          visible_only_for_team: visibleOnlyForTeam
         })
       });
     }
@@ -1919,6 +1927,7 @@ async function editChoice(choiceId) {
         document.getElementById('legendChoice').checked = data.choice.is_legend_choice || false;
         document.getElementById('legendTitle').value = data.choice.legend_title || '';
         document.getElementById('legendBackground').value = data.choice.legend_icon || '';
+        document.getElementById('visibleOnlyForTeam').value = data.choice.visible_only_for_team || '';
       }, 100);
     } else {
       alert(data.error || 'Ошибка загрузки варианта');

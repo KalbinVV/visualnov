@@ -1063,7 +1063,8 @@ def api_get_choices(scene_id):
                          'required_teasing_level': choice.required_teasing_level,
                          'is_legend_choice': choice.is_legend_choice,
                          'legend_title': choice.legend_title,
-                         'legend_icon': choice.legend_icon} for choice in choices]
+                         'legend_icon': choice.legend_icon,
+                         'visible_only_for_team': choice.visible_only_for_team} for choice in choices]
         }), 200
 
     except Exception as e:
@@ -1095,7 +1096,8 @@ def api_create_choice():
             required_teasing_level=data.get('required_teasing_level'),
             is_legend_choice=data.get('isLegendChoice'),
             legend_title=data.get('legendTitle'),
-            legend_icon=data.get('legend_icon')
+            legend_icon=data.get('legend_icon'),
+            visible_only_for_team=data.get('visible_only_for_team')
         )
 
         if not choice_id:
