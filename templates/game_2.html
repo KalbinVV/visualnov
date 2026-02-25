@@ -51,11 +51,6 @@
     <span class="currency-value" id="diamondAmount">{{ user.diamonds }}</span>
   </div>
 
-  <!-- Контейнер выборов (Размещен ВЫШЕ диалога) -->
-  <div class="choices-container" id="choicesContainer">
-    <!-- Кнопки генерируются JS -->
-  </div>
-
   <!-- Диалоговое окно (В самом низу) -->
   <div class="dialogue-container" id="dialogueContainer">
     <div class="dialogue-box glass-panel">
@@ -65,6 +60,11 @@
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
       </div>
     </div>
+  </div>
+
+  <!-- Контейнер выборов (Размещен НАД диалогом) -->
+  <div class="choices-container" id="choicesContainer">
+    <!-- Кнопки генерируются JS -->
   </div>
 
 </div>
@@ -132,7 +132,7 @@
 
     /* Размеры для layout */
     --dialogue-height: 160px;
-    --choices-gap: 24px;
+    --choices-gap: 16px;
     --safe-area-bottom: 20px;
   }
 
@@ -281,96 +281,7 @@
   }
   .currency-pill:active { transform: scale(0.95); }
 
-  /* --- ВЫБОРЫ --- */
-  .choices-container {
-    position: absolute;
-    bottom: calc(var(--dialogue-height) + var(--choices-gap) + var(--safe-area-bottom));
-    left: 50%;
-    transform: translateX(-50%);
-    width: 90%;
-    max-width: 600px;
-    z-index: 60;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    padding: 0 20px;
-    pointer-events: none;
-    max-height: 40vh;
-    overflow-y: auto;
-    overflow-x: hidden;
-    scrollbar-width: thin;
-    scrollbar-color: var(--primary) transparent;
-    transition: opacity 0.3s ease, transform 0.3s ease;
-  }
-
-  .choices-container.hidden {
-    opacity: 0;
-    transform: translate(-50%, 20px);
-    pointer-events: none;
-  }
-
-  .choices-container::-webkit-scrollbar { width: 6px; }
-  .choices-container::-webkit-scrollbar-track { background: transparent; }
-  .choices-container::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 3px; }
-
-  .choice-wrapper {
-    pointer-events: auto;
-    display: grid;
-    gap: 8px;
-    animation: slideUp 0.4s ease-out forwards;
-    opacity: 0;
-    transform: translateY(20px);
-    width: 100%;
-  }
-  @keyframes slideUp { to { opacity: 1; transform: translateY(0); } }
-
-  .choice-btn {
-    background: rgba(20, 20, 30, 0.9);
-    border: 1px solid var(--glass-border);
-    color: var(--text-main);
-    padding: 16px 20px;
-    border-radius: var(--radius-md);
-    font-size: 15px;
-    font-weight: 600;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.2s;
-    backdrop-filter: blur(4px);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-    white-space: normal;
-    word-wrap: break-word;
-    width: 100%;
-    min-height: 50px;
-  }
-
-  .choice-btn:hover {
-    background: var(--primary);
-    border-color: var(--primary);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px var(--primary-glow);
-  }
-
-  .choice-status {
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-    width: 100%;
-  }
-  .status-badge {
-    background: rgba(0,0,0,0.6);
-    padding: 4px 10px;
-    border-radius: 12px;
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--accent);
-    border: 1px solid var(--glass-border);
-    white-space: nowrap;
-  }
-
-  /* --- ДИАЛОГ --- */
+  /* --- ДИАЛОГ (В самом низу) --- */
   .dialogue-container {
     position: absolute;
     bottom: var(--safe-area-bottom);
@@ -438,6 +349,101 @@
   }
   @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(5px); } }
 
+  /* --- ВЫБОРЫ (НАД диалогом) --- */
+  .choices-container {
+    position: absolute;
+    /* Размещаем НАД диалоговым окном */
+    bottom: calc(var(--dialogue-height) + var(--safe-area-bottom) + var(--choices-gap));
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 600px;
+    z-index: 60;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 0 20px;
+    pointer-events: none;
+    max-height: 35vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary) transparent;
+    transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
+  }
+
+  .choices-container.hidden {
+    opacity: 0;
+    transform: translate(-50%, 30px);
+    pointer-events: none;
+    visibility: hidden;
+  }
+
+  .choices-container::-webkit-scrollbar { width: 6px; }
+  .choices-container::-webkit-scrollbar-track { background: transparent; }
+  .choices-container::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 3px; }
+
+  .choice-wrapper {
+    pointer-events: auto;
+    display: grid;
+    gap: 8px;
+    animation: slideUp 0.4s ease-out forwards;
+    opacity: 0;
+    transform: translateY(20px);
+    width: 100%;
+  }
+  @keyframes slideUp { to { opacity: 1; transform: translateY(0); } }
+
+  .choice-btn {
+    background: rgba(20, 20, 30, 0.9);
+    border: 1px solid var(--glass-border);
+    color: var(--text-main);
+    padding: 16px 20px;
+    border-radius: var(--radius-md);
+    font-size: 15px;
+    font-weight: 600;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    white-space: normal;
+    word-wrap: break-word;
+    width: 100%;
+    min-height: 50px;
+  }
+
+  .choice-btn:hover {
+    background: var(--primary);
+    border-color: var(--primary);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px var(--primary-glow);
+  }
+
+  .choice-btn:active {
+    transform: translateY(0);
+  }
+
+  .choice-status {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+  }
+  .status-badge {
+    background: rgba(0,0,0,0.6);
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--accent);
+    border: 1px solid var(--glass-border);
+    white-space: nowrap;
+  }
+
   /* Меню паузы */
   .pause-menu {
     position: absolute; inset: 0; z-index: 300; display: flex; align-items: center; justify-content: center;
@@ -494,6 +500,7 @@
     :root {
       --dialogue-height: 140px;
       --safe-area-bottom: 16px;
+      --choices-gap: 12px;
     }
 
     .game-hud { padding: 12px 16px; }
@@ -505,8 +512,8 @@
     .dialogue-text { font-size: 15px; }
 
     .choices-container {
-      bottom: calc(var(--dialogue-height) + 16px + var(--safe-area-bottom));
-      max-height: 35vh;
+      bottom: calc(var(--dialogue-height) + var(--safe-area-bottom) + var(--choices-gap));
+      max-height: 30vh;
     }
 
     .currency-pill { top: 70px; right: 16px; padding: 6px 12px; font-size: 13px; }
@@ -624,10 +631,18 @@
     }, 400);
   }
 
+  function hideChoices() {
+    els.choices.classList.add('hidden');
+  }
+
+  function showChoices() {
+    els.choices.classList.remove('hidden');
+  }
+
   function renderInputChoice() {
      const choicesContainer = els.choices;
      choicesContainer.innerHTML = '';
-     choicesContainer.classList.remove('hidden');
+     showChoices();
 
      const wrapper = document.createElement('div');
      wrapper.className = 'choice-wrapper';
@@ -642,7 +657,10 @@
      const sendBtn = document.createElement('div');
      sendBtn.className = 'choice-btn';
      sendBtn.innerHTML = 'Отправить';
-     sendBtn.onclick = makeInputChoice;
+     sendBtn.onclick = () => {
+       hideChoices();
+       makeInputChoice();
+     };
 
      wrapper.appendChild(input);
      wrapper.appendChild(sendBtn);
@@ -651,7 +669,6 @@
 
   function renderChoices() {
     els.choices.innerHTML = '';
-    els.choices.classList.remove('hidden');
 
     if (sceneData.scene_type == 'input') {
       renderInputChoice();
@@ -666,13 +683,16 @@
       continueBtn.className = 'choice-btn';
       continueBtn.innerHTML = 'Продолжить';
       continueBtn.onclick = () => {
-        // Скрываем выборы при нажатии
-        els.choices.classList.add('hidden');
-        goToNextScene();
+        // Скрываем выборы ПЕРЕД переходом
+        hideChoices();
+        setTimeout(() => {
+          goToNextScene();
+        }, 300);
       };
 
       wrapper.appendChild(continueBtn);
       els.choices.appendChild(wrapper);
+      showChoices();
       return;
     }
 
@@ -688,9 +708,11 @@
       btn.className = 'choice-btn';
       btn.innerHTML = choice.data.text;
       btn.onclick = () => {
-        // Скрываем выборы при выборе
-        els.choices.classList.add('hidden');
-        makeChoice(choice.data.id);
+        // Скрываем выборы ПЕРЕД переходом
+        hideChoices();
+        setTimeout(() => {
+          makeChoice(choice.data.id);
+        }, 300);
       };
 
       if(choice.data.premium) {
@@ -723,6 +745,8 @@
       wrapper.appendChild(btn);
       els.choices.appendChild(wrapper);
     });
+
+    showChoices();
   }
 
   async function makeChoice(choiceId) {
@@ -767,7 +791,6 @@
       if (response.ok && data.success) {
         sceneData = data.next_scene;
         els.text.style.opacity = '0';
-        els.choices.classList.add('hidden');
         setTimeout(() => loadScene(), 200);
       } else {
         alert(data.message || 'Ошибка');
