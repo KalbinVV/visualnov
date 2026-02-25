@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 
 from config import config
 from database import Database, User, Choice, Scene, Story, GameSave, DiamondCode, DiamondCodesHistory, TeamCode, \
-    ChoiceHistory
+    ChoiceHistory, MoveCode
 from auth import AuthService
 from game import GameService
 
@@ -1325,6 +1325,37 @@ def reset_user_progress(user_id):
         }), 200
     except Exception as e:
         return jsonify({'error': f'Ошибка сброса прогресса: {str(e)}'}), 500
+
+
+@app.route('/codes/move/<uuid>')
+@login_required
+def code_move_to(uuid: str):
+    with Session(db.engine) as s:
+        user = s.get(User, session['user_id'])
+        code = s.get(MoveCode, uuid)
+
+        if not code:
+            return render_template('error.html', message='Код не найден', code=404), 404
+
+        current_save = db.load_game_raw(user.id, code.story_id)
+        current_save.scene_id = code.scene_id
+
+        s.commit()
+
+        return redirect(f'/game/{code.story_id}')
+
+
+@app.route('/admin/codes/move/<story_id>/<scene_id>')
+@admin_required
+def generate_move_code(story_id: int, scene_id: int):
+    with Session(db.engine) as s:
+        move_code = MoveCode(story_id=story_id,
+                        scene_id=scene_id)
+
+        s.add(move_code)
+        s.commit()
+
+        return f'/codes/move/{move_code.code}'
 
 
 @app.errorhandler(404)

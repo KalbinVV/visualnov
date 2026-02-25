@@ -337,6 +337,16 @@ class StoryCharacter(Base):
     character: Mapped["Character"] = relationship("Character", back_populates="story_characters")
 
 
+class MoveCode(Base):
+    __tablename__ = 'move_codes'
+
+    code: Mapped[UUID] = mapped_column(UUID, primary_key=True, default=uuid4)
+    story_id: Mapped[int] = mapped_column(ForeignKey('stories.id', ondelete='CASCADE'), nullable=False)
+    scene_id: Mapped[int] = mapped_column(ForeignKey('scenes.id', ondelete='CASCADE'), nullable=False)
+
+
+
+
 class Database:
     def __init__(self, db_url: str):
         self.db_url = db_url
