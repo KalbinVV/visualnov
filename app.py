@@ -6,6 +6,7 @@ from flask import Flask, request, jsonify, session, render_template, redirect, u
 from functools import wraps
 import sys
 
+from sqlalchemy import update
 from sqlalchemy.orm import Session
 
 from config import config
@@ -1288,6 +1289,13 @@ def start_story_again(story_id: int):
 
         s.query(GameSave).filter_by(user_id=user_id, story_id=story_id).delete()
 
+        stmt = (update(ChoiceHistory)
+                .where(ChoiceHistory.user_id == user_id,
+                       ChoiceHistory.story_id == story_id).
+                values(is_active=False))
+
+        s.execute(stmt)
+
         s.commit()
 
         return {'success': True}
@@ -1299,6 +1307,13 @@ def reset_user_progress(user_id):
     try:
         with Session(db.engine) as s:
             s.query(GameSave).filter_by(user_id=user_id).delete()
+
+            stmt = (update(ChoiceHistory)
+                    .where(ChoiceHistory.user_id == user_id).
+                    values(is_active=False))
+
+            s.execute(stmt)
+
             s.commit()
 
         return jsonify({

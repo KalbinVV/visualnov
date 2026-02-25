@@ -304,6 +304,7 @@ class ChoiceHistory(Base):
     choice_id: Mapped[int] = mapped_column(ForeignKey('choices.id', ondelete='CASCADE'), nullable=False)
     story_id: Mapped[int] = mapped_column(ForeignKey('stories.id', ondelete='CASCADE'), nullable=False)
     scene_id: Mapped[int] = mapped_column(ForeignKey('scenes.id', ondelete='CASCADE'), nullable=False)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
 
 
 class Character(Base):
