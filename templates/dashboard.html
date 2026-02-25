@@ -13,7 +13,7 @@
     </div>
     
     <div class="top-right">
-      <div class="diamond-counter">
+      <div class="diamond-counter" id="diamondCounter" onclick="showDiamondModal()" title="Информация об алмазах">
         <span class="diamond-icon">💎</span>
         <span class="diamond-amount" id="diamondAmount">{{ user.diamonds }}</span>
       </div>
@@ -50,6 +50,34 @@
   </div>
 </div>
 
+<!-- Diamond Info Modal -->
+<div class="diamond-modal" id="diamondModal">
+  <div class="diamond-modal-overlay" onclick="hideDiamondModal()"></div>
+  <div class="diamond-modal-card">
+    <div class="diamond-modal-close" onclick="hideDiamondModal()">
+      <svg class="icon" viewBox="0 0 24 24">
+        <path d="M18 6L6 18M6 6l12 12"/>
+      </svg>
+    </div>
+    <div class="diamond-modal-header">
+      <div class="diamond-modal-icon">💎</div>
+      <div class="diamond-modal-title">Алмазы</div>
+    </div>
+    <div class="diamond-modal-balance" id="modalDiamondBalance">{{ user.diamonds }} 💎</div>
+
+    <div class="diamond-modal-section">
+      <div class="diamond-modal-section-title">Для чего нужны</div>
+      <ul class="diamond-modal-list">
+        <li>Открывайте премиум-выборы в сюжете</li>
+        <li>Получайте эксклюзивные концовки</li>
+        <li>Разблокируйте особые диалоги и сцены</li>
+        <li>Повышайте отношения с персонажами</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
 <style>
   :root {
     --bg-primary: #0a0a0f;
@@ -57,10 +85,13 @@
     --bg-gradient-end: #1a1a2e;
     --accent: #6366f1;
     --accent-dark: #4f46e5;
+    --accent-light: #a5b4fc;
     --text-primary: #f1f5f9;
     --text-secondary: #cbd5e1;
     --card-bg: rgba(20, 20, 40, 0.7);
     --card-border: rgba(99, 102, 241, 0.3);
+    --modal-overlay: rgba(8, 8, 24, 0.85);
+    --glow: 0 0 25px rgba(99, 102, 241, 0.5);
   }
 
   [data-theme="orange"] {
@@ -69,10 +100,13 @@
     --bg-gradient-end: #1a1208;
     --accent: #f97316;
     --accent-dark: #ea580c;
+    --accent-light: #fdba74;
     --text-primary: #fef3c7;
     --text-secondary: #fcd34d;
     --card-bg: rgba(40, 20, 10, 0.7);
     --card-border: rgba(249, 115, 22, 0.3);
+    --modal-overlay: rgba(20, 10, 5, 0.85);
+    --glow: 0 0 25px rgba(249, 115, 22, 0.5);
   }
 
   [data-theme="purple"] {
@@ -81,10 +115,13 @@
     --bg-gradient-end: #1a082e;
     --accent: #8b5cf6;
     --accent-dark: #7c3aed;
+    --accent-light: #c4b5fd;
     --text-primary: #e0e7ff;
     --text-secondary: #cbd5e1;
     --card-bg: rgba(30, 15, 40, 0.7);
     --card-border: rgba(139, 92, 246, 0.3);
+    --modal-overlay: rgba(15, 8, 30, 0.85);
+    --glow: 0 0 25px rgba(139, 92, 246, 0.5);
   }
 
   [data-theme="dark-green"] {
@@ -93,17 +130,16 @@
     --bg-gradient-end: #122014;
     --accent: #10b981;
     --accent-dark: #059669;
+    --accent-light: #6ee7b7;
     --text-primary: #d1fae5;
     --text-secondary: #6ee7b7;
     --card-bg: rgba(10, 40, 25, 0.7);
     --card-border: rgba(16, 185, 129, 0.3);
+    --modal-overlay: rgba(5, 15, 10, 0.85);
+    --glow: 0 0 25px rgba(16, 185, 129, 0.5);
   }
 
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
     font-family: 'Inter', sans-serif;
@@ -158,15 +194,21 @@
     padding: 6px 16px;
     font-weight: 600;
     font-size: 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
   }
 
-  .diamond-icon {
-    font-size: 20px;
+  .diamond-counter:hover {
+    transform: scale(1.05);
+    box-shadow: var(--glow);
+    background: rgba(255, 215, 0, 0.15);
   }
 
-  .user-menu {
-    position: relative;
-  }
+  .diamond-counter:active { transform: scale(0.98); }
+  .diamond-icon { font-size: 20px; }
+
+  .user-menu { position: relative; }
 
   .user-avatar {
     width: 40px;
@@ -205,9 +247,7 @@
     z-index: 200;
   }
 
-  .user-menu:hover .user-menu-dropdown {
-    display: flex;
-  }
+  .user-menu:hover .user-menu-dropdown { display: flex; }
 
   .user-menu-dropdown a {
     padding: 12px 20px;
@@ -227,16 +267,12 @@
     overflow-y: auto;
   }
 
-  .welcome-section {
-    margin-bottom: 40px;
-  }
-
+  .welcome-section { margin-bottom: 40px; }
   .welcome-section h2 {
     font-size: 32px;
     font-weight: 700;
     margin-bottom: 12px;
   }
-
   .welcome-section p {
     color: var(--text-secondary);
     font-size: 18px;
@@ -350,9 +386,7 @@
     transition: all 0.2s;
   }
 
-  .game-action:hover {
-    transform: scale(1.05);
-  }
+  .game-action:hover { transform: scale(1.05); }
 
   .game-action.secondary {
     background: rgba(99, 102, 241, 0.1);
@@ -372,35 +406,188 @@
     font-weight: 600;
   }
 
+  /* Diamond Modal Styles */
+  .diamond-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .diamond-modal.show {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .diamond-modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--modal-overlay);
+    backdrop-filter: blur(12px);
+  }
+
+  .diamond-modal-card {
+    position: relative;
+    background: var(--card-bg);
+    backdrop-filter: blur(32px);
+    border: 2px solid var(--card-border);
+    border-radius: 28px;
+    padding: 32px 28px;
+    min-width: 320px;
+    max-width: 420px;
+    z-index: 2001;
+    box-shadow: 0 30px 70px rgba(0, 0, 0, 0.6), var(--glow), inset 0 1px 0 rgba(255,255,255,0.1);
+    transform: scale(0.94) translateY(10px);
+    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    animation: modalSlideIn 0.4s forwards;
+  }
+
+  .diamond-modal.show .diamond-modal-card {
+    transform: scale(1) translateY(0);
+  }
+
+  @keyframes modalSlideIn {
+    from { opacity: 0; transform: scale(0.94) translateY(10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+  }
+
+  .diamond-modal-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 36px;
+    height: 36px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .diamond-modal-close:hover {
+    background: rgba(99, 102, 241, 0.2);
+    transform: scale(1.05);
+  }
+
+  .diamond-modal-close .icon {
+    width: 18px;
+    height: 18px;
+    stroke: var(--text-primary);
+    stroke-width: 2;
+    fill: none;
+  }
+
+  .diamond-modal-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--card-border);
+  }
+
+  .diamond-modal-icon {
+    width: 42px;
+    height: 42px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
+  }
+
+  .diamond-modal-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+
+  .diamond-modal-balance {
+    font-size: 2.2rem;
+    font-weight: 800;
+    text-align: center;
+    margin: 8px 0 24px;
+    background: linear-gradient(135deg, var(--accent-light), var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .diamond-modal-section { margin-bottom: 20px; }
+
+  .diamond-modal-section-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--accent-light);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .diamond-modal-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .diamond-modal-list li {
+    padding: 8px 0;
+    font-size: 0.98rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .diamond-modal-list li::before {
+    content: '✦';
+    color: var(--accent);
+    font-size: 1.1rem;
+    margin-top: 2px;
+  }
+
+  .diamond-modal-footer {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--card-border);
+    text-align: center;
+  }
+
+  .diamond-modal-note {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    font-style: italic;
+  }
+
   @media (max-width: 768px) {
-    .games-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .top-bar {
-      padding: 0 16px;
-      height: 60px;
-    }
-
-    .top-left .logo h1 {
-      font-size: 20px;
-    }
-
-    .main-content {
-      padding: 24px 16px;
-    }
-
-    .welcome-section h2 {
-      font-size: 26px;
-    }
-
-    .game-card {
-      padding: 20px;
-    }
-
-    .game-title {
-      font-size: 20px;
-    }
+    .games-grid { grid-template-columns: 1fr; }
+    .top-bar { padding: 0 16px; height: 60px; }
+    .top-left .logo h1 { font-size: 20px; }
+    .main-content { padding: 24px 16px; }
+    .welcome-section h2 { font-size: 26px; }
+    .game-card { padding: 20px; }
+    .game-title { font-size: 20px; }
+    .diamond-modal-card { min-width: 280px; padding: 24px 20px; }
+    .diamond-modal-balance { font-size: 1.8rem; }
   }
 </style>
 
@@ -413,7 +600,6 @@ async function loadGames() {
   try {
     const response = await fetch('/api/games');
     const data = await response.json();
-
     if (data.success && data.games) {
       renderGames(data.games);
     }
@@ -425,34 +611,24 @@ async function loadGames() {
 function renderGames(games) {
   const gamesGrid = document.getElementById('gamesGrid');
   gamesGrid.innerHTML = '';
-
   if (games.length === 0) {
     gamesGrid.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">Нет доступных игр</p>';
     return;
   }
-
   games.forEach(game => {
     const gameCard = document.createElement('div');
     gameCard.className = `game-card ${game.premium ? 'premium' : ''}`;
     gameCard.onclick = () => handleGameClick(game);
-
-    const hasSave = game.saves && game.saves.length > 0;
-    const actionText = hasSave ? 'Продолжить' : (game.premium ? 'Купить' : 'Начать');
-
     gameCard.innerHTML = `
       <div class="game-card-header">
         <div>
           <div class="game-title">${game.title}</div>
-          <div class="game-badge ${game.premium ? 'premium' : 'free'}">
-            ${game.premium ? 'Премиум' : 'Бесплатно'}
-          </div>
+          <div class="game-badge ${game.premium ? 'premium' : 'free'}">${game.premium ? 'Премиум' : 'Бесплатно'}</div>
         </div>
       </div>
       <div class="game-description">${game.description}</div>
-      <div class="game-meta">
-      </div>
+      <div class="game-meta"></div>
     `;
-
     gamesGrid.appendChild(gameCard);
   });
 }
@@ -469,16 +645,15 @@ async function checkGameAccess(gameId) {
   try {
     const response = await fetch(`/api/games/${gameId}/access`);
     const data = await response.json();
-
     if (data.accessible) {
-      window.location.href = `/game/${gameKey}`;
+      window.location.href = `/game/${gameId}`;
     } else {
-      if (data.message.includes('Недостаточно алмазов')) {
-        if (confirm(`Купить игру за ${gameKey === 'midnight_encounter' ? 50 : 100} алмазов?`)) {
-          purchaseGame(gameKey);
+      if (data.message && data.message.includes('Недостаточно алмазов')) {
+        if (confirm(`Купить игру за ${gameId === 'midnight_encounter' ? 50 : 100} алмазов?`)) {
+          purchaseGame(gameId);
         }
       } else {
-        alert(data.message);
+        alert(data.message || 'Доступ ограничен');
       }
     }
   } catch (error) {
@@ -487,19 +662,14 @@ async function checkGameAccess(gameId) {
   }
 }
 
-async function purchaseGame(gameKey) {
+async function purchaseGame(gameId) {
   try {
-    const response = await fetch(`/api/games/${gameKey}/purchase`, {
-      method: 'POST'
-    });
-
+    const response = await fetch(`/api/games/${gameId}/purchase`, { method: 'POST' });
     const data = await response.json();
-
     if (response.ok && data.success) {
-      // Обновить количество алмазов
       document.getElementById('diamondAmount').textContent = data.user.diamonds;
-      // Перейти к игре
-      window.location.href = `/game/${gameKey}`;
+      document.getElementById('modalDiamondBalance').textContent = data.user.diamonds + ' 💎';
+      window.location.href = `/game/${gameId}`;
     } else {
       alert(data.error || 'Ошибка покупки');
     }
@@ -510,20 +680,35 @@ async function purchaseGame(gameKey) {
 }
 
 async function logout() {
-  if (!confirm('Вы уверены, что хотите выйти?')) {
-    return;
-  }
-
+  if (!confirm('Вы уверены, что хотите выйти?')) return;
   try {
-    await fetch('/api/logout', {
-      method: 'POST'
-    });
-
+    await fetch('/api/logout', { method: 'POST' });
     window.location.href = '/login';
   } catch (error) {
     console.error('Ошибка выхода:', error);
     window.location.href = '/login';
   }
 }
+
+/* Diamond Modal Functions */
+function showDiamondModal() {
+  const modal = document.getElementById('diamondModal');
+  const currentBalance = document.getElementById('diamondAmount').textContent;
+  document.getElementById('modalDiamondBalance').textContent = currentBalance + ' 💎';
+  modal.classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+
+function hideDiamondModal() {
+  const modal = document.getElementById('diamondModal');
+  modal.classList.remove('show');
+  document.body.style.overflow = '';
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    hideDiamondModal();
+  }
+});
 </script>
 {% endblock %}

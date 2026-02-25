@@ -96,6 +96,7 @@ class GameService:
                 s.add(choice_history)
             else:
                 choice_history.choice_id = choice_id
+                choice_history.is_active = True
 
             s.commit()
 
