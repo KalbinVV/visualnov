@@ -56,7 +56,7 @@
           <div class="profile-meta">
             <span class="meta-item">
               <span class="meta-icon">📅</span>
-              <span>С {{ user.created_at[:10] if user.created_at else '2024' }}</span>
+              <span>С {{ user.created_at if user.created_at else '2026' }}</span>
             </span>
             {% if is_team_leader %}
             <span class="meta-item leader-badge">
