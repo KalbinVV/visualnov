@@ -51,20 +51,25 @@
     <span class="currency-value" id="diamondAmount">{{ user.diamonds }}</span>
   </div>
 
-  <!-- Диалоговое окно (В самом низу) -->
-  <div class="dialogue-container" id="dialogueContainer">
-    <div class="dialogue-box glass-panel">
-      <div class="speaker-name" id="speakerName">...</div>
-      <div class="dialogue-text" id="dialogueText">...</div>
-      <div class="next-indicator">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+  <!-- Контейнер для диалога и выборов -->
+  <div class="bottom-ui-container">
+
+    <!-- Диалоговое окно -->
+    <div class="dialogue-container" id="dialogueContainer">
+      <div class="dialogue-box glass-panel">
+        <div class="speaker-name" id="speakerName">...</div>
+        <div class="dialogue-text" id="dialogueText">...</div>
+        <div class="next-indicator">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- Контейнер выборов (Размещен НАД диалогом) -->
-  <div class="choices-container" id="choicesContainer">
-    <!-- Кнопки генерируются JS -->
+    <!-- Контейнер выборов (ПОД диалогом) -->
+    <div class="choices-container" id="choicesContainer">
+      <!-- Кнопки генерируются JS -->
+    </div>
+
   </div>
 
 </div>
@@ -130,8 +135,9 @@
     --radius-md: 16px;
     --radius-sm: 8px;
 
-    /* Размеры для layout */
-    --dialogue-height: 160px;
+    /* Размеры для layout - УВЕЛИЧЕННЫЕ */
+    --dialogue-height: 220px; /* Было 160px */
+    --dialogue-max-height: 280px; /* Максимальная высота */
     --choices-gap: 16px;
     --safe-area-bottom: 20px;
   }
@@ -281,8 +287,8 @@
   }
   .currency-pill:active { transform: scale(0.95); }
 
-  /* --- ДИАЛОГ (В самом низу) --- */
-  .dialogue-container {
+  /* --- КОНТЕЙНЕР НИЖНЕГО UI (диалог + выборы) --- */
+  .bottom-ui-container {
     position: absolute;
     bottom: var(--safe-area-bottom);
     left: 50%;
@@ -290,11 +296,24 @@
     width: 90%;
     max-width: 900px;
     z-index: 50;
+    display: flex;
+    flex-direction: column;
+    gap: var(--choices-gap);
+    pointer-events: none;
+  }
+
+  /* --- ДИАЛОГ --- */
+  .dialogue-container {
+    width: 100%;
     pointer-events: none;
     transition: opacity 0.3s, transform 0.3s;
-    height: var(--dialogue-height);
   }
-  .dialogue-container.hidden { opacity: 0; transform: translate(-50%, 20px); pointer-events: none; }
+
+  .dialogue-container.hidden {
+    opacity: 0;
+    transform: translateY(20px);
+    pointer-events: none;
+  }
 
   .dialogue-box {
     background: var(--glass-bg);
@@ -302,7 +321,8 @@
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-lg);
     padding: 24px;
-    height: 100%;
+    min-height: var(--dialogue-height);
+    max-height: var(--dialogue-max-height);
     position: relative;
     pointer-events: auto;
     box-shadow: 0 10px 40px rgba(0,0,0,0.5);
@@ -324,8 +344,8 @@
   }
 
   .dialogue-text {
-    font-size: 16px;
-    line-height: 1.6;
+    font-size: 17px; /* Увеличенный шрифт */
+    line-height: 1.7; /* Увеличенный интервал */
     color: var(--text-main);
     opacity: 0;
     animation: textReveal 0.6s forwards;
@@ -349,20 +369,13 @@
   }
   @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(5px); } }
 
-  /* --- ВЫБОРЫ (НАД диалогом) --- */
+  /* --- ВЫБОРЫ (ПОД диалогом) --- */
   .choices-container {
-    position: absolute;
-    /* Размещаем НАД диалоговым окном */
-    bottom: calc(var(--dialogue-height) + var(--safe-area-bottom) + var(--choices-gap));
-    left: 50%;
-    transform: translateX(-50%);
-    width: 90%;
-    max-width: 600px;
-    z-index: 60;
+    width: 100%;
     display: flex;
     flex-direction: column;
     gap: 12px;
-    padding: 0 20px;
+    padding: 0;
     pointer-events: none;
     max-height: 35vh;
     overflow-y: auto;
@@ -374,7 +387,7 @@
 
   .choices-container.hidden {
     opacity: 0;
-    transform: translate(-50%, 30px);
+    transform: translateY(20px);
     pointer-events: none;
     visibility: hidden;
   }
@@ -398,9 +411,9 @@
     background: rgba(20, 20, 30, 0.9);
     border: 1px solid var(--glass-border);
     color: var(--text-main);
-    padding: 16px 20px;
+    padding: 18px 24px; /* Увеличенные отступы */
     border-radius: var(--radius-md);
-    font-size: 15px;
+    font-size: 16px; /* Увеличенный шрифт */
     font-weight: 600;
     text-align: center;
     cursor: pointer;
@@ -413,7 +426,7 @@
     white-space: normal;
     word-wrap: break-word;
     width: 100%;
-    min-height: 50px;
+    min-height: 56px;
   }
 
   .choice-btn:hover {
@@ -498,7 +511,8 @@
   /* Адаптивность */
   @media (max-width: 768px) {
     :root {
-      --dialogue-height: 140px;
+      --dialogue-height: 180px;
+      --dialogue-max-height: 240px;
       --safe-area-bottom: 16px;
       --choices-gap: 12px;
     }
@@ -511,17 +525,15 @@
     .speaker-name { font-size: 16px; }
     .dialogue-text { font-size: 15px; }
 
-    .choices-container {
-      bottom: calc(var(--dialogue-height) + var(--safe-area-bottom) + var(--choices-gap));
-      max-height: 30vh;
-    }
+    .choice-btn { padding: 14px 18px; font-size: 15px; }
 
     .currency-pill { top: 70px; right: 16px; padding: 6px 12px; font-size: 13px; }
   }
 
   @media (max-height: 600px) {
     :root {
-      --dialogue-height: 120px;
+      --dialogue-height: 140px;
+      --dialogue-max-height: 180px;
     }
     .character-sprite { height: 50vh; }
     .choice-btn { padding: 12px; font-size: 14px; }
