@@ -476,8 +476,8 @@
     justify-content: center;
     font-size: 40px;
     background: linear-gradient(45deg, #1a1a2e, #2a2a4e);
-    background-size: cover;
-    background-position: center;
+    background-size: cover !important;
+    background-position: center !important;
   }
 
   .card-badge {
@@ -801,7 +801,7 @@ function renderGames(games) {
 
     card.innerHTML = `
       <div class="card-image-wrapper">
-        <div class="card-image-placeholder" style="background: url('${game.cover_image}')">📖</div>
+        <div class="card-image-placeholder" style="background: url('${game.cover_image}')"></div>
         <div class="card-badge ${badgeClass}">${badgeText}</div>
       </div>
       <div class="card-content">
