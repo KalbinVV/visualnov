@@ -46,7 +46,8 @@ class GameService:
                 'chapters': story.chapters_count,
                 'premium': story.premium,
                 'diamonds_cost': story.diamonds_cost,
-                'id': story.id
+                'id': story.id,
+                'cover_image': story.cover_image
             })
 
         return games_list
