@@ -116,6 +116,12 @@
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
+  html, body {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+  }
+
   body {
     font-family: var(--font-ui);
     background-color: var(--bg-deep);
@@ -123,12 +129,11 @@
       radial-gradient(circle at 10% 20%, rgba(139, 92, 246, 0.08) 0%, transparent 40%),
       radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.05) 0%, transparent 40%);
     color: var(--text-main);
-    min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 20px;
-    overflow-x: hidden;
+    position: fixed;
+    inset: 0;
   }
 
   .auth-wrapper {
@@ -136,6 +141,11 @@
     width: 100%;
     max-width: 480px;
     z-index: 10;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
   }
 
   .auth-background {
@@ -179,6 +189,9 @@
                 0 0 40px rgba(139, 92, 246, 0.1);
     position: relative;
     overflow: hidden;
+    width: 100%;
+    max-height: 95vh;
+    overflow-y: auto;
   }
 
   .auth-card::before {
@@ -189,12 +202,26 @@
     right: 0;
     height: 1px;
     background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    pointer-events: none;
+  }
+
+  /* Скроллбар для карточки */
+  .auth-card::-webkit-scrollbar {
+    width: 4px;
+  }
+  .auth-card::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .auth-card::-webkit-scrollbar-thumb {
+    background: var(--glass-border);
+    border-radius: 4px;
   }
 
   /* Header */
   .auth-header {
     text-align: center;
     margin-bottom: 40px;
+    flex-shrink: 0;
   }
 
   .brand-icon {
@@ -299,6 +326,7 @@
     color: #fca5a5;
     font-size: 13px;
     animation: shake 0.4s ease-in-out;
+    flex-shrink: 0;
   }
 
   @keyframes shake {
@@ -323,6 +351,7 @@
     box-shadow: 0 8px 25px var(--primary-glow);
     overflow: hidden;
     margin-top: 8px;
+    flex-shrink: 0;
   }
 
   .btn-primary:hover {
@@ -385,6 +414,7 @@
     margin-top: 32px;
     padding-top: 24px;
     border-top: 1px solid var(--glass-border);
+    flex-shrink: 0;
   }
 
   .auth-footer p {
@@ -429,13 +459,21 @@
     animation: fadeInUp 0.6s ease-out forwards;
   }
 
-  /* Mobile Responsive */
+  /* Mobile Responsive — фиксация по центру */
   @media (max-width: 600px) {
-    body { padding: 16px; }
+    body {
+      padding: 0;
+    }
+
+    .auth-wrapper {
+      padding: 16px;
+      min-height: 100dvh;
+    }
 
     .auth-card {
       padding: 40px 28px;
       border-radius: 24px;
+      max-height: 90dvh;
     }
 
     .auth-title { font-size: 28px; }
@@ -450,11 +488,42 @@
       padding: 13px 24px;
       font-size: 15px;
     }
+
+    .auth-header { margin-bottom: 32px; }
+    .auth-footer { margin-top: 24px; padding-top: 20px; }
+  }
+
+  /* Для очень маленьких экранов */
+  @media (max-height: 700px) and (max-width: 600px) {
+    .auth-card {
+      padding: 32px 24px;
+      max-height: 95dvh;
+    }
+    .auth-header { margin-bottom: 24px; }
+    .brand-icon { font-size: 36px; margin-bottom: 12px; }
+    .auth-title { font-size: 24px; }
+    .auth-subtitle { font-size: 14px; }
+    .form-group { gap: 12px; }
+    .auth-footer { margin-top: 20px; padding-top: 16px; }
   }
 </style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+  // Предотвращаем скролл страницы на мобильных при фокусе на инпуты
+  const inputs = document.querySelectorAll('input');
+  inputs.forEach(input => {
+    input.addEventListener('focus', function() {
+      if (window.innerWidth <= 600) {
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          document.body.scrollTop = 0;
+          document.documentElement.scrollTop = 0;
+        }, 100);
+      }
+    });
+  });
+
   const loginForm = document.getElementById('loginForm');
   const errorMessage = document.getElementById('errorMessage');
 
