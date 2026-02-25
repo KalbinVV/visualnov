@@ -1,485 +1,635 @@
 {% extends "base.html" %}
 
-{% block title %}Профиль — Любовный симулятор{% endblock %}
+{% block title %}Профиль — USSC Romance{% endblock %}
 
 {% block content %}
-<div class="profile-container">
-  <div class="top-bar">
-    <div class="top-left">
-      <button class="icon-btn" onclick="window.location.href='/dashboard'">
-          <svg class="icon" viewBox="0 0 24 24">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
+
+<div class="profile-wrapper">
+
+  <!-- Навигация -->
+  <nav class="glass-nav">
+    <div class="nav-content">
+      <div class="nav-left">
+        <button class="nav-back" onclick="window.location.href='/dashboard'" title="Назад">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
             <path d="M15 18l-6-6 6-6"/>
           </svg>
-      </button>
-      <div class="page-title">Профиль</div>
-    </div>
-    
-    <div class="top-right">
-      <div class="diamond-counter">
-        <span class="diamond-icon">💎</span>
-        <span class="diamond-amount">{{ user.diamonds }}</span>
+        </button>
+        <h1 class="page-title">Профиль</h1>
+      </div>
+
+      <div class="nav-right">
+        <div class="currency-pill" onclick="showDiamondModal()">
+          <span class="currency-icon">💎</span>
+          <span class="currency-value">{{ user.diamonds }}</span>
+        </div>
       </div>
     </div>
-  </div>
+  </nav>
 
-  <div class="main-content">
-    <div class="profile-card">
-      <div class="profile-header">
-        <div class="profile-avatar">
-          {% if user.avatar_url %}
-            <img src="{{ user.avatar_url }}" alt="{{ user.display_name }}">
-          {% else %}
-            <span>{{ user.display_name[0] }}</span>
-          {% endif %}
+  <!-- Основной контент -->
+  <main class="profile-stage">
+
+    <!-- Карточка профиля -->
+    <section class="profile-hero glass-panel fade-in">
+      <div class="profile-hero-content">
+        <div class="avatar-wrapper">
+          <div class="avatar-glow"></div>
+          <div class="avatar-frame">
+            {% if user.avatar_url %}
+              <img src="{{ user.avatar_url }}" alt="{{ user.display_name }}">
+            {% else %}
+              <span class="avatar-initials">{{ user.display_name[:2] }}</span>
+            {% endif %}
+          </div>
+          <span class="avatar-badge">✦</span>
         </div>
-        <div class="profile-info">
-          <h2>{{ user.display_name }}</h2>
-          <p class="username">@{{ user.username }}</p>
-          <p class="email">{{ user.email }}</p>
-          <div class="member-since">
-            На платформе с {{ user.created_at }}
+
+        <div class="profile-details">
+          <h2 class="profile-name">{{ user.display_name }}</h2>
+          <p class="profile-handle">@{{ user.username }}</p>
+          <p class="profile-email">{{ user.email }}</p>
+
+          <div class="profile-meta">
+            <span class="meta-item">
+              <span class="meta-icon">📅</span>
+              <span>С {{ user.created_at[:10] if user.created_at else '2024' }}</span>
+            </span>
+            {% if is_team_leader %}
+            <span class="meta-item leader-badge">
+              <span class="meta-icon">👑</span>
+              <span>Лидер команды</span>
+            </span>
+            {% endif %}
           </div>
         </div>
+
+        <button class="btn-edit" onclick="editProfile()">
+          <span>✎</span> Редактировать
+        </button>
       </div>
-      
-      <div class="profile-stats">
-        <div class="stat-item">
+
+      <!-- Статистика -->
+      <div class="profile-stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon">🎮</div>
           <div class="stat-value">{{ stats|length if stats else 0 }}</div>
-          <div class="stat-label">Игр сыграно</div>
+          <div class="stat-label">Игр пройдено</div>
         </div>
-        <div class="stat-item">
+        <div class="stat-card">
+          <div class="stat-icon">🏆</div>
           <div class="stat-value">{{ achievements|length }}</div>
           <div class="stat-label">Достижений</div>
         </div>
-        <div class="stat-item">
+        <div class="stat-card highlight">
+          <div class="stat-icon">💎</div>
           <div class="stat-value">{{ user.diamonds }}</div>
           <div class="stat-label">Алмазов</div>
         </div>
       </div>
-      
-      <button class="btn-primary btn-edit" onclick="editProfile()">
-        Редактировать профиль
-      </button>
-    </div>
+    </section>
 
-
-    <div class="section">
-      <h3>👥 Команда</h3>
-      <h4>{{ team_info.name if team_info else "Вы пока не назначены в команду!" }}  {{ "👑" if is_team_leader else "" }}</h4>
-    </div>
-
-    <div class="section">
-      <h3>🏆 Мои достижения</h3>
-      <div class="achievements-grid">
-        {% if achievements %}
-          {% for achievement in achievements %}
-            <div class="achievement-card">
-              <div class="achievement-icon">✨</div>
-              <div class="achievement-name">{{ achievement.achievement_name }}</div>
-              <div class="achievement-desc">{{ achievement.description }}</div>
-              <div class="achievement-date">
-                Разблокировано: {{ achievement.unlocked_at[:10] }}
-              </div>
-            </div>
-          {% endfor %}
-        {% else %}
-          <div class="empty-state">
-            <div class="empty-icon">🎮</div>
-            <p>У вас пока нет достижений</p>
-            <p class="empty-subtext">Начните играть, чтобы разблокировать первые достижения!</p>
-          </div>
+    <!-- Команда -->
+    <section class="profile-section glass-panel fade-in" style="animation-delay: 0.1s">
+      <div class="section-header">
+        <h3>👥 Команда</h3>
+        {% if team_info %}
+        <span class="section-badge">{{ team_info.name }}</span>
         {% endif %}
       </div>
-    </div>
 
-    <div class="section">
-      <h3>📊 Статистика игр</h3>
+      {% if team_info %}
+      <div class="team-card">
+        <div class="team-info">
+          <div class="team-name">{{ team_info.name }}</div>
+          <div class="team-desc">{{ team_info.description if team_info.description else 'Участник романтической истории' }}</div>
+        </div>
+        {% if is_team_leader %}
+        <span class="team-role">Лидер</span>
+        {% else %}
+        <span class="team-role member">Участник</span>
+        {% endif %}
+      </div>
+      {% else %}
+      <div class="empty-state">
+        <div class="empty-icon">🔍</div>
+        <p>Вы пока не в команде</p>
+        <p class="empty-subtext">Присоединитесь к истории, чтобы найти свою команду</p>
+      </div>
+      {% endif %}
+    </section>
+
+    <!-- Достижения -->
+    <section class="profile-section glass-panel fade-in" style="animation-delay: 0.2s">
+      <div class="section-header">
+        <h3>🏆 Достижения</h3>
+        <span class="section-count">{{ achievements|length }}</span>
+      </div>
+
+      {% if achievements %}
+      <div class="achievements-grid">
+        {% for achievement in achievements %}
+        <div class="achievement-card">
+          <div class="achievement-header">
+            <div class="achievement-icon">✨</div>
+            <div class="achievement-rarity common">Обычное</div>
+          </div>
+          <h4 class="achievement-title">{{ achievement.achievement_name }}</h4>
+          <p class="achievement-desc">{{ achievement.description }}</p>
+          <div class="achievement-footer">
+            <span class="unlock-date">🗓 {{ achievement.unlocked_at[:10] if achievement.unlocked_at else '—' }}</span>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty-state">
+        <div class="empty-icon">🎁</div>
+        <p>Пока нет достижений</p>
+        <p class="empty-subtext">Играйте, чтобы открывать новые награды</p>
+      </div>
+      {% endif %}
+    </section>
+
+    <!-- Статистика игр -->
+    <section class="profile-section glass-panel fade-in" style="animation-delay: 0.3s">
+      <div class="section-header">
+        <h3>📊 История игр</h3>
+      </div>
+
+      {% if stats %}
+      <div class="games-history">
+        {% for stat in stats %}
+        <div class="game-history-item">
+          <div class="game-info">
+            <div class="game-title">{{ stat.game_title }}</div>
+            <div class="game-meta">
+              <span>📖 Глава {{ stat.current_chapter }}</span>
+              <span>⏱ {{ stat.play_time }} мин</span>
+            </div>
+          </div>
+          <div class="game-progress">
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: {{ stat.progress }}%"></div>
+            </div>
+            <span class="progress-text">{{ stat.progress }}%</span>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty-state">
+        <div class="empty-icon">📚</div>
+        <p>История пуста</p>
+        <p class="empty-subtext">Начните новую историю, чтобы увидеть прогресс здесь</p>
+        <button class="btn-browse" onclick="window.location.href='/dashboard'">Выбрать историю</button>
+      </div>
+      {% endif %}
+    </section>
+
+  </main>
+</div>
+
+<!-- Модальное окно алмазов -->
+<div class="diamond-modal" id="diamondModal">
+  <div class="modal-backdrop" onclick="hideDiamondModal()"></div>
+  <div class="modal-content glass-panel">
+    <button class="modal-close" onclick="hideDiamondModal()">✕</button>
+    <div class="modal-header">
+      <div class="gem-icon-large">💎</div>
+      <h3>Ваши Алмазы</h3>
     </div>
+    <div class="balance-display">
+      <span class="balance-amount">{{ user.diamonds }}</span>
+      <span class="balance-label">доступно</span>
+    </div>
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="info-icon">🔓</div>
+        <h4>Эксклюзив</h4>
+        <p>Открывайте платные сцены и концовки</p>
+      </div>
+      <div class="info-card">
+        <div class="info-icon">❤️</div>
+        <h4>Отношения</h4>
+        <p>Улучшайте связь с персонажами</p>
+      </div>
+    </div>
+    <div class="modal-footer-note">Валюта сохраняется между сессиями</div>
   </div>
 </div>
 
 <style>
-  .icon-btn {
-      width: 48px;
-      height: 48px;
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(176, 140, 255, 0.25);
-      border-radius: 14px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.25s cubic-bezier(0.4, 0.0, 0.2, 1);
-      touch-action: manipulation;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    }
-
-    .icon-btn:hover,
-    .icon-btn:active {
-      background: rgba(176, 140, 255, 0.2);
-      transform: scale(1.08) translateY(-1px);
-      box-shadow: var(--glow);
-    }
-
-    .icon {
-      width: 22px;
-      height: 22px;
-      stroke: #e0e0ff;
-      stroke-width: 2.4;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-      fill: none;
-      transition: stroke 0.25s ease;
-    }
-
-    .icon-btn:hover .icon {
-      stroke: #fff;
-    }
-
   :root {
-    --bg-primary: #0a0a0f;
-    --bg-gradient-start: #0f0f1a;
-    --bg-gradient-end: #1a1a2e;
-    --accent: #6366f1;
-    --accent-dark: #4f46e5;
-    --text-primary: #f1f5f9;
-    --text-secondary: #cbd5e1;
-    --card-bg: rgba(20, 20, 40, 0.7);
-    --card-border: rgba(99, 102, 241, 0.3);
+    --bg-deep: #050508;
+    --bg-surface: #0f0f16;
+    --primary: #6366f1;
+    --primary-glow: rgba(99, 102, 241, 0.5);
+    --accent: #a5b4fc;
+    --text-main: #ffffff;
+    --text-muted: #94a3b8;
+    --glass-bg: rgba(20, 20, 30, 0.6);
+    --glass-border: rgba(255, 255, 255, 0.08);
+
+    --font-display: 'Playfair Display', serif;
+    --font-ui: 'Inter', sans-serif;
+
+    --radius-lg: 24px;
+    --radius-md: 16px;
+    --radius-sm: 8px;
   }
 
   [data-theme="orange"] {
-    --bg-primary: #080503;
-    --bg-gradient-start: #0d0704;
-    --bg-gradient-end: #1a1208;
-    --accent: #f97316;
-    --accent-dark: #ea580c;
-    --text-primary: #fef3c7;
-    --text-secondary: #fcd34d;
-    --card-bg: rgba(40, 20, 10, 0.7);
-    --card-border: rgba(249, 115, 22, 0.3);
+    --primary: #f97316; --primary-glow: rgba(249, 115, 22, 0.5); --accent: #fdba74;
+    --bg-deep: #080402; --bg-surface: #150a05;
   }
-
   [data-theme="purple"] {
-    --bg-primary: #0a0515;
-    --bg-gradient-start: #0d061a;
-    --bg-gradient-end: #1a082e;
-    --accent: #8b5cf6;
-    --accent-dark: #7c3aed;
-    --text-primary: #e0e7ff;
-    --text-secondary: #cbd5e1;
-    --card-bg: rgba(30, 15, 40, 0.7);
-    --card-border: rgba(139, 92, 246, 0.3);
+    --primary: #8b5cf6; --primary-glow: rgba(139, 92, 246, 0.5); --accent: #c4b5fd;
+    --bg-deep: #0a0515; --bg-surface: #140a1e;
   }
-
   [data-theme="dark-green"] {
-    --bg-primary: #050a06;
-    --bg-gradient-start: #070f0a;
-    --bg-gradient-end: #122014;
-    --accent: #10b981;
-    --accent-dark: #059669;
-    --text-primary: #d1fae5;
-    --text-secondary: #6ee7b7;
-    --card-bg: rgba(10, 40, 25, 0.7);
-    --card-border: rgba(16, 185, 129, 0.3);
+    --primary: #10b981; --primary-glow: rgba(16, 185, 129, 0.5); --accent: #6ee7b7;
+    --bg-deep: #020403; --bg-surface: #05150f;
   }
 
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
-    font-family: 'Inter', sans-serif;
-    background: var(--bg-primary);
-    color: var(--text-primary);
+    font-family: var(--font-ui);
+    background: var(--bg-deep);
+    background-image:
+      radial-gradient(circle at 15% 30%, rgba(139, 92, 246, 0.06) 0%, transparent 40%),
+      radial-gradient(circle at 85% 70%, rgba(139, 92, 246, 0.04) 0%, transparent 40%);
+    color: var(--text-main);
     min-height: 100vh;
+    overflow-x: hidden;
   }
 
-  .profile-container {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
+  /* Навигация */
+  .glass-nav {
+    position: fixed; top: 0; left: 0; width: 100%; height: 72px;
+    background: rgba(5, 5, 8, 0.75); backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--glass-border); z-index: 1000;
+    display: flex; align-items: center; justify-content: center;
   }
-
-  .top-bar {
-    height: 60px;
-    background: rgba(15, 15, 35, 0.9);
-    backdrop-filter: blur(20px);
-    border-bottom: 1px solid var(--card-border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 20px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
+  .nav-content {
+    width: 100%; max-width: 1200px; padding: 0 24px;
+    display: flex; justify-content: space-between; align-items: center;
   }
-
-  .top-left {
-    display: flex;
-    align-items: center;
-    gap: 16px;
+  .nav-left { display: flex; align-items: center; gap: 16px; }
+  .nav-back {
+    width: 40px; height: 40px; border-radius: 12px;
+    background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all 0.2s; color: var(--text-muted);
   }
-
+  .nav-back:hover { background: rgba(255,255,255,0.1); color: var(--text-main); transform: translateX(-2px); }
+  .nav-back svg { width: 20px; height: 20px; }
   .page-title {
-    font-size: 20px;
-    font-weight: 600;
+    font-family: var(--font-display); font-size: 22px; font-weight: 700;
+  }
+  .nav-right { display: flex; align-items: center; }
+
+  /* Валюта */
+  .currency-pill {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 16px; border-radius: 50px;
+    background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border);
+    cursor: pointer; transition: all 0.25s;
+  }
+  .currency-pill:hover {
+    background: rgba(255,255,255,0.1); border-color: var(--primary);
+    transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  }
+  .currency-icon { font-size: 16px; animation: float 3s ease-in-out infinite; }
+  .currency-value { font-weight: 600; color: var(--accent); font-size: 14px; }
+
+  /* Основной контент */
+  .profile-stage {
+    padding-top: 96px; padding-bottom: 40px;
+    max-width: 900px; margin: 0 auto; padding-left: 20px; padding-right: 20px;
   }
 
-  .top-right {
-    display: flex;
-    align-items: center;
-    gap: 16px;
+  /* Glass Panel */
+  .glass-panel {
+    background: var(--glass-bg); backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border); border-radius: var(--radius-lg);
+    padding: 28px; margin-bottom: 20px;
   }
 
-  .diamond-counter {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    background: rgba(255, 215, 0, 0.1);
-    border: 2px solid rgba(255, 215, 0, 0.3);
-    border-radius: 12px;
-    padding: 4px 12px;
-    font-weight: 600;
-    font-size: 14px;
+  /* Hero Profile */
+  .profile-hero { display: flex; flex-direction: column; gap: 24px; }
+  .profile-hero-content {
+    display: flex; align-items: center; gap: 24px; flex-wrap: wrap;
   }
 
-  .main-content {
-    padding: 24px;
-    overflow-y: auto;
-    flex: 1;
+  /* Аватар */
+  .avatar-wrapper { position: relative; flex-shrink: 0; }
+  .avatar-glow {
+    position: absolute; inset: -4px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), transparent);
+    filter: blur(12px); opacity: 0.6; animation: pulse 4s ease-in-out infinite;
+  }
+  .avatar-frame {
+    width: 96px; height: 96px; border-radius: 50%;
+    background: var(--bg-surface); border: 3px solid var(--bg-deep);
+    display: flex; align-items: center; justify-content: center;
+    position: relative; z-index: 2; overflow: hidden;
+  }
+  .avatar-frame img { width: 100%; height: 100%; object-fit: cover; }
+  .avatar-initials {
+    font-size: 32px; font-weight: 700; color: var(--text-main);
+    font-family: var(--font-display);
+  }
+  .avatar-badge {
+    position: absolute; bottom: 4px; right: 4px; z-index: 3;
+    width: 28px; height: 28px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; box-shadow: 0 4px 12px var(--primary-glow);
   }
 
-  .profile-card {
-    background: var(--card-bg);
-    backdrop-filter: blur(15px);
-    border: 2px solid var(--card-border);
-    border-radius: 20px;
-    padding: 32px;
-    margin-bottom: 24px;
+  /* Детали профиля */
+  .profile-details { flex: 1; min-width: 200px; }
+  .profile-name {
+    font-family: var(--font-display); font-size: 32px; font-weight: 700;
+    margin-bottom: 4px; line-height: 1.2;
+  }
+  .profile-handle {
+    color: var(--primary); font-weight: 600; font-size: 16px; margin-bottom: 8px;
+  }
+  .profile-email {
+    color: var(--text-muted); font-size: 14px; margin-bottom: 16px;
+  }
+  .profile-meta { display: flex; gap: 16px; flex-wrap: wrap; }
+  .meta-item {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 13px; color: var(--text-muted);
+  }
+  .meta-icon { font-size: 14px; }
+  .leader-badge {
+    color: #fbbf24; font-weight: 600;
   }
 
-  .profile-header {
-    display: flex;
-    align-items: center;
-    gap: 24px;
-    margin-bottom: 24px;
+  /* Кнопка редактирования */
+  .btn-edit {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 20px; border-radius: 50px;
+    background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border);
+    color: var(--text-main); font-weight: 500; font-size: 14px;
+    cursor: pointer; transition: all 0.25s;
   }
-
-  .profile-avatar {
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    background: var(--accent);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 40px;
-    font-weight: 700;
-    flex-shrink: 0;
-  }
-
-  .profile-avatar img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 50%;
-  }
-
-  .profile-info h2 {
-    font-size: 28px;
-    font-weight: 700;
-    margin-bottom: 4px;
-  }
-
-  .username {
-    color: var(--accent);
-    font-weight: 600;
-    margin-bottom: 4px;
-  }
-
-  .email {
-    color: var(--text-secondary);
-    font-size: 14px;
-    margin-bottom: 8px;
-  }
-
-  .member-since {
-    color: var(--text-secondary);
-    font-size: 13px;
-    opacity: 0.8;
-  }
-
-  .profile-stats {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
-    margin-bottom: 24px;
-  }
-
-  .stat-item {
-    text-align: center;
-    padding: 16px;
-    background: rgba(99, 102, 241, 0.05);
-    border-radius: 12px;
-    border: 1px solid var(--card-border);
-  }
-
-  .stat-value {
-    font-size: 28px;
-    font-weight: 700;
-    color: var(--accent);
-    margin-bottom: 4px;
-  }
-
-  .stat-label {
-    font-size: 13px;
-    color: var(--text-secondary);
-    opacity: 0.9;
-  }
-
-  .btn-primary {
-    padding: 14px 28px;
-    background: linear-gradient(135deg, var(--accent), var(--accent-dark));
-    border: none;
-    border-radius: 12px;
-    color: white;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-    width: 100%;
-  }
-
-  .btn-primary:hover {
+  .btn-edit:hover {
+    background: rgba(255,255,255,0.1); border-color: var(--primary);
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
   }
 
-  .section {
-    background: var(--card-bg);
-    backdrop-filter: blur(15px);
-    border: 2px solid var(--card-border);
-    border-radius: 20px;
-    padding: 24px;
-    margin-bottom: 24px;
+  /* Статистика */
+  .profile-stats-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+  }
+  .stat-card {
+    background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md); padding: 16px; text-align: center;
+    transition: all 0.25s;
+  }
+  .stat-card:hover {
+    background: rgba(255,255,255,0.06); border-color: var(--primary);
+    transform: translateY(-3px);
+  }
+  .stat-card.highlight {
+    background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(99,102,241,0.05));
+    border-color: var(--primary);
+  }
+  .stat-icon { font-size: 24px; margin-bottom: 8px; }
+  .stat-value {
+    font-size: 28px; font-weight: 800; color: var(--primary);
+    margin-bottom: 4px; font-family: var(--font-display);
+  }
+  .stat-label { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+
+  /* Секции */
+  .profile-section { }
+  .section-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 20px; flex-wrap: wrap; gap: 12px;
+  }
+  .section-header h3 {
+    font-family: var(--font-display); font-size: 22px; font-weight: 700;
+  }
+  .section-badge, .section-count {
+    padding: 4px 12px; border-radius: 20px;
+    background: rgba(255,255,255,0.05); font-size: 12px; font-weight: 600;
+  }
+  .section-badge { color: var(--accent); }
+  .section-count { color: var(--text-muted); }
+
+  /* Команда */
+  .team-card {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 16px; border-radius: var(--radius-md);
+    background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border);
+  }
+  .team-name { font-weight: 600; margin-bottom: 4px; }
+  .team-desc { font-size: 13px; color: var(--text-muted); }
+  .team-role {
+    padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 600;
+    background: rgba(99,102,241,0.15); color: var(--accent);
+  }
+  .team-role.member {
+    background: rgba(255,255,255,0.05); color: var(--text-muted);
   }
 
-  .section h3 {
-    font-size: 20px;
-    font-weight: 700;
-    margin-bottom: 20px;
-    color: var(--accent);
-  }
-
+  /* Достижения */
   .achievements-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
     gap: 16px;
   }
-
   .achievement-card {
-    background: rgba(99, 102, 241, 0.05);
-    border: 1px solid var(--card-border);
-    border-radius: 16px;
-    padding: 20px;
+    background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md); padding: 20px;
+    transition: all 0.3s;
+  }
+  .achievement-card:hover {
+    border-color: var(--primary); transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.3);
+  }
+  .achievement-header {
+    display: flex; justify-content: space-between; align-items: start;
+    margin-bottom: 12px;
+  }
+  .achievement-icon { font-size: 28px; }
+  .achievement-rarity {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 4px;
+    background: rgba(255,255,255,0.1); color: var(--text-muted);
+  }
+  .achievement-title {
+    font-weight: 600; font-size: 15px; margin-bottom: 8px;
+  }
+  .achievement-desc {
+    font-size: 13px; color: var(--text-muted); line-height: 1.5;
+    margin-bottom: 12px;
+  }
+  .achievement-footer {
+    display: flex; justify-content: space-between; align-items: center;
+    padding-top: 12px; border-top: 1px solid var(--glass-border);
+  }
+  .unlock-date { font-size: 11px; color: var(--text-muted); }
+
+  /* История игр */
+  .games-history { display: flex; flex-direction: column; gap: 12px; }
+  .game-history-item {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 16px; border-radius: var(--radius-md);
+    background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border);
     transition: all 0.2s;
   }
-
-  .achievement-card:hover {
-    transform: translateY(-4px);
-    border-color: var(--accent);
-    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.2);
+  .game-history-item:hover { border-color: var(--glass-border); }
+  .game-title { font-weight: 600; margin-bottom: 4px; }
+  .game-meta {
+    display: flex; gap: 12px; font-size: 12px; color: var(--text-muted);
   }
-
-  .achievement-icon {
-    font-size: 32px;
-    margin-bottom: 12px;
+  .game-progress {
+    display: flex; align-items: center; gap: 12px; min-width: 120px;
   }
-
-  .achievement-name {
-    font-weight: 600;
-    margin-bottom: 8px;
-    font-size: 15px;
+  .progress-bar {
+    flex: 1; height: 6px; border-radius: 3px;
+    background: rgba(255,255,255,0.1); overflow: hidden;
   }
-
-  .achievement-desc {
-    color: var(--text-secondary);
-    font-size: 13px;
-    margin-bottom: 12px;
+  .progress-fill {
+    height: 100%; border-radius: 3px;
+    background: linear-gradient(90deg, var(--primary), var(--accent));
+    transition: width 0.5s ease;
   }
+  .progress-text { font-size: 12px; font-weight: 600; color: var(--accent); min-width: 36px; text-align: right; }
 
-  .achievement-date {
-    color: var(--text-secondary);
-    font-size: 12px;
-    opacity: 0.8;
-  }
-
+  /* Пустые состояния */
   .empty-state {
-    text-align: center;
-    padding: 40px 20px;
-    color: var(--text-secondary);
+    text-align: center; padding: 40px 20px; color: var(--text-muted);
   }
-
-  .empty-icon {
-    font-size: 48px;
-    margin-bottom: 16px;
-    opacity: 0.5;
+  .empty-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.4; }
+  .empty-state p { margin-bottom: 8px; }
+  .empty-subtext { font-size: 13px; opacity: 0.7; }
+  .btn-browse {
+    margin-top: 16px; padding: 10px 24px; border-radius: 50px;
+    background: var(--primary); border: none; color: white;
+    font-weight: 600; cursor: pointer; transition: all 0.2s;
   }
+  .btn-browse:hover { transform: scale(1.03); box-shadow: 0 8px 20px var(--primary-glow); }
 
-  .empty-subtext {
-    font-size: 14px;
-    margin-top: 8px;
-    opacity: 0.7;
+  /* Модальное окно */
+  .diamond-modal {
+    position: fixed; inset: 0; z-index: 2000;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none; transition: opacity 0.3s;
   }
-
-  .stats-list {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+  .diamond-modal.show { opacity: 1; pointer-events: auto; }
+  .modal-backdrop {
+    position: absolute; inset: 0; background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(8px);
   }
-
-  .stat-row {
-    background: rgba(99, 102, 241, 0.05);
-    border: 1px solid var(--card-border);
-    border-radius: 12px;
-    padding: 16px;
+  .modal-content {
+    position: relative; width: 100%; max-width: 380px;
+    padding: 32px 28px; border-radius: 28px; text-align: center;
+    transform: scale(0.95) translateY(15px); transition: all 0.35s cubic-bezier(0.34,1.56,0.64,1);
   }
-
-  .stat-game {
-    font-weight: 600;
-    margin-bottom: 8px;
-    color: var(--accent);
+  .diamond-modal.show .modal-content { transform: scale(1) translateY(0); }
+  .modal-close {
+    position: absolute; top: 16px; right: 16px;
+    width: 32px; height: 32px; border-radius: 10px;
+    background: rgba(255,255,255,0.05); border: none;
+    color: var(--text-muted); cursor: pointer; transition: all 0.2s;
   }
-
-  .stat-detail {
-    color: var(--text-secondary);
-    font-size: 14px;
-    margin-bottom: 4px;
+  .modal-close:hover { background: rgba(255,255,255,0.1); color: var(--text-main); }
+  .modal-header { margin-bottom: 20px; }
+  .gem-icon-large { font-size: 42px; margin-bottom: 10px; animation: float 4s ease-in-out infinite; }
+  .modal-header h3 { font-family: var(--font-display); font-size: 22px; }
+  .balance-display {
+    padding: 18px; border-radius: 14px; margin-bottom: 24px;
+    background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border);
   }
+  .balance-amount {
+    display: block; font-size: 32px; font-weight: 800;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .balance-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+  .info-card {
+    padding: 14px; border-radius: 12px; text-align: left;
+    background: rgba(255,255,255,0.02); border: 1px solid transparent;
+  }
+  .info-card:hover { border-color: var(--glass-border); }
+  .info-icon { font-size: 18px; margin-bottom: 6px; }
+  .info-card h4 { font-size: 13px; margin-bottom: 4px; }
+  .info-card p { font-size: 11px; color: var(--text-muted); line-height: 1.4; }
+  .modal-footer-note { font-size: 11px; color: var(--text-muted); opacity: 0.7; font-style: italic; }
 
+  /* Анимации */
+  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+  @keyframes pulse { 0%,100%{opacity:0.6} 50%{opacity:0.9} }
+  .fade-in { animation: fadeInUp 0.6s ease-out forwards; opacity: 0; }
+  @keyframes fadeInUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+
+  /* Адаптив */
   @media (max-width: 768px) {
-    .profile-header {
-      flex-direction: column;
-      text-align: center;
-    }
-
-    .profile-stats {
-      grid-template-columns: repeat(2, 1fr);
-    }
-
-    .achievements-grid {
-      grid-template-columns: 1fr;
-    }
+    .profile-hero-content { flex-direction: column; text-align: center; }
+    .profile-meta { justify-content: center; }
+    .profile-stats-grid { grid-template-columns: repeat(3, 1fr); }
+    .achievements-grid { grid-template-columns: 1fr; }
+    .game-history-item { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .game-progress { width: 100%; }
+    .nav-content { padding: 0 16px; }
+    .page-title { font-size: 19px; }
+  }
+  @media (max-width: 480px) {
+    .profile-stats-grid { grid-template-columns: 1fr; }
+    .info-grid { grid-template-columns: 1fr; }
   }
 </style>
 
 <script>
 function editProfile() {
-  // Здесь будет модальное окно для редактирования профиля
-  alert('Функция редактирования профиля будет добавлена позже');
+  alert('Редактирование профиля будет доступно в следующем обновлении ✨');
 }
+
+function showDiamondModal() {
+  const modal = document.getElementById('diamondModal');
+  modal.classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+
+function hideDiamondModal() {
+  const modal = document.getElementById('diamondModal');
+  modal.classList.remove('show');
+  document.body.style.overflow = '';
+}
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') hideDiamondModal();
+});
+
+// Плавное появление элементов при скролле
+document.addEventListener('DOMContentLoaded', () => {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.opacity = '1';
+        entry.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.fade-in').forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(20px)';
+    el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+    observer.observe(el);
+  });
+});
 </script>
 {% endblock %}
