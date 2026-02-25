@@ -11,6 +11,12 @@
 <!-- Основной контейнер -->
 <div class="game-wrapper">
   
+  <!-- Экран загрузки -->
+  <div class="loading-screen" id="loadingScreen">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Загрузка сцены...</div>
+  </div>
+
   <!-- Фон сцены -->
   <div class="scene-background" id="sceneBackground"></div>
   <div class="scene-overlay"></div>
@@ -45,7 +51,12 @@
     <span class="currency-value" id="diamondAmount">{{ user.diamonds }}</span>
   </div>
 
-  <!-- Диалоговое окно -->
+  <!-- Контейнер выборов (Размещен ВЫШЕ диалога) -->
+  <div class="choices-container" id="choicesContainer">
+    <!-- Кнопки генерируются JS -->
+  </div>
+
+  <!-- Диалоговое окно (В самом низу) -->
   <div class="dialogue-container" id="dialogueContainer">
     <div class="dialogue-box glass-panel">
       <div class="speaker-name" id="speakerName">...</div>
@@ -54,11 +65,6 @@
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
       </div>
     </div>
-  </div>
-
-  <!-- Контейнер выборов -->
-  <div class="choices-container" id="choicesContainer">
-    <!-- Кнопки генерируются JS -->
   </div>
 
 </div>
@@ -70,8 +76,6 @@
     <h2>Меню игры</h2>
     <div class="menu-grid">
       <button class="menu-item" onclick="resumeGame()">▶ Продолжить</button>
-      <button class="menu-item" onclick="saveGame()">💾 Сохранить</button>
-      <button class="menu-item" onclick="loadGame()">📂 Загрузить</button>
       <button class="menu-item danger" onclick="exitToDashboard()">🚪 Выйти</button>
     </div>
   </div>
@@ -125,6 +129,11 @@
     --radius-lg: 24px;
     --radius-md: 16px;
     --radius-sm: 8px;
+
+    /* Размеры для layout */
+    --dialogue-height: 160px;
+    --choices-gap: 24px;
+    --safe-area-bottom: 20px;
   }
 
   [data-theme="orange"] {
@@ -145,11 +154,65 @@
     position: relative; width: 100%; height: 100%; display: flex; flex-direction: column;
   }
 
+  /* Экран загрузки */
+  .loading-screen {
+    position: absolute;
+    inset: 0;
+    background: rgba(5, 5, 8, 0.95);
+    backdrop-filter: blur(10px);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    opacity: 1;
+    transition: opacity 0.4s ease;
+    pointer-events: auto;
+  }
+
+  .loading-screen.hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 3px solid rgba(139, 92, 246, 0.2);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 20px;
+    box-shadow: 0 0 20px var(--primary-glow);
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .loading-text {
+    font-family: var(--font-display);
+    font-size: 18px;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+  }
+
   /* Фон */
   .scene-background {
     position: absolute; inset: 0; background-size: cover; background-position: center;
-    transition: background-image 0.5s ease; z-index: 0;
+    transition: background-image 0.5s ease, opacity 0.4s ease; z-index: 0;
   }
+
+  .scene-background.fade {
+    opacity: 0.5;
+  }
+
   .scene-overlay {
     position: absolute; inset: 0;
     background: radial-gradient(circle at center, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.7) 100%);
@@ -161,15 +224,28 @@
     position: absolute; bottom: 0; left: 0; width: 100%; height: 100%;
     z-index: 10; pointer-events: none; display: flex; justify-content: center; align-items: flex-end;
   }
+
   .character-sprite {
     height: 85%; max-height: 800px; width: auto; object-fit: contain;
     filter: drop-shadow(0 0 20px rgba(0,0,0,0.5));
-    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease, filter 0.4s;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.6s ease, filter 0.6s ease;
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
   }
-  /* Анимации спрайта из референса */
-  .character-sprite.hide { opacity: 0; transform: translateY(20px) scale(0.95); }
-  .character-sprite.visible { opacity: 1; transform: translateY(0) scale(1); }
-  .character-sprite.blackout { filter: brightness(0.2); }
+
+  .character-sprite.show {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  .character-sprite.hide {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+
+  .character-sprite.blackout {
+    filter: brightness(0.2) drop-shadow(0 0 20px rgba(0,0,0,0.5));
+  }
 
   /* HUD */
   .game-hud {
@@ -178,7 +254,7 @@
     pointer-events: none;
   }
   .hud-left, .hud-right { display: flex; align-items: center; gap: 16px; pointer-events: auto; }
-  
+
   .game-title {
     font-family: var(--font-display); font-size: 20px; font-weight: 700;
     text-shadow: 0 2px 4px rgba(0,0,0,0.8); letter-spacing: -0.5px;
@@ -205,74 +281,162 @@
   }
   .currency-pill:active { transform: scale(0.95); }
 
-  /* Диалог */
-  .dialogue-container {
-    position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
-    width: 90%; max-width: 900px; z-index: 50; pointer-events: none;
-    transition: opacity 0.3s, transform 0.3s;
-  }
-  .dialogue-container.hidden { opacity: 0; transform: translate(-50%, 20px); pointer-events: none; }
-
-  .dialogue-box {
-    background: var(--glass-bg); backdrop-filter: blur(16px);
-    border: 1px solid var(--glass-border); border-radius: var(--radius-lg);
-    padding: 24px; min-height: 140px; position: relative;
-    pointer-events: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-    display: flex; flex-direction: column;
-  }
-
-  .speaker-name {
-    font-family: var(--font-display); font-size: 20px; font-weight: 700;
-    color: var(--primary); margin-bottom: 12px; align-self: flex-start;
-    border-bottom: 2px solid var(--primary); padding-bottom: 2px;
-  }
-
-  .dialogue-text {
-    font-size: 16px; line-height: 1.6; color: var(--text-main);
-    opacity: 0; animation: textReveal 0.6s forwards;
-  }
-  @keyframes textReveal { from { opacity: 0; filter: blur(3px); } to { opacity: 1; filter: blur(0); } }
-
-  .next-indicator {
-    position: absolute; bottom: 16px; right: 20px; color: var(--primary);
-    animation: bounce 1.5s infinite; opacity: 0.7;
-  }
-  @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(5px); } }
-
-  /* Выборы */
+  /* --- ВЫБОРЫ --- */
   .choices-container {
-    position: absolute; bottom: 200px; left: 50%; transform: translateX(-50%);
-    width: 100%; max-width: 600px; z-index: 60;
-    display: flex; flex-direction: column; gap: 12px; padding: 0 20px;
+    position: absolute;
+    bottom: calc(var(--dialogue-height) + var(--choices-gap) + var(--safe-area-bottom));
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 600px;
+    z-index: 60;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 0 20px;
+    pointer-events: none;
+    max-height: 40vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary) transparent;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+
+  .choices-container.hidden {
+    opacity: 0;
+    transform: translate(-50%, 20px);
     pointer-events: none;
   }
-  
+
+  .choices-container::-webkit-scrollbar { width: 6px; }
+  .choices-container::-webkit-scrollbar-track { background: transparent; }
+  .choices-container::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 3px; }
+
   .choice-wrapper {
-    pointer-events: auto; display: grid; gap: 8px;
-    animation: slideUp 0.4s ease-out forwards; opacity: 0; transform: translateY(20px);
+    pointer-events: auto;
+    display: grid;
+    gap: 8px;
+    animation: slideUp 0.4s ease-out forwards;
+    opacity: 0;
+    transform: translateY(20px);
+    width: 100%;
   }
   @keyframes slideUp { to { opacity: 1; transform: translateY(0); } }
 
   .choice-btn {
-    background: rgba(20, 20, 30, 0.9); border: 1px solid var(--glass-border);
-    color: var(--text-main); padding: 16px 20px; border-radius: var(--radius-md);
-    font-size: 15px; font-weight: 600; text-align: center; cursor: pointer;
-    transition: all 0.2s; backdrop-filter: blur(4px);
-    display: flex; justify-content: center; align-items: center; gap: 10px;
+    background: rgba(20, 20, 30, 0.9);
+    border: 1px solid var(--glass-border);
+    color: var(--text-main);
+    padding: 16px 20px;
+    border-radius: var(--radius-md);
+    font-size: 15px;
+    font-weight: 600;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    white-space: normal;
+    word-wrap: break-word;
+    width: 100%;
+    min-height: 50px;
   }
+
   .choice-btn:hover {
-    background: var(--primary); border-color: var(--primary);
-    transform: translateY(-2px); box-shadow: 0 8px 20px var(--primary-glow);
+    background: var(--primary);
+    border-color: var(--primary);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px var(--primary-glow);
   }
 
   .choice-status {
-    display: flex; justify-content: center; gap: 8px;
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
   }
   .status-badge {
-    background: rgba(0,0,0,0.6); padding: 4px 10px; border-radius: 12px;
-    font-size: 12px; font-weight: 700; color: var(--accent);
+    background: rgba(0,0,0,0.6);
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--accent);
     border: 1px solid var(--glass-border);
+    white-space: nowrap;
   }
+
+  /* --- ДИАЛОГ --- */
+  .dialogue-container {
+    position: absolute;
+    bottom: var(--safe-area-bottom);
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 900px;
+    z-index: 50;
+    pointer-events: none;
+    transition: opacity 0.3s, transform 0.3s;
+    height: var(--dialogue-height);
+  }
+  .dialogue-container.hidden { opacity: 0; transform: translate(-50%, 20px); pointer-events: none; }
+
+  .dialogue-box {
+    background: var(--glass-bg);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    height: 100%;
+    position: relative;
+    pointer-events: auto;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .speaker-name {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 12px;
+    align-self: flex-start;
+    border-bottom: 2px solid var(--primary);
+    padding-bottom: 2px;
+    flex-shrink: 0;
+  }
+
+  .dialogue-text {
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--text-main);
+    opacity: 0;
+    animation: textReveal 0.6s forwards;
+    overflow-y: auto;
+    padding-right: 10px;
+    flex-grow: 1;
+  }
+  .dialogue-text::-webkit-scrollbar { width: 4px; }
+  .dialogue-text::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 2px; }
+
+  @keyframes textReveal { from { opacity: 0; filter: blur(3px); } to { opacity: 1; filter: blur(0); } }
+
+  .next-indicator {
+    position: absolute;
+    bottom: 16px;
+    right: 20px;
+    color: var(--primary);
+    animation: bounce 1.5s infinite;
+    opacity: 0.7;
+    flex-shrink: 0;
+  }
+  @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(5px); } }
 
   /* Меню паузы */
   .pause-menu {
@@ -327,14 +491,33 @@
 
   /* Адаптивность */
   @media (max-width: 768px) {
+    :root {
+      --dialogue-height: 140px;
+      --safe-area-bottom: 16px;
+    }
+
     .game-hud { padding: 12px 16px; }
     .game-title { font-size: 16px; }
     .character-sprite { height: 60vh; }
-    .dialogue-box { padding: 16px; min-height: 110px; }
+
+    .dialogue-box { padding: 16px; }
     .speaker-name { font-size: 16px; }
     .dialogue-text { font-size: 15px; }
-    .choices-container { bottom: 160px; }
+
+    .choices-container {
+      bottom: calc(var(--dialogue-height) + 16px + var(--safe-area-bottom));
+      max-height: 35vh;
+    }
+
     .currency-pill { top: 70px; right: 16px; padding: 6px 12px; font-size: 13px; }
+  }
+
+  @media (max-height: 600px) {
+    :root {
+      --dialogue-height: 120px;
+    }
+    .character-sprite { height: 50vh; }
+    .choice-btn { padding: 12px; font-size: 14px; }
   }
 </style>
 
@@ -346,6 +529,7 @@
 
   // Элементы DOM
   const els = {
+    loading: document.getElementById('loadingScreen'),
     bg: document.getElementById('sceneBackground'),
     sprite: document.getElementById('characterSprite'),
     speaker: document.getElementById('speakerName'),
@@ -360,8 +544,7 @@
 
   document.addEventListener('DOMContentLoaded', function() {
     loadScene();
-    
-    // Обработка Escape
+
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape') {
         hideDiamondModal();
@@ -371,82 +554,96 @@
   });
 
   function loadScene() {
-    // Фон
-    if (sceneData.background) {
-      els.bg.style.backgroundImage = `url('${sceneData.background}')`;
-    }
+    // Показываем экран загрузки
+    els.loading.classList.remove('hidden');
+    els.bg.classList.add('fade');
 
-    // Спрайт
-    if (sceneData.character_image) {
-      els.sprite.src = sceneData.character_image;
-      
-      // Сброс классов анимации
-      els.sprite.className = 'character-sprite';
-      
-      // Логика эффектов из референса
-      let sceneEffect = null;
-      if (sceneData.scene_effect == 'character_appears') {
-        sceneEffect = () => {
-          els.sprite.classList.add('hide');
-          // Небольшая задержка для срабатывания CSS transition
-          setTimeout(() => els.sprite.classList.add('visible'), 50);
-        };
-      } else if(sceneData.scene_effect == 'character_disappears') {
-        sceneEffect = () => {
-          els.sprite.classList.add('visible');
-          setTimeout(() => els.sprite.classList.add('hide'), 50);
-        };
-      } else if(sceneData.scene_effect == 'blackout') {
-        sceneEffect = () => {
-          els.sprite.classList.add('blackout');
-        };
+    // Имитация загрузки для плавности
+    setTimeout(() => {
+      // Фон
+      if (sceneData.background) {
+        els.bg.style.backgroundImage = `url('${sceneData.background}')`;
       }
 
-      if (sceneEffect) {
-        els.sprite.onload = sceneEffect;
+      // Спрайт
+      const sprite = els.sprite;
+
+      if (sceneData.character_image) {
+        sprite.src = sceneData.character_image;
+        sprite.style.display = 'block';
+
+        sprite.classList.remove('show', 'hide', 'blackout');
+
+        const applyEffect = () => {
+          setTimeout(() => {
+            if (sceneData.scene_effect == 'character_appears') {
+              sprite.classList.add('show');
+            } else if (sceneData.scene_effect == 'character_disappears') {
+              sprite.classList.add('hide');
+            } else if (sceneData.scene_effect == 'blackout') {
+              sprite.classList.add('show', 'blackout');
+            } else {
+              sprite.classList.add('show');
+            }
+          }, 50);
+        };
+
+        if (sprite.complete) {
+          applyEffect();
+        } else {
+          sprite.onload = applyEffect;
+          sprite.onerror = () => {
+            sprite.classList.add('show');
+          };
+        }
       } else {
-        els.sprite.classList.add('visible');
+        sprite.style.display = 'none';
+        sprite.classList.remove('show', 'hide', 'blackout');
       }
-    } else {
-      els.sprite.style.display = 'none';
-    }
 
-    // Текст и имя
-    els.speaker.innerHTML = sceneData.character_name || '';
-    
-    // Анимация текста
-    els.text.innerHTML = sceneData.dialogue || '';
-    els.text.style.animation = 'none';
-    els.text.offsetHeight; /* trigger reflow */
-    els.text.style.animation = 'textReveal 0.6s forwards';
+      // Текст и имя
+      els.speaker.innerHTML = sceneData.character_name || '';
 
-    // Обновление алмазов
-    const diamondsCount = sceneData.current_user_diamonds || {{ user.diamonds }};
-    els.diamondAmount.textContent = diamondsCount;
-    els.modalDiamondBalance.textContent = diamondsCount;
+      els.text.innerHTML = sceneData.dialogue || '';
+      els.text.style.animation = 'none';
+      els.text.offsetHeight;
+      els.text.style.animation = 'textReveal 0.6s forwards';
+      els.text.scrollTop = els.text.scrollHeight;
 
-    // Рендер выборов
-    renderChoices();
+      // Обновление алмазов
+      const diamondsCount = sceneData.current_user_diamonds || {{ user.diamonds }};
+      els.diamondAmount.textContent = diamondsCount;
+      els.modalDiamondBalance.textContent = diamondsCount;
+
+      // Рендер выборов
+      renderChoices();
+
+      // Скрываем экран загрузки
+      els.bg.classList.remove('fade');
+      els.loading.classList.add('hidden');
+    }, 400);
   }
 
   function renderInputChoice() {
      const choicesContainer = els.choices;
      choicesContainer.innerHTML = '';
-     
+     choicesContainer.classList.remove('hidden');
+
      const wrapper = document.createElement('div');
      wrapper.className = 'choice-wrapper';
-     
+
      const input = document.createElement('input');
      input.className = 'choice-btn';
      input.style.background = 'rgba(255,255,255,0.1)';
      input.style.textAlign = 'left';
      input.placeholder = 'Введите ответ...';
-     
+     input.style.justifyContent = 'flex-start';
+
      const sendBtn = document.createElement('div');
      sendBtn.className = 'choice-btn';
      sendBtn.innerHTML = 'Отправить';
      sendBtn.onclick = makeInputChoice;
-     
+
      wrapper.appendChild(input);
      wrapper.appendChild(sendBtn);
      choicesContainer.appendChild(wrapper);
@@ -454,6 +651,7 @@
 
   function renderChoices() {
     els.choices.innerHTML = '';
+    els.choices.classList.remove('hidden');
 
     if (sceneData.scene_type == 'input') {
       renderInputChoice();
@@ -463,12 +661,16 @@
     if (!sceneData.choices || sceneData.choices.length === 0) {
       const wrapper = document.createElement('div');
       wrapper.className = 'choice-wrapper';
-      
+
       const continueBtn = document.createElement('div');
       continueBtn.className = 'choice-btn';
       continueBtn.innerHTML = 'Продолжить';
-      continueBtn.onclick = () => goToNextScene();
-      
+      continueBtn.onclick = () => {
+        // Скрываем выборы при нажатии
+        els.choices.classList.add('hidden');
+        goToNextScene();
+      };
+
       wrapper.appendChild(continueBtn);
       els.choices.appendChild(wrapper);
       return;
@@ -485,9 +687,12 @@
       const btn = document.createElement('div');
       btn.className = 'choice-btn';
       btn.innerHTML = choice.data.text;
-      btn.onclick = () => makeChoice(choice.data.id);
+      btn.onclick = () => {
+        // Скрываем выборы при выборе
+        els.choices.classList.add('hidden');
+        makeChoice(choice.data.id);
+      };
 
-      // Премиум метка
       if(choice.data.premium) {
         const badge = document.createElement('span');
         badge.className = 'status-badge';
@@ -495,7 +700,6 @@
         statusContainer.appendChild(badge);
       }
 
-      // Лидер метка
       if(choice.data.only_leader) {
         const badge = document.createElement('span');
         badge.className = 'status-badge';
@@ -503,7 +707,6 @@
         statusContainer.appendChild(badge);
       }
 
-      // Замок
       if (!choice.is_available){
         const badge = document.createElement('span');
         badge.className = 'status-badge';
@@ -534,11 +737,7 @@
 
       if (response.ok && data.success) {
         sceneData = data.next_scene;
-        
-        // Анимация перехода
         els.text.style.opacity = '0';
-        els.choices.innerHTML = '';
-        
         setTimeout(() => {
           loadScene();
         }, 200);
@@ -568,7 +767,7 @@
       if (response.ok && data.success) {
         sceneData = data.next_scene;
         els.text.style.opacity = '0';
-        els.choices.innerHTML = '';
+        els.choices.classList.add('hidden');
         setTimeout(() => loadScene(), 200);
       } else {
         alert(data.message || 'Ошибка');
@@ -591,7 +790,6 @@
       if (response.ok && data.success) {
         sceneData = data.next_scene;
         els.text.style.opacity = '0';
-        els.choices.innerHTML = '';
         setTimeout(() => loadScene(), 200);
       } else {
         if (data.is_ending) {
@@ -604,30 +802,6 @@
       console.error('Ошибка:', error);
       alert('Ошибка подключения');
     }
-  }
-
-  async function saveGame() {
-    try {
-      const response = await fetch(`/api/games/${storyId}/save`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ game_state: sceneData, slot: 1 })
-      });
-      const data = await response.json();
-      if (response.ok && data.success) {
-        alert('Игра сохранена!');
-        hideMenu();
-      } else {
-        alert(data.error || 'Ошибка сохранения');
-      }
-    } catch (error) {
-      alert('Ошибка сети');
-    }
-  }
-
-  function loadGame() {
-    hideMenu();
-    location.reload();
   }
 
   function goBack() {
