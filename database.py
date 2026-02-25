@@ -265,6 +265,7 @@ class Choice(Base):
     required_passion_level: Mapped[str] = mapped_column(Integer, default=0)
     required_friendship_level: Mapped[str] = mapped_column(Integer, default=0)
     unlocked_for_teams: Mapped[str] = mapped_column(String, nullable=False)
+    visible_only_for_team: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
 
     scene: Mapped["Scene"] = relationship(
         "Scene",

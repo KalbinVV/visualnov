@@ -139,6 +139,7 @@ class GameService:
 
             return True, '', choice.next_scene_id, choice.next_chapter_id
 
+
     def is_choice_available(self, user_id: int, choice_id: int) -> tuple[bool,str]:
         with Session(self.db.engine) as s:
             choice = s.get(Choice, choice_id)
@@ -174,7 +175,23 @@ class GameService:
                 if user.team_id not in teams_ids:
                     return False, 'Ваша команда не разблокировала ещё данный вариант!'
 
+            if choice.visible_only_for_team:
+                if user.team_id != choice.visible_only_for_team:
+                    return False, 'Вам недоступен этот выбор!'
+
             return True, ''
+
+
+    def is_choice_visible_for_user(self, user_id: int, choice_id: int) -> bool:
+        with Session(self.db.engine) as s:
+            choice = s.get(Choice, choice_id)
+            user = s.get(User, user_id)
+
+            if choice.visible_only_for_team:
+                if user.team_id != choice.visible_only_for_team:
+                    return False
+
+        return True
 
 
     def get_current_user_scene_data(self, db: Database, user_id: int, story_id: int) -> Optional[Dict[str, Any]]:
@@ -205,6 +222,7 @@ class GameService:
                         'is_available': self.is_choice_available(user.id, choice.id)[0]
                     }
                     for choice in scene.choices
+                    if self.is_choice_visible_for_user(user_id, choice.id)
                 ] if scene.scene_type != 'input' else []
             }
 

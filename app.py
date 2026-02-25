@@ -518,7 +518,8 @@ def to_next_scene(story_id: int):
                 'dialogue': scene.dialogue_text.replace("{name}", user.display_name),
                 'choices': [{'data': Choice.as_dict(choice),
                              'is_available': game_service.is_choice_available(user.id, choice.id)[0]}
-                            for choice in scene.choices],
+                            for choice in scene.choices
+                            if game_service.is_choice_visible_for_user(user.id, choice.id)],
                 'current_user_diamonds': user.diamonds,
                 'scene_type': scene.scene_type,
                 'scene_effect': scene.scene_effect
