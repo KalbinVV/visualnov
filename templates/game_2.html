@@ -791,7 +791,7 @@
         hideChoices();
         setTimeout(() => {
           makeChoice(choice.data.id);
-        }, 50);
+        }, 20);
       };
 
       wrapper.appendChild(btn);
@@ -816,7 +816,7 @@
         els.text.style.opacity = '0';
         setTimeout(() => {
           loadScene();
-        }, 50);
+        }, 20);
       } else {
         alert(data.message || 'Ошибка при совершении выбора');
       }
@@ -843,7 +843,7 @@
       if (response.ok && data.success) {
         sceneData = data.next_scene;
         els.text.style.opacity = '0';
-        setTimeout(() => loadScene(), 200);
+        setTimeout(() => loadScene(), 50);
       } else {
         alert(data.message || 'Ошибка');
       }
@@ -865,7 +865,7 @@
       if (response.ok && data.success) {
         sceneData = data.next_scene;
         els.text.style.opacity = '0';
-        setTimeout(() => loadScene(), 200);
+        setTimeout(() => loadScene(), 50);
       } else {
         if (data.is_ending) {
           window.location.href = `/ending/${storyId}/`;
