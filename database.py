@@ -266,6 +266,8 @@ class Choice(Base):
     required_friendship_level: Mapped[str] = mapped_column(Integer, default=0)
     unlocked_for_teams: Mapped[str] = mapped_column(String, nullable=False)
     visible_only_for_team: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    move_to_url: Mapped[[Optional[str]]] = mapped_column(String, nullable=True)
+
 
     scene: Mapped["Scene"] = relationship(
         "Scene",
@@ -292,7 +294,9 @@ class Choice(Base):
                 'required_friendship_level': choice.required_friendship_level,
                 'is_legend_choice': choice.is_legend_choice,
                 'legend_title': choice.legend_title,
-                'legend_icon': choice.legend_icon
+                'legend_icon': choice.legend_icon,
+                'visible_only_for_team': choice.visible_only_for_team,
+                'move_to_url': choice.move_to_url
                 }
 
 

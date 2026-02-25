@@ -1064,7 +1064,8 @@ def api_get_choices(scene_id):
                          'is_legend_choice': choice.is_legend_choice,
                          'legend_title': choice.legend_title,
                          'legend_icon': choice.legend_icon,
-                         'visible_only_for_team': choice.visible_only_for_team} for choice in choices]
+                         'visible_only_for_team': choice.visible_only_for_team,
+                         'move_to_url': choice.move_to_url} for choice in choices]
         }), 200
 
     except Exception as e:

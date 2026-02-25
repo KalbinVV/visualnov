@@ -787,12 +787,18 @@
 
       btn.innerHTML = `${badgeHtml}<span class="choice-text">${choice.data.text}</span>`;
 
-      btn.onclick = () => {
-        hideChoices();
-        setTimeout(() => {
-          makeChoice(choice.data.id);
-        }, 20);
-      };
+      if (!choice.data.move_to_url) {
+        btn.onclick = () => {
+          hideChoices();
+          setTimeout(() => {
+            makeChoice(choice.data.id);
+          }, 20);
+        };
+      } else {
+        btn.onclick = () => {
+          window.location.href = choice.data.move_to_url
+        }
+      }
 
       wrapper.appendChild(btn);
       els.choices.appendChild(wrapper);
