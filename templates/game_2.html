@@ -2,103 +2,212 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Визуальная новелла — Диалог</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>{{ game_info.title }} — USSC Romance</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap');
-
     :root {
-      --accent: #b08cff;
-      --accent-dark: #7a4fd9;
-      --accent-light: #d4b4ff;
-      --text-primary: #f0f0f5;
-      --text-secondary: #b0b0c0;
-      --bg-dark: #0a0a1f;
-      --bg-overlay: rgba(10, 10, 31, 0.85);
-      --border-color: rgba(176, 140, 255, 0.3);
+      --bg-deep: #050508;
+      --bg-surface: #0f0f16;
+      --primary: #8b5cf6;
+      --primary-glow: rgba(139, 92, 246, 0.5);
+      --accent: #c4b5fd;
+      --text-main: #ffffff;
+      --text-muted: #94a3b8;
+      --glass-bg: rgba(20, 20, 30, 0.75);
+      --glass-border: rgba(255, 255, 255, 0.08);
       --bubble-bg: rgba(255, 255, 255, 0.95);
-      --choice-bg: rgba(255, 255, 255, 0.92);
-      --glow: 0 0 25px rgba(176, 140, 255, 0.6);
-      --duration: 900ms;
-      --easing: cubic-bezier(.22,.85,.36,1);
+      --bubble-text: #1a1a2e;
+
+      --font-display: 'Playfair Display', serif;
+      --font-ui: 'Inter', sans-serif;
+
+      --radius-lg: 24px;
+      --radius-md: 16px;
+      --radius-sm: 12px;
+
+      --transition-fast: 0.2s ease;
+      --transition-smooth: 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
+    [data-theme="orange"] {
+      --primary: #f97316; --primary-glow: rgba(249, 115, 22, 0.5); --accent: #fdba74;
+      --bg-deep: #080402; --bg-surface: #150a05;
     }
+    [data-theme="purple"] {
+      --primary: #8b5cf6; --primary-glow: rgba(139, 92, 246, 0.5); --accent: #c4b5fd;
+      --bg-deep: #0a0515; --bg-surface: #140a1e;
+    }
+    [data-theme="dark-green"] {
+      --primary: #10b981; --primary-glow: rgba(16, 185, 129, 0.5); --accent: #6ee7b7;
+      --bg-deep: #020403; --bg-surface: #05150f;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
     body {
-      font-family: 'Inter', system-ui, -apple-system, sans-serif;
-      background: var(--bg-dark);
-      color: var(--text-primary);
+      font-family: var(--font-ui);
+      background: var(--bg-deep);
+      background-image:
+        radial-gradient(circle at 20% 30%, rgba(139, 92, 246, 0.08) 0%, transparent 45%),
+        radial-gradient(circle at 80% 70%, rgba(139, 92, 246, 0.05) 0%, transparent 45%);
+      color: var(--text-main);
       min-height: 100vh;
       overflow: hidden;
-      background: linear-gradient(135deg, #1a1a3d 0%, #0f0f2a 100%);
       position: relative;
     }
 
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(180deg, transparent 60%, rgba(5,5,8,0.9) 100%);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* === TOP BAR === */
+    .top-bar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      background: rgba(5, 5, 8, 0.8);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--glass-border);
+      z-index: 100;
+    }
+
+    .top-left, .top-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .game-title {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-main);
+      max-width: 180px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .icon-btn {
+      width: 42px; height: 42px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--glass-border);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      color: var(--text-muted);
+    }
+    .icon-btn:hover, .icon-btn:active {
+      background: rgba(255,255,255,0.12);
+      border-color: var(--primary);
+      color: var(--text-main);
+      transform: scale(1.05);
+    }
+    .icon-btn svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; }
+
+    /* === DIAMOND COUNTER === */
+    .diamonds {
+      position: fixed;
+      top: 72px;
+      right: 16px;
+      z-index: 99;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid var(--glass-border);
+      border-radius: 50px;
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--accent);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      user-select: none;
+    }
+    .diamonds:hover {
+      background: rgba(255,255,255,0.15);
+      border-color: var(--primary);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    }
+    .diamonds:active { transform: scale(0.98); }
+
+    /* === SCENE & CHARACTER === */
     .scene {
-      overflow-y: auto;
-      height: 90vh;
+      position: relative;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
       display: flex;
       flex-direction: column;
       justify-content: flex-end;
-      scroll-behavior: smooth;
     }
 
     .character {
-      background-size: cover;
-      background-position: center 20%;
-      background-repeat: no-repeat;
       position: absolute;
-      inset: 0;
-      pointer-events: none;
-      z-index: 0;
-      transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1),
-                  filter 0.4s ease;
-      filter: brightness(0.92) contrast(1.05);
-      top: 10%;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
       width: 100%;
+      max-width: 520px;
+      max-height: 75vh;
+      object-fit: contain;
+      object-position: bottom center;
+      filter: drop-shadow(0 20px 40px rgba(0,0,0,0.5));
+      transition: opacity 0.5s ease, transform 0.6s cubic-bezier(0.4,0,0.2,1);
+      z-index: 5;
+      pointer-events: none;
     }
+    .character.hide { opacity: 0; }
+    .character.blackout { filter: brightness(0.4) contrast(0.9); }
 
-    .character:hover {
-      transform: scale(1.015);
-    }
-
+    /* === DIALOGUE AREA === */
     .dialogue-container {
       position: relative;
-      z-index: 10;
-      padding: 0 24px 14vh;
+      z-index: 20;
+      padding: 0 16px 24px;
+      width: 100%;
+      max-width: 720px;
+      margin: 0 auto;
       transition: opacity 0.3s ease, transform 0.3s ease;
     }
-
     .dialogue-container.hidden {
       opacity: 0;
-      transform: translateY(20px);
+      transform: translateY(30px);
       pointer-events: none;
     }
 
     .bubble {
-      backdrop-filter: blur(28px);
-      border: 2px solid var(--accent);
-      border-radius: 28px 28px 28px 12px;
-      padding: 24px 28px 28px;
-      position: relative;
-      box-shadow: var(--glow),
-                  0 20px 40px rgba(0, 0, 0, 0.45),
-                  inset 0 2px 0 rgba(255,255,255,0.6);
       background: var(--bubble-bg);
-      color: #1a1a2e;
-      transition: all 0.25s cubic-bezier(0.4, 0.0, 0.2, 1);
+      color: var(--bubble-text);
+      border-radius: 24px 24px 24px 8px;
+      padding: 20px 22px 24px 64px;
+      position: relative;
+      margin-bottom: 16px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.4), 0 0 0 1px var(--glass-border);
       opacity: 0;
       transform: translateY(20px);
-      animation: bubblePop 0.4s forwards;
-      max-height: 40vh;
+      transition: all 0.4s cubic-bezier(0.34,1.56,0.64,1);
+      max-height: 45vh;
       overflow-y: auto;
+      scrollbar-width: none;
     }
-
+    .bubble::-webkit-scrollbar { display: none; }
     .bubble.show {
       opacity: 1;
       transform: translateY(0);
@@ -106,1047 +215,708 @@
 
     .name {
       position: absolute;
-      z-index: 10;
-      top: -18px;
-      left: 32px;
-      background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+      top: -14px;
+      left: 24px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-glow));
       color: white;
+      font-family: var(--font-display);
       font-weight: 700;
-      font-size: 1.15rem;
-      padding: 6px 18px;
-      border-radius: 40px;
-      box-shadow: 0 4px 15px rgba(176,140,255,0.5),
-                  inset 0 -2px 0 rgba(255,255,255,0.3);
-      letter-spacing: 0.4px;
+      font-size: 14px;
+      padding: 5px 16px;
+      border-radius: 50px;
+      box-shadow: 0 4px 15px var(--primary-glow);
+      letter-spacing: 0.3px;
       text-transform: uppercase;
-      font-family: 'Playfair Display', serif;
+      z-index: 2;
     }
 
     .text {
-      font-size: 1.08rem;
-      line-height: 1.55;
-      color: #1a1a2e;
+      font-size: 16px;
+      line-height: 1.6;
+      color: var(--bubble-text);
       font-weight: 500;
       opacity: 0;
-      animation: textReveal 0.6s 0.15s forwards;
-      overflow-wrap: break-word;
-      hyphens: auto;
-      -webkit-hyphens: auto;
-      -ms-hyphens: auto;
+      animation: textFadeIn 0.5s 0.15s forwards;
       word-break: break-word;
     }
-
-    @keyframes bubblePop {
-      from {
-        opacity: 0;
-        transform: scale(0.92) translateY(25px);
-      }
-      to {
-        opacity: 1;
-        transform: scale(1) translateY(0);
-      }
-    }
-
-    @keyframes textReveal {
-      from { opacity: 0; filter: blur(3px); }
+    @keyframes textFadeIn {
+      from { opacity: 0; filter: blur(2px); }
       to { opacity: 1; filter: blur(0); }
     }
 
+    /* === CHOICES === */
     .choices {
       display: flex;
-      flex-direction: column;
-      gap: 14px;
-      padding: 0 12px 20%;
-      overflow-x: auto;
-      overflow-y: auto;
-      scroll-snap-type: x mandatory;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
-      -ms-overflow-style: none;
-      position: relative;
-      top: 2%;
-    }
-
-    .choices::-webkit-scrollbar {
-      display: none;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding: 0 4px 32px;
+      justify-content: center;
     }
 
     .choice {
-      backdrop-filter: blur(24px);
-      border: 2px solid var(--accent-light);
-      border-radius: 20px;
-      padding: 18px 18px;
-      font-size: 1.08rem;
-      font-weight: 600;
-      text-align: center;
+      background: var(--glass-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-md);
+      padding: 14px 20px;
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text-main);
       cursor: pointer;
-      transition: all 0.22s cubic-bezier(0.4, 0.0, 0.2, 1);
-      background: var(--choice-bg);
-      color: #1a1a2e;
+      transition: all var(--transition-fast);
       position: relative;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.35);
-      overflow-wrap: break-word;
       overflow: hidden;
-      hyphens: auto;
-      -webkit-hyphens: auto;
-      -ms-hyphens: auto;
-      word-break: break-word;
-      white-space: normal;
-      flex: 0 0 40%;
-      min-width: 300px;
-      max-width: 40%;
-      scroll-snap-align: start;
-      max-height: 15vh;
+      min-width: 140px;
+      max-width: 100%;
+      text-align: center;
+      flex: 1 1 auto;
     }
-
     .choice::before {
       content: '';
       position: absolute;
       inset: 0;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
       transform: translateX(-150%);
-      transition: transform 0.4s;
+      transition: transform 0.5s;
+    }
+    .choice:hover::before { transform: translateX(150%); }
+    .choice:hover {
+      border-color: var(--primary);
+      background: rgba(255,255,255,0.1);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.4);
+    }
+    .choice:active { transform: scale(0.99); }
+    .choice:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none !important;
     }
 
-    .choice:hover::before {
-      transform: translateX(150%);
-    }
-
-    div.choice:hover {
-      background: linear-gradient(135deg, #e8d4ff, #c8a8ff);
-      border-color: var(--accent);
-      transform: translateY(-4px) scale(1.02);
-      box-shadow: var(--glow), 0 16px 36px rgba(160, 100, 255, 0.45);
-      color: #0f0f1f;
-    }
-
-    div.choice:active {
-      transform: scale(0.98);
-    }
-
-    .premium-mark {
-      color: aqua;
-      font-size: 1.2em;
-      vertical-align: middle;
-      margin-left: 6px;
-    }
-
-    .top-bar {
-      position: relative;
-      z-index: 30;
-      height: 64px;
+    .choice-input-wrapper {
       display: flex;
-      height: 10vh;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 24px;
-      backdrop-filter: blur(32px);
-      background: rgba(15, 15, 35, 0.88);
-      border-bottom: 1px solid var(--border-color);
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+      gap: 10px;
+      width: 100%;
+      max-width: 480px;
+      margin: 0 auto;
     }
-
-    .top-left {
-      display: flex;
-      align-items: center;
-      gap: 20px;
+    .choice-input {
+      flex: 1;
+      padding: 14px 18px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--glass-border);
+      background: rgba(255,255,255,0.08);
+      color: var(--text-main);
+      font-size: 15px;
+      outline: none;
+      transition: border-color var(--transition-fast);
     }
-
-    .top-right {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .game-title {
-      font-size: 19px;
-      font-weight: 700;
-      color: var(--text-primary);
-      letter-spacing: -0.3px;
-      font-family: 'Playfair Display', serif;
-    }
-
-    .icon-btn {
-      width: 48px;
-      height: 48px;
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(176, 140, 255, 0.25);
-      border-radius: 14px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    .choice-input:focus { border-color: var(--primary); }
+    .choice-input::placeholder { color: var(--text-muted); }
+    .choice-send {
+      padding: 14px 24px;
+      border-radius: var(--radius-md);
+      background: var(--primary);
+      color: white;
+      font-weight: 600;
+      border: none;
       cursor: pointer;
-      transition: all 0.25s cubic-bezier(0.4, 0.0, 0.2, 1);
-      touch-action: manipulation;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      transition: all var(--transition-fast);
+    }
+    .choice-send:hover { filter: brightness(1.1); transform: translateY(-2px); }
+
+    /* Choice badges */
+    .choice-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .badge-premium {
+      background: rgba(249,115,22,0.15);
+      color: #fdba74;
+      border: 1px solid rgba(249,115,22,0.3);
+    }
+    .badge-locked {
+      background: rgba(255,255,255,0.08);
+      color: var(--text-muted);
+      border: 1px solid var(--glass-border);
+    }
+    .badge-leader {
+      background: rgba(16,185,129,0.15);
+      color: #6ee7b7;
+      border: 1px solid rgba(16,185,129,0.3);
     }
 
-    .icon-btn:hover,
-    .icon-btn:active {
-      background: rgba(176, 140, 255, 0.2);
-      transform: scale(1.08) translateY(-1px);
-      box-shadow: var(--glow);
-    }
-
-    .icon {
-      width: 22px;
-      height: 22px;
-      stroke: #e0e0ff;
-      stroke-width: 2.4;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-      fill: none;
-      transition: stroke 0.25s ease;
-    }
-
-    .icon-btn:hover .icon {
-      stroke: #fff;
-    }
-
+    /* === GAME MENU MODAL === */
     .game-menu {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 1000;
+      inset: 0;
+      z-index: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.3s ease;
+      padding: 20px;
     }
-
-    .game-menu.show {
-      opacity: 1;
-      pointer-events: auto;
-    }
-
+    .game-menu.show { opacity: 1; pointer-events: auto; }
     .menu-overlay {
       position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(8, 8, 24, 0.92);
-      backdrop-filter: blur(18px);
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(8px);
     }
-
     .menu-card {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%) scale(0.92);
-      background: rgba(22, 22, 44, 0.96);
-      backdrop-filter: blur(32px);
-      border: 2px solid var(--border-color);
-      border-radius: 28px;
-      padding: 40px 36px;
-      min-width: 340px;
-      max-width: 92%;
-      z-index: 1001;
-      box-shadow: 0 30px 70px rgba(0, 0, 0, 0.6),
-                  inset 0 1px 0 rgba(255,255,255,0.1);
-      transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-
-    .game-menu.show .menu-card {
-      transform: translate(-50%, -50%) scale(1);
-    }
-
-    .menu-card h3 {
-      font-size: 26px;
-      font-weight: 800;
-      margin-bottom: 32px;
-      text-align: center;
-      background: linear-gradient(90deg, var(--accent-light), var(--accent));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      font-family: 'Playfair Display', serif;
-      letter-spacing: -0.5px;
-    }
-
-    .menu-btn {
-      width: 100%;
-      padding: 18px 28px;
-      margin-bottom: 14px;
-      background: linear-gradient(135deg, var(--accent), var(--accent-dark));
-      border: none;
-      border-radius: 18px;
-      color: white;
-      font-size: 1.05rem;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.25s cubic-bezier(0.4, 0.0, 0.2, 1);
-      box-shadow: 0 10px 25px rgba(176, 140, 255, 0.4);
-      letter-spacing: 0.3px;
-    }
-
-    .menu-btn:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 14px 30px rgba(176, 140, 255, 0.55);
-      background: linear-gradient(135deg, #c8a8ff, var(--accent));
-    }
-
-    .menu-btn.secondary {
-      background: rgba(255,255,255,0.1);
-      color: var(--text-secondary);
-      border: 1px solid var(--border-color);
-      box-shadow: none;
-    }
-
-    .menu-btn.secondary:hover {
-      background: rgba(255,255,255,0.18);
-      color: white;
-    }
-
-    .mobile-warning {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100vh;
-      background: var(--bg-dark);
-      display: none;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      padding: 20px;
-      z-index: 2000;
-      backdrop-filter: blur(10px);
-    }
-
-    .mobile-warning.show {
-      display: flex;
-    }
-
-    .mobile-warning h2 {
-      font-size: 2rem;
-      margin-bottom: 20px;
-      color: var(--accent);
-      font-family: 'Playfair Display', serif;
-    }
-
-    .mobile-warning p {
-      font-size: 1.2rem;
-      line-height: 1.6;
-      margin-bottom: 40px;
-      max-width: 600px;
-    }
-
-    .mobile-warning .icon {
-      font-size: 4rem;
-      margin-bottom: 20px;
-    }
-
-    .app-content {
-      transition: opacity 0.3s ease;
-    }
-
-    .app-content.hidden {
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    .diamonds {
       position: relative;
-      left: 70%;
-      font-size: 1.08rem;
-      font-weight: 600;
-      padding: 5px;
-      top: 2vh;
-      cursor: pointer;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-      user-select: none;
-    }
-
-    .diamonds:hover {
-      transform: scale(1.08);
-      box-shadow: var(--glow);
-    }
-
-    .diamonds:active {
-      transform: scale(0.98);
-    }
-
-    .choice-status-container {
-      position: relative;
-      z-index: 20;
-      top: 10px;
-      left: 5px;
-    }
-
-    .status-icon {
-      background: linear-gradient(135deg, var(--accent), var(--accent-dark));
-      color: white;
-      font-weight: 700;
-      font-size: 1.15rem;
-      padding: 6px 18px;
-      border-radius: 40px;
-      box-shadow: 0 4px 15px rgba(176,140,255,0.5),
-                  inset 0 -2px 0 rgba(255,255,255,0.3);
-      letter-spacing: 0.4px;
-      text-transform: uppercase;
-    }
-
-    .hide{
-      opacity: 0;
-    }
-
-    .hide {
-      opacity: 0;
-    }
-
-    .hide.visible {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-      filter: blur(0);
-      box-shadow: var(--shadow-end);
-      transition:
-        opacity var(--duration) var(--easing),
-        transform var(--duration) var(--easing),
-        filter calc(var(--duration) * 0.9) var(--easing),
-        box-shadow calc(var(--duration) * 0.7) var(--easing);
-      transform: translateY(18px) scale(0.98);
-    }
-
-    .visible.hide-w-animation {
-      opacity: 0;
-      transform: translateY(0) scale(1);
-      filter: blur(0);
-      box-shadow: var(--shadow-end);
-      transition:
-        opacity var(--duration) var(--easing),
-        transform var(--duration) var(--easing),
-        filter calc(var(--duration) * 0.9) var(--easing),
-        box-shadow calc(var(--duration) * 0.7) var(--easing);
-      transform: translateY(18px) scale(0.98);
-    }
-
-    .blackout {
-      filter: brightness(50%);
-    }
-
-    /* Diamond Info Modal Styles */
-    .diamond-modal {
-      position: fixed;
-      top: 0;
-      left: 0;
       width: 100%;
-      height: 100%;
-      z-index: 2000;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
-
-    .diamond-modal.show {
-      opacity: 1;
-      pointer-events: auto;
-    }
-
-    .diamond-modal-overlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(8, 8, 24, 0.85);
-      backdrop-filter: blur(12px);
-    }
-
-    .diamond-modal-card {
-      position: relative;
-      background: rgba(22, 22, 44, 0.98);
-      backdrop-filter: blur(32px);
-      border: 2px solid var(--border-color);
-      border-radius: 28px;
+      max-width: 360px;
+      background: var(--glass-bg);
+      backdrop-filter: blur(24px);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-lg);
       padding: 32px 28px;
-      min-width: 320px;
-      max-width: 420px;
-      z-index: 2001;
-      box-shadow: 0 30px 70px rgba(0, 0, 0, 0.6),
-                  0 0 40px rgba(176, 140, 255, 0.25),
-                  inset 0 1px 0 rgba(255,255,255,0.1);
-      transform: scale(0.94) translateY(10px);
-      transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
-      animation: modalSlideIn 0.4s forwards;
+      text-align: center;
+      transform: scale(0.95) translateY(10px);
+      transition: all var(--transition-smooth);
     }
-
-    .diamond-modal.show .diamond-modal-card {
+    .game-menu.show .menu-card {
       transform: scale(1) translateY(0);
     }
-
-    @keyframes modalSlideIn {
-      from {
-        opacity: 0;
-        transform: scale(0.94) translateY(10px);
-      }
-      to {
-        opacity: 1;
-        transform: scale(1) translateY(0);
-      }
-    }
-
-    .diamond-modal-close {
-      position: absolute;
-      top: 16px;
-      right: 16px;
-      width: 36px;
-      height: 36px;
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .diamond-modal-close:hover {
-      background: rgba(176, 140, 255, 0.2);
-      transform: scale(1.05);
-    }
-
-    .diamond-modal-close .icon {
-      width: 18px;
-      height: 18px;
-      stroke: #e0e0ff;
-    }
-
-    .diamond-modal-header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
+    .menu-card h3 {
+      font-family: var(--font-display);
+      font-size: 24px;
       margin-bottom: 24px;
-      padding-bottom: 16px;
-      border-bottom: 1px solid var(--border-color);
+      color: var(--text-main);
+    }
+    .menu-btn {
+      width: 100%;
+      padding: 14px 20px;
+      margin-bottom: 12px;
+      border-radius: var(--radius-md);
+      border: none;
+      font-weight: 600;
+      font-size: 15px;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+    .menu-btn.primary {
+      background: var(--primary);
+      color: white;
+    }
+    .menu-btn.primary:hover { filter: brightness(1.1); transform: translateY(-2px); }
+    .menu-btn.secondary {
+      background: rgba(255,255,255,0.08);
+      color: var(--text-muted);
+      border: 1px solid var(--glass-border);
+    }
+    .menu-btn.secondary:hover {
+      background: rgba(255,255,255,0.15);
+      color: var(--text-main);
     }
 
-    .diamond-modal-icon {
-      width: 42px;
-      height: 42px;
-      background: linear-gradient(135deg, var(--accent), var(--accent-dark));
-      border-radius: 14px;
+    /* === DIAMOND MODAL === */
+    .diamond-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 600;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.5rem;
-      box-shadow: 0 8px 20px rgba(176, 140, 255, 0.4);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+      padding: 20px;
     }
-
-    .diamond-modal-title {
-      font-size: 1.4rem;
-      font-weight: 700;
-      color: var(--text-primary);
-      font-family: 'Playfair Display', serif;
-    }
-
-    .diamond-modal-balance {
-      font-size: 2.2rem;
-      font-weight: 800;
+    .diamond-modal.show { opacity: 1; pointer-events: auto; }
+    .diamond-modal .menu-overlay { background: rgba(0,0,0,0.75); }
+    .diamond-modal-card {
+      position: relative;
+      width: 100%;
+      max-width: 380px;
+      background: var(--glass-bg);
+      backdrop-filter: blur(24px);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-lg);
+      padding: 28px 24px;
       text-align: center;
-      margin: 8px 0 24px;
-      background: linear-gradient(135deg, var(--accent-light), var(--accent));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      transform: scale(0.95) translateY(10px);
+      transition: all var(--transition-smooth);
+    }
+    .diamond-modal.show .diamond-modal-card { transform: scale(1) translateY(0); }
+
+    .modal-close {
+      position: absolute;
+      top: 14px; right: 14px;
+      width: 32px; height: 32px;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.08);
+      border: none;
+      color: var(--text-muted);
+      font-size: 18px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all var(--transition-fast);
+    }
+    .modal-close:hover { background: rgba(255,255,255,0.15); color: var(--text-main); }
+
+    .modal-header {
+      display: flex; align-items: center; justify-content: center;
+      gap: 10px; margin-bottom: 16px;
+    }
+    .modal-header .gem { font-size: 28px; animation: float 3s ease-in-out infinite; }
+    .modal-header h3 {
+      font-family: var(--font-display);
+      font-size: 20px;
+      color: var(--text-main);
     }
 
-    .diamond-modal-section {
+    .balance-display {
+      padding: 16px;
+      border-radius: var(--radius-md);
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--glass-border);
       margin-bottom: 20px;
     }
+    .balance-amount {
+      display: block;
+      font-size: 28px;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .balance-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
 
-    .diamond-modal-section-title {
-      font-size: 1.05rem;
-      font-weight: 600;
-      color: var(--accent-light);
-      margin-bottom: 10px;
-      display: flex;
+    .modal-list {
+      text-align: left;
+      margin: 0 0 20px;
+    }
+    .modal-list li {
+      padding: 10px 0;
+      font-size: 14px;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--glass-border);
+      display: flex; align-items: flex-start; gap: 10px;
+    }
+    .modal-list li:last-child { border-bottom: none; }
+    .modal-list li::before {
+      content: '✦'; color: var(--primary); font-size: 14px; margin-top: 2px;
+    }
+
+    .modal-note {
+      font-size: 12px; color: var(--text-muted); font-style: italic; opacity: 0.8;
+    }
+
+    /* === MOBILE WARNING === */
+    .mobile-warning {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: var(--bg-deep);
+      display: none;
+      flex-direction: column;
       align-items: center;
-      gap: 8px;
-    }
-
-    .diamond-modal-list {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-
-    .diamond-modal-list li {
-      padding: 8px 0;
-      font-size: 0.98rem;
-      color: var(--text-secondary);
-      line-height: 1.5;
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-    }
-
-    .diamond-modal-list li::before {
-      content: '✦';
-      color: var(--accent);
-      font-size: 1.1rem;
-      margin-top: 2px;
-    }
-
-    .diamond-modal-footer {
-      margin-top: 24px;
-      padding-top: 20px;
-      border-top: 1px solid var(--border-color);
+      justify-content: center;
+      padding: 32px 24px;
       text-align: center;
     }
-
-    .diamond-modal-note {
-      font-size: 0.9rem;
-      color: var(--text-secondary);
-      font-style: italic;
+    .mobile-warning.show { display: flex; }
+    .mobile-warning .icon { font-size: 56px; margin-bottom: 20px; }
+    .mobile-warning h2 {
+      font-family: var(--font-display);
+      font-size: 24px;
+      margin-bottom: 12px;
+      color: var(--primary);
+    }
+    .mobile-warning p {
+      color: var(--text-muted);
+      font-size: 15px;
+      line-height: 1.6;
+      max-width: 400px;
     }
 
+    /* === ANIMATIONS === */
+    @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+    @keyframes pulse { 0%,100%{opacity:0.6} 50%{opacity:0.9} }
+
+    .fade-in { animation: fadeIn 0.5s ease forwards; }
+    @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+
+    /* === RESPONSIVE === */
+    @media (min-width: 769px) {
+      .scene { justify-content: center; }
+      .character { max-width: 680px; bottom: 10%; }
+      .dialogue-container { padding-bottom: 40px; }
+      .bubble { padding-left: 72px; }
+      .choices { padding-bottom: 48px; }
+    }
+
+    @media (max-width: 480px) {
+      .top-bar { height: 56px; padding: 0 12px; }
+      .icon-btn { width: 38px; height: 38px; }
+      .game-title { font-size: 16px; }
+      .diamonds { top: 64px; right: 12px; padding: 6px 12px; font-size: 13px; }
+      .bubble { padding: 18px 20px 22px 56px; border-radius: 20px 20px 20px 6px; }
+      .name { font-size: 13px; padding: 4px 14px; top: -12px; left: 20px; }
+      .text { font-size: 15px; }
+      .choice { padding: 12px 16px; font-size: 14px; }
+      .menu-card, .diamond-modal-card { padding: 24px 20px; }
+    }
   </style>
 </head>
 <body>
 
+<!-- Mobile Warning -->
 <div class="mobile-warning" id="mobileWarning">
-  <h2>Мобильное устройство требуется</h2>
-  <p>Это приложение предназначено только для мобильных устройств. Пожалуйста, откройте его на смартфоне или планшете для оптимального опыта. На ПК работа может быть некорректной.</p>
+  <div class="icon">📱</div>
+  <h2>Требуется мобильное устройство</h2>
+  <p>Откройте эту историю на смартфоне или планшете для полного погружения. На десктопе некоторые функции могут работать некорректно.</p>
 </div>
 
-<div class="game-menu" id="gameMenu">
-    <div class="menu-overlay" onclick="hideMenu()"></div>
-    <div class="menu-card">
-      <h3>Меню игры</h3>
-      <button class="menu-btn" onclick="resumeGame()">Продолжить</button>
-      <button class="menu-btn secondary" onclick="exitToDashboard()">Выйти в меню</button>
+<!-- Top Bar -->
+<div class="top-bar">
+  <div class="top-left">
+    <button class="icon-btn" onclick="goBack()" title="Назад">
+      <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <div class="game-title">{{ game_info.title }}</div>
+  </div>
+  <div class="top-right">
+    <button class="icon-btn" onclick="toggleDialogues()" title="Скрыть диалог">
+      <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg>
+    </button>
+    <button class="icon-btn" onclick="showMenu()" title="Меню">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- Diamond Counter -->
+<div class="diamonds" onclick="showDiamondModal()">
+  <span>💎</span>
+  <span id="diamondCount">{{ user.diamonds }}</span>
+</div>
+
+<!-- Main Scene -->
+<div class="scene">
+  <img class="character" id="characterImg" alt="">
+
+  <div class="dialogue-container" id="dialogueContainer">
+    <div class="bubble" id="bubble">
+      <div class="name" id="charName">Джейни</div>
+      <div class="text" id="dialogueText"></div>
     </div>
+    <div class="choices" id="choicesContainer"></div>
+  </div>
+</div>
+
+<!-- Game Menu Modal -->
+<div class="game-menu" id="gameMenu">
+  <div class="menu-overlay" onclick="hideMenu()"></div>
+  <div class="menu-card">
+    <h3>Меню</h3>
+    <button class="menu-btn primary" onclick="hideMenu()">Продолжить</button>
+    <button class="menu-btn secondary" onclick="exitToDashboard()">Выйти в меню</button>
+  </div>
 </div>
 
 <!-- Diamond Info Modal -->
 <div class="diamond-modal" id="diamondModal">
-  <div class="diamond-modal-overlay" onclick="hideDiamondModal()"></div>
+  <div class="menu-overlay" onclick="hideDiamondModal()"></div>
   <div class="diamond-modal-card">
-    <div class="diamond-modal-close" onclick="hideDiamondModal()">
-      <svg class="icon" viewBox="0 0 24 24">
-        <path d="M18 6L6 18M6 6l12 12"/>
-      </svg>
+    <button class="modal-close" onclick="hideDiamondModal()">✕</button>
+    <div class="modal-header">
+      <span class="gem">💎</span>
+      <h3>Алмазы</h3>
     </div>
-    <div class="diamond-modal-header">
-      <div class="diamond-modal-icon">💎</div>
-      <div class="diamond-modal-title">Алмазы</div>
+    <div class="balance-display">
+      <span class="balance-amount" id="modalBalance">{{ user.diamonds }}</span>
+      <span class="balance-label">доступно</span>
     </div>
-    <div class="diamond-modal-balance" id="modalDiamondBalance">{{ user.diamonds }} 💎</div>
-
-    <div class="diamond-modal-section">
-      <div class="diamond-modal-section-title">Для чего нужны</div>
-      <ul class="diamond-modal-list">
-        <li>Открывайте премиум-выборы в сюжете</li>
-        <li>Получайте эксклюзивные концовки</li>
-        <li>Разблокируйте особые диалоги и сцены</li>
-        <li>Повышайте отношения с персонажами</li>
-      </ul>
-    </div>
-
-    <div class="diamond-modal-footer">
-      <div class="diamond-modal-note">
-        Алмазы сохраняются между сессиями и не расходуются при загрузке сохранений
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="app-content" id="appContent">
-  <div class="top-bar">
-      <div class="top-left">
-        <button class="icon-btn" onclick="goBack()">
-          <svg class="icon" viewBox="0 0 24 24">
-            <path d="M15 18l-6-6 6-6"/>
-          </svg>
-        </button>
-        <div class="game-title">{{ game_info.title }}</div>
-      </div>
-
-      <div class="top-right">
-        <button class="icon-btn" onclick="toggleDialogues()" title="Скрыть/показать диалоги">
-          <svg class="icon" viewBox="0 0 24 24">
-            <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
-          </svg>
-        </button>
-        <button class="icon-btn" onclick="showMenu()">
-          <svg class="icon" viewBox="0 0 24 24">
-            <circle cx="12" cy="12" r="1"/>
-            <circle cx="12" cy="5" r="1"/>
-            <circle cx="12" cy="19" r="1"/>
-          </svg>
-        </button>
-      </div>
-  </div>
-
-  <span class="diamonds status-icon" onclick="showDiamondModal()">
-    {{ user.diamonds }} 💎
-  </span>
-
-  <div class="scene">
-    <img class="character">
-
-    <div class="dialogue-container">
-      <div class="name">Джейни</div>
-      <div class="bubble">
-        <div class="text">
-          Так, он реагирует. Обычно кошки воспринимают прямой зрительный контакт как угрозу, и, чтобы показать им свои мирные намерения, нужно отвести взгляд и моргнуть.
-        </div>
-      </div>
-
-      <div class="choices">
-      </div>
-    </div>
+    <ul class="modal-list">
+      <li>Открывайте премиум-выборы в сюжете</li>
+      <li>Получайте эксклюзивные концовки</li>
+      <li>Разблокируйте особые диалоги и сцены</li>
+      <li>Улучшайте отношения с персонажами</li>
+    </ul>
+    <div class="modal-note">Алмазы сохраняются между сессиями</div>
   </div>
 </div>
 
 <script>
+  // === DATA ===
   let gameInfo = {{ game_info|tojson }};
   let sceneData = {{ scene_data|tojson }};
   let storyId = {{ story_id }};
 
+  // === UTILS ===
   function isMobile() {
     return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
   }
 
-  document.addEventListener('DOMContentLoaded', function() {
+  // === INIT ===
+  document.addEventListener('DOMContentLoaded', () => {
     if (!isMobile()) {
       document.getElementById('mobileWarning').classList.add('show');
-      document.getElementById('appContent').classList.add('hidden');
       return;
     }
     loadScene();
   });
 
+  // === SCENE LOADING ===
   function loadScene() {
+    // Background
     if (sceneData.background) {
       document.body.style.backgroundImage = `url('${sceneData.background}')`;
       document.body.style.backgroundSize = 'cover';
       document.body.style.backgroundPosition = 'center';
     }
 
-    const characterImage = document.querySelector('.character');
+    // Character
+    const charImg = document.getElementById('characterImg');
     if (sceneData.character_image) {
-      characterImage.onload = null
-      characterImage.src = `${sceneData.character_image}`;
-      characterImage.className = 'character'
+      charImg.src = sceneData.character_image;
+      charImg.style.opacity = '0';
+      charImg.onload = () => {
+        charImg.style.opacity = '1';
+        applySceneEffect(sceneData.scene_effect);
+      };
+      if (charImg.complete) applySceneEffect(sceneData.scene_effect);
+    } else {
+      charImg.style.opacity = '0';
     }
 
-    let sceneEffect = null
+    // Dialogue
+    document.getElementById('charName').textContent = sceneData.character_name || '';
+    const textEl = document.getElementById('dialogueText');
+    textEl.innerHTML = sceneData.dialogue || '';
+    textEl.classList.remove('show');
 
-    if (sceneData.scene_effect == 'character_appears') {
-      sceneEffect = () => {
-        characterImage.classList.add('hide')
-        characterImage.classList.add('visible')
-      }
-    } else if(sceneData.scene_effect == 'character_disappears') {
-      sceneEffect = () => {
-        characterImage.classList.add('visible')
-        characterImage.classList.add('hide-w-animation')
-      }
-    } else if(sceneData.scene_effect == 'blackout') {
-      sceneEffect = () => {
-        characterImage.classList.add('blackout')
-      }
-    }
-
-    characterImage.onload = sceneEffect
-
-    document.querySelector('.name').innerHTML = sceneData.character_name;
-
-    const dialogueText = document.querySelector('.text');
-    dialogueText.innerHTML = sceneData.dialogue;
-    dialogueText.classList.remove('show');
-
-    const bubble = document.querySelector('.bubble');
+    const bubble = document.getElementById('bubble');
     bubble.classList.remove('show');
 
-    const diamondsCount = sceneData.current_user_diamonds || {{ user.diamonds }};
-    document.querySelector('.diamonds').innerHTML = diamondsCount + " 💎";
-    document.getElementById('modalDiamondBalance').textContent = diamondsCount + " 💎";
-
-    // Trigger animation
     setTimeout(() => {
       bubble.classList.add('show');
-      dialogueText.classList.add('show');
+      textEl.style.opacity = '1';
     }, 50);
+
+    // Diamonds
+    const diamonds = sceneData.current_user_diamonds ?? {{ user.diamonds }};
+    document.getElementById('diamondCount').textContent = diamonds;
+    document.getElementById('modalBalance').textContent = diamonds;
 
     renderChoices();
   }
 
-  function renderInputChoice() {
-     const choicesContainer = document.querySelector('.choices')
-     const choiceContainer = document.createElement('div')
-     choiceContainer.style.display = 'grid'
-
-     const choiceInput = document.createElement('input')
-     const choiceInputSendBtn = document.createElement('div')
-     choiceInputSendBtn.onclick = makeInputChoice
-
-     choiceInput.className = 'choice'
-     choiceInputSendBtn.className = 'choice'
-
-     choiceInputSendBtn.innerHTML = 'Отправить'
-
-     choiceContainer.appendChild(choiceInput)
-
-     choicesContainer.appendChild(choiceContainer)
-     choicesContainer.appendChild(choiceInputSendBtn)
+  function applySceneEffect(effect) {
+    const char = document.getElementById('characterImg');
+    if (effect === 'character_appears') {
+      char.classList.remove('hide');
+      char.style.transition = 'opacity 0.6s ease';
+    } else if (effect === 'character_disappears') {
+      char.classList.add('hide');
+    } else if (effect === 'blackout') {
+      char.classList.add('blackout');
+    }
   }
 
+  // === CHOICES ===
   function renderChoices() {
-    const choicesContainer = document.querySelector('.choices');
-    choicesContainer.innerHTML = '';
+    const container = document.getElementById('choicesContainer');
+    container.innerHTML = '';
 
-    if (sceneData.scene_type == 'input') {
-      renderInputChoice()
-    }else if (!sceneData.choices || sceneData.choices.length === 0) {
-      const continueBtn = document.createElement('div');
-      continueBtn.className = `choice`;
-      continueBtn.innerHTML = 'Продолжить';
-      continueBtn.onclick = () => goToNextScene();
-      choicesContainer.appendChild(continueBtn);
+    if (sceneData.scene_type === 'input') {
+      renderInputChoice(container);
+      return;
+    }
+
+    if (!sceneData.choices?.length) {
+      const btn = createChoiceBtn('Продолжить', () => goToNextScene());
+      container.appendChild(btn);
       return;
     }
 
     sceneData.choices.forEach(choice => {
-      const choiceContainer = document.createElement('div')
-      choiceContainer.style.display = 'grid';
-      const choiceStatusContainer = document.createElement('div')
+      const wrapper = document.createElement('div');
+      wrapper.style.width = '100%';
 
-      choiceStatusContainer.className = 'choice-status-container'
-
-      const choiceBtn = document.createElement('div');
-      choiceBtn.innerHTML = choice.data.text
-
-      if(choice.data.premium) {
-        const diamondIcon = document.createElement('span');
-        diamondIcon.className = 'status-icon'
-        diamondIcon.innerHTML = `${choice.data.diamonds_cost} 💎`
-
-        choiceStatusContainer.appendChild(diamondIcon)
+      // Badges
+      if (choice.data.premium) {
+        const badge = document.createElement('div');
+        badge.className = 'choice-badge badge-premium';
+        badge.innerHTML = `💎 ${choice.data.diamonds_cost}`;
+        wrapper.appendChild(badge);
+      }
+      if (choice.data.only_leader) {
+        const badge = document.createElement('div');
+        badge.className = 'choice-badge badge-leader';
+        badge.textContent = '👥 Лидер';
+        wrapper.appendChild(badge);
+      }
+      if (!choice.is_available) {
+        const badge = document.createElement('div');
+        badge.className = 'choice-badge badge-locked';
+        badge.textContent = '🔒 Закрыто';
+        wrapper.appendChild(badge);
       }
 
-      if(choice.data.is_important) {
+      const btn = createChoiceBtn(choice.data.text, () => {
+        if (choice.is_available) makeChoice(choice.data.id);
+      }, !choice.is_available);
 
-      }
-
-      if(choice.data.only_leader) {
-        const onlyLeaderIcon = document.createElement('span');
-        onlyLeaderIcon.className = 'status-icon'
-        onlyLeaderIcon.innerHTML = '👥'
-
-        choiceStatusContainer.appendChild(onlyLeaderIcon)
-      }
-
-      choiceBtn.className = `choice`;
-      choiceBtn.onclick = () => makeChoice(choice.data.id);
-
-      if (!choice.is_available){
-        const lockedIcon = document.createElement('span')
-
-        lockedIcon.className = 'status-icon'
-        lockedIcon.innerHTML = '🔒'
-
-        choiceStatusContainer.appendChild(lockedIcon)
-      }
-
-      choiceContainer.appendChild(choiceStatusContainer)
-      choiceContainer.appendChild(choiceBtn)
-      choicesContainer.appendChild(choiceContainer);
+      wrapper.appendChild(btn);
+      container.appendChild(wrapper);
     });
   }
 
+  function createChoiceBtn(text, onClick, disabled = false) {
+    const btn = document.createElement('button');
+    btn.className = 'choice';
+    btn.textContent = text;
+    btn.onclick = onClick;
+    if (disabled) {
+      btn.disabled = true;
+      btn.style.opacity = '0.6';
+    }
+    return btn;
+  }
+
+  function renderInputChoice(container) {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'choice-input-wrapper';
+
+    const input = document.createElement('input');
+    input.className = 'choice-input';
+    input.placeholder = 'Ваш ответ...';
+    input.type = 'text';
+
+    const send = document.createElement('button');
+    send.className = 'choice-send';
+    send.textContent = 'Отправить';
+    send.onclick = () => {
+      if (input.value.trim()) makeInputChoice(input.value.trim());
+    };
+
+    input.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter' && input.value.trim()) {
+        makeInputChoice(input.value.trim());
+      }
+    });
+
+    wrapper.appendChild(input);
+    wrapper.appendChild(send);
+    container.appendChild(wrapper);
+    input.focus();
+  }
+
+  // === API CALLS ===
   async function makeChoice(choiceId) {
     try {
-      const response = await fetch(`/api/games/${storyId}/choice`, {
+      const res = await fetch(`/api/games/${storyId}/choice`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          choice_id: choiceId,
-          slot: 1
-        })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ choice_id: choiceId, slot: 1 })
       });
+      const data = await res.json();
 
-      const data = await response.json();
-
-      if (response.ok && data.success) {
-        sceneData = data.next_scene;
-
-        const bubble = document.querySelector('.bubble');
-        bubble.style.transition = 'opacity 0.2s, transform 0.2s';
-        bubble.style.opacity = '0';
-        bubble.style.transform = 'translateY(15px)';
-
-        document.querySelector('.choices').innerHTML = '';
-
-        loadScene();
+      if (res.ok && data.success) {
+        transitionToNextScene(data.next_scene);
       } else {
-        alert(data.message || 'Ошибка при совершении выбора');
+        alert(data.message || 'Ошибка выбора');
       }
-    } catch (error) {
-      console.error('Ошибка:', error);
-      alert('Ошибка подключения к серверу');
+    } catch (e) {
+      console.error(e);
+      alert('Ошибка соединения');
     }
   }
 
-  async function makeInputChoice() {
-    const sceneId = sceneData.scene_id
-    const choiceValue = document.querySelector('input.choice').value
-
+  async function makeInputChoice(value) {
     try {
-      const response = await fetch(`/api/games/${storyId}/choice_input`, {
+      const res = await fetch(`/api/games/${storyId}/choice_input`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          value: choiceValue,
-          scene_id: sceneId
-        })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ value, scene_id: sceneData.scene_id })
       });
+      const data = await res.json();
 
-      const data = await response.json();
-
-      if (response.ok && data.success) {
-        sceneData = data.next_scene;
-
-        const bubble = document.querySelector('.bubble');
-        bubble.style.transition = 'opacity 0.2s, transform 0.2s';
-        bubble.style.opacity = '0';
-        bubble.style.transform = 'translateY(15px)';
-
-        document.querySelector('.choices').innerHTML = '';
-
-        loadScene();
+      if (res.ok && data.success) {
+        transitionToNextScene(data.next_scene);
       } else {
-        alert(data.message || 'Ошибка при совершении выбора');
+        alert(data.message || 'Ошибка');
       }
-    } catch (error) {
-      console.error('Ошибка:', error);
-      alert('Ошибка подключения к серверу');
+    } catch (e) {
+      console.error(e);
+      alert('Ошибка соединения');
     }
   }
 
   async function goToNextScene() {
     try {
-      const response = await fetch(`/api/games/${storyId}/to_next_scene`, {
+      const res = await fetch(`/api/games/${storyId}/to_next_scene`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        }
+        headers: { 'Content-Type': 'application/json' }
       });
+      const data = await res.json();
 
-      const data = await response.json();
-
-      if (response.ok && data.success) {
-        sceneData = data.next_scene;
-
-        const bubble = document.querySelector('.bubble');
-        bubble.style.transition = 'opacity 0.2s, transform 0.2s';
-        bubble.style.opacity = '0';
-        bubble.style.transform = 'translateY(15px)';
-
-        document.querySelector('.choices').innerHTML = '';
-
-        loadScene();
+      if (res.ok && data.success) {
+        transitionToNextScene(data.next_scene);
+      } else if (data.is_ending) {
+        window.location.href = `/ending/${storyId}/`;
       } else {
-        if (data.is_ending) {
-          window.location.href = `/ending/${storyId}/`
-        } else {
-          alert(data.message || 'Ошибка при совершении выбора');
-        }
+        alert(data.message || 'Ошибка');
       }
-    } catch (error) {
-      console.error('Ошибка:', error);
-      alert('Ошибка подключения к серверу');
+    } catch (e) {
+      console.error(e);
+      alert('Ошибка соединения');
     }
   }
 
-  async function saveGame() {
-    try {
-      const response = await fetch(`/api/games/${storyId}/save`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          game_state: sceneData,
-          slot: 1
-        })
-      });
+  function transitionToNextScene(nextScene) {
+    const bubble = document.getElementById('bubble');
+    bubble.style.opacity = '0';
+    bubble.style.transform = 'translateY(15px)';
 
-      const data = await response.json();
-
-      if (response.ok && data.success) {
-        alert('Игра сохранена!');
-      } else {
-        alert(data.error || 'Ошибка сохранения');
-      }
-    } catch (error) {
-      console.error('Ошибка:', error);
-      alert('Ошибка подключения к серверу');
-    }
+    setTimeout(() => {
+      sceneData = nextScene;
+      loadScene();
+    }, 200);
   }
 
-  function goBack() {
-    window.location.href = '/dashboard';
-  }
+  // === UI ACTIONS ===
+  function goBack() { window.location.href = '/dashboard'; }
 
-  function showMenu() {
-    const menu = document.getElementById('gameMenu');
-    menu.classList.add('show');
-  }
-
-  function hideMenu() {
-    const menu = document.getElementById('gameMenu');
-    menu.classList.remove('show');
-  }
-
-  function resumeGame() {
-    hideMenu();
-  }
-
-  function loadGame() {
-    hideMenu();
-    location.reload();
-  }
-
-  function exitToDashboard() {
-    window.location.href = '/dashboard';
-  }
+  function showMenu() { document.getElementById('gameMenu').classList.add('show'); }
+  function hideMenu() { document.getElementById('gameMenu').classList.remove('show'); }
+  function resumeGame() { hideMenu(); }
+  function exitToDashboard() { window.location.href = '/dashboard'; }
 
   function toggleDialogues() {
-    const container = document.querySelector('.dialogue-container');
-    container.classList.toggle('hidden');
+    document.getElementById('dialogueContainer').classList.toggle('hidden');
   }
 
-  /* Diamond Modal Functions */
   function showDiamondModal() {
     const modal = document.getElementById('diamondModal');
-    const balance = sceneData.current_user_diamonds || {{ user.diamonds }};
-    document.getElementById('modalDiamondBalance').textContent = balance + " 💎";
+    const diamonds = sceneData.current_user_diamonds ?? {{ user.diamonds }};
+    document.getElementById('modalBalance').textContent = diamonds;
     modal.classList.add('show');
     document.body.style.overflow = 'hidden';
   }
 
   function hideDiamondModal() {
-    const modal = document.getElementById('diamondModal');
-    modal.classList.remove('show');
+    document.getElementById('diamondModal').classList.remove('show');
     document.body.style.overflow = '';
   }
 
-  // Close modal on Escape key
-  document.addEventListener('keydown', function(e) {
+  // Keyboard shortcuts
+  document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       hideDiamondModal();
       hideMenu();
