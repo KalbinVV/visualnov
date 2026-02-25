@@ -21,7 +21,7 @@
   <div class="scene-background" id="sceneBackground"></div>
   <div class="scene-overlay"></div>
 
-  <!-- Персонаж -->
+  <!-- Персонаж (Крупный план) -->
   <div class="stage-area">
     <img class="character-sprite" id="characterSprite" alt="Character">
   </div>
@@ -135,9 +135,9 @@
     --radius-md: 16px;
     --radius-sm: 8px;
 
-    /* Размеры для layout - УВЕЛИЧЕННЫЕ */
-    --dialogue-height: 220px; /* Было 160px */
-    --dialogue-max-height: 280px; /* Максимальная высота */
+    /* Размеры для layout */
+    --dialogue-height: 220px;
+    --dialogue-max-height: 280px;
     --choices-gap: 16px;
     --safe-area-bottom: 20px;
   }
@@ -225,18 +225,25 @@
     z-index: 1; pointer-events: none;
   }
 
-  /* Сцена (Персонаж) */
+  /* Сцена (Персонаж) - УВЕЛИЧЕННЫЙ РАЗМЕР */
   .stage-area {
     position: absolute; bottom: 0; left: 0; width: 100%; height: 100%;
     z-index: 10; pointer-events: none; display: flex; justify-content: center; align-items: flex-end;
+    overflow: hidden;
   }
 
   .character-sprite {
-    height: 85%; max-height: 800px; width: auto; object-fit: contain;
-    filter: drop-shadow(0 0 20px rgba(0,0,0,0.5));
+    /* Занимает почти всю высоту экрана */
+    height: 95vh;
+    max-height: 900px;
+    width: auto;
+    max-width: 100%;
+    object-fit: contain;
+    object-position: bottom center;
+    filter: drop-shadow(0 0 30px rgba(0,0,0,0.6));
     transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.6s ease, filter 0.6s ease;
     opacity: 0;
-    transform: translateY(20px) scale(0.95);
+    transform: translateY(30px) scale(0.95);
   }
 
   .character-sprite.show {
@@ -246,11 +253,11 @@
 
   .character-sprite.hide {
     opacity: 0;
-    transform: translateY(20px) scale(0.95);
+    transform: translateY(30px) scale(0.95);
   }
 
   .character-sprite.blackout {
-    filter: brightness(0.2) drop-shadow(0 0 20px rgba(0,0,0,0.5));
+    filter: brightness(0.2) drop-shadow(0 0 30px rgba(0,0,0,0.6));
   }
 
   /* HUD */
@@ -287,7 +294,7 @@
   }
   .currency-pill:active { transform: scale(0.95); }
 
-  /* --- КОНТЕЙНЕР НИЖНЕГО UI (диалог + выборы) --- */
+  /* --- КОНТЕЙНЕР НИЖНЕГО UI --- */
   .bottom-ui-container {
     position: absolute;
     bottom: var(--safe-area-bottom);
@@ -344,8 +351,8 @@
   }
 
   .dialogue-text {
-    font-size: 17px; /* Увеличенный шрифт */
-    line-height: 1.7; /* Увеличенный интервал */
+    font-size: 17px;
+    line-height: 1.7;
     color: var(--text-main);
     opacity: 0;
     animation: textReveal 0.6s forwards;
@@ -369,7 +376,7 @@
   }
   @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(5px); } }
 
-  /* --- ВЫБОРЫ (ПОД диалогом) --- */
+  /* --- ВЫБОРЫ --- */
   .choices-container {
     width: 100%;
     display: flex;
@@ -398,35 +405,33 @@
 
   .choice-wrapper {
     pointer-events: auto;
-    display: grid;
-    gap: 8px;
+    width: 100%;
     animation: slideUp 0.4s ease-out forwards;
     opacity: 0;
     transform: translateY(20px);
-    width: 100%;
   }
   @keyframes slideUp { to { opacity: 1; transform: translateY(0); } }
 
   .choice-btn {
-    background: rgba(20, 20, 30, 0.9);
+    background: rgba(20, 20, 30, 0.95);
     border: 1px solid var(--glass-border);
     color: var(--text-main);
-    padding: 18px 24px; /* Увеличенные отступы */
+    padding: 18px 24px;
     border-radius: var(--radius-md);
-    font-size: 16px; /* Увеличенный шрифт */
+    font-size: 16px;
     font-weight: 600;
-    text-align: center;
+    text-align: left; /* Выравнивание по левому краю для иконки */
     cursor: pointer;
     transition: all 0.2s;
     backdrop-filter: blur(4px);
     display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
+    align-items: center; /* Центрирование по вертикали */
+    gap: 12px; /* Отступ между иконкой и текстом */
     white-space: normal;
     word-wrap: break-word;
     width: 100%;
     min-height: 56px;
+    position: relative;
   }
 
   .choice-btn:hover {
@@ -440,21 +445,31 @@
     transform: translateY(0);
   }
 
-  .choice-status {
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-    width: 100%;
-  }
-  .status-badge {
+  /* Бейдж с алмазами/статусом внутри кнопки */
+  .choice-badge {
     background: rgba(0,0,0,0.6);
     padding: 4px 10px;
     border-radius: 12px;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 700;
     color: var(--accent);
     border: 1px solid var(--glass-border);
     white-space: nowrap;
+    flex-shrink: 0; /* Чтобы иконка не сжималась */
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .choice-badge.premium {
+    color: #fdba74;
+    border-color: rgba(249, 115, 22, 0.5);
+    background: rgba(249, 115, 22, 0.15);
+  }
+
+  .choice-text {
+    flex-grow: 1;
+    text-align: left;
   }
 
   /* Меню паузы */
@@ -519,7 +534,7 @@
 
     .game-hud { padding: 12px 16px; }
     .game-title { font-size: 16px; }
-    .character-sprite { height: 60vh; }
+    .character-sprite { height: 85vh; } /* Чуть меньше на мобильных чтобы влезло */
 
     .dialogue-box { padding: 16px; }
     .speaker-name { font-size: 16px; }
@@ -535,7 +550,7 @@
       --dialogue-height: 140px;
       --dialogue-max-height: 180px;
     }
-    .character-sprite { height: 50vh; }
+    .character-sprite { height: 75vh; }
     .choice-btn { padding: 12px; font-size: 14px; }
   }
 </style>
@@ -693,9 +708,8 @@
 
       const continueBtn = document.createElement('div');
       continueBtn.className = 'choice-btn';
-      continueBtn.innerHTML = 'Продолжить';
+      continueBtn.innerHTML = '<span class="choice-text">Продолжить</span>';
       continueBtn.onclick = () => {
-        // Скрываем выборы ПЕРЕД переходом
         hideChoices();
         setTimeout(() => {
           goToNextScene();
@@ -713,47 +727,38 @@
       wrapper.className = 'choice-wrapper';
       wrapper.style.animationDelay = `${index * 0.1}s`;
 
-      const statusContainer = document.createElement('div');
-      statusContainer.className = 'choice-status';
-
       const btn = document.createElement('div');
       btn.className = 'choice-btn';
-      btn.innerHTML = choice.data.text;
+
+      // Создаем контент кнопки
+      let badgeHtml = '';
+
+      // Премиум бейдж (алмазы)
+      if(choice.data.premium) {
+        badgeHtml = `<span class="choice-badge premium">💎 ${choice.data.diamonds_cost}</span>`;
+      }
+
+      // Лидер бейдж
+      if(choice.data.only_leader) {
+        badgeHtml += `<span class="choice-badge">👥 Лидер</span>`;
+      }
+
+      // Замок (если недоступно)
+      if (!choice.is_available){
+        badgeHtml += `<span class="choice-badge" style="color:#ef4444; border-color:#ef4444;">🔒</span>`;
+        btn.style.opacity = '0.5';
+        btn.style.pointerEvents = 'none';
+      }
+
+      btn.innerHTML = `${badgeHtml}<span class="choice-text">${choice.data.text}</span>`;
+
       btn.onclick = () => {
-        // Скрываем выборы ПЕРЕД переходом
         hideChoices();
         setTimeout(() => {
           makeChoice(choice.data.id);
         }, 300);
       };
 
-      if(choice.data.premium) {
-        const badge = document.createElement('span');
-        badge.className = 'status-badge';
-        badge.innerHTML = `${choice.data.diamonds_cost} 💎`;
-        statusContainer.appendChild(badge);
-      }
-
-      if(choice.data.only_leader) {
-        const badge = document.createElement('span');
-        badge.className = 'status-badge';
-        badge.innerHTML = '👥';
-        statusContainer.appendChild(badge);
-      }
-
-      if (!choice.is_available){
-        const badge = document.createElement('span');
-        badge.className = 'status-badge';
-        badge.style.color = '#ef4444';
-        badge.innerHTML = '🔒';
-        statusContainer.appendChild(badge);
-        btn.style.opacity = '0.5';
-        btn.style.pointerEvents = 'none';
-      }
-
-      if (statusContainer.children.length > 0) {
-        wrapper.appendChild(statusContainer);
-      }
       wrapper.appendChild(btn);
       els.choices.appendChild(wrapper);
     });
@@ -861,7 +866,6 @@
 
   function toggleDialogues() {
     els.dialogueContainer.classList.toggle('hidden');
-    document.querySelector('.choices-container').classList.toggle('hidden');
   }
 
   function showDiamondModal() {
