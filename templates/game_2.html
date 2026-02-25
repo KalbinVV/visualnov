@@ -172,7 +172,7 @@
     align-items: center;
     justify-content: center;
     opacity: 1;
-    transition: opacity 0.4s ease;
+    transition: opacity 0.3s ease;
     pointer-events: auto;
   }
 
@@ -225,7 +225,7 @@
     z-index: 1; pointer-events: none;
   }
 
-  /* Сцена (Персонаж) - ОТРЕГУЛИРОВАННЫЙ РАЗМЕР */
+  /* Сцена (Персонаж) */
   .stage-area {
     position: absolute; bottom: 0; left: 0; width: 100%; height: 100%;
     z-index: 10; pointer-events: none; display: flex; justify-content: center; align-items: flex-end;
@@ -233,7 +233,6 @@
   }
 
   .character-sprite {
-    /* Уменьшено с 95vh до 82vh, чтобы не наезжать на меню */
     height: 82vh;
     max-height: 850px;
     width: auto;
@@ -533,7 +532,6 @@
 
     .game-hud { padding: 12px 16px; }
     .game-title { font-size: 16px; }
-    /* На мобильных тоже уменьшаем, чтобы было комфортно */
     .character-sprite { height: 75vh; }
 
     .dialogue-box { padding: 16px; }
@@ -576,6 +574,34 @@
     dialogueContainer: document.getElementById('dialogueContainer')
   };
 
+  // Функция для загрузки изображения с Promise
+  function loadImage(src) {
+    return new Promise((resolve, reject) => {
+      if (!src) {
+        resolve(null);
+        return;
+      }
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = () => resolve(img); // Resolve even on error to not block
+      img.src = src;
+    });
+  }
+
+  // Функция для загрузки фона с Promise
+  function loadBackground(url) {
+    return new Promise((resolve) => {
+      if (!url) {
+        resolve();
+        return;
+      }
+      const img = new Image();
+      img.onload = () => resolve();
+      img.onerror = () => resolve(); // Resolve even on error
+      img.src = url;
+    });
+  }
+
   document.addEventListener('DOMContentLoaded', function() {
     loadScene();
 
@@ -587,75 +613,88 @@
     });
   });
 
-  function loadScene() {
+  async function loadScene() {
     // Показываем экран загрузки
     els.loading.classList.remove('hidden');
     els.bg.classList.add('fade');
 
-    // Имитация загрузки для плавности
-    setTimeout(() => {
-      // Фон
-      if (sceneData.background) {
-        els.bg.style.backgroundImage = `url('${sceneData.background}')`;
-      }
+    // Собираем все промисы для загрузки
+    const loadPromises = [];
 
-      // Спрайт
-      const sprite = els.sprite;
+    // Загрузка фона
+    if (sceneData.background) {
+      loadPromises.push(loadBackground(sceneData.background));
+    }
 
-      if (sceneData.character_image) {
-        sprite.src = sceneData.character_image;
-        sprite.style.display = 'block';
+    // Загрузка спрайта персонажа
+    if (sceneData.character_image) {
+      loadPromises.push(loadImage(sceneData.character_image));
+    }
 
-        sprite.classList.remove('show', 'hide', 'blackout');
+    // Ждем загрузки всех ресурсов (или сразу продолжаем если ничего нет)
+    await Promise.all(loadPromises);
 
-        const applyEffect = () => {
-          setTimeout(() => {
-            if (sceneData.scene_effect == 'character_appears') {
-              sprite.classList.add('show');
-            } else if (sceneData.scene_effect == 'character_disappears') {
-              sprite.classList.add('hide');
-            } else if (sceneData.scene_effect == 'blackout') {
-              sprite.classList.add('show', 'blackout');
-            } else {
-              sprite.classList.add('show');
-            }
-          }, 50);
-        };
+    // Применяем фон
+    if (sceneData.background) {
+      els.bg.style.backgroundImage = `url('${sceneData.background}')`;
+    }
 
-        if (sprite.complete) {
-          applyEffect();
-        } else {
-          sprite.onload = applyEffect;
-          sprite.onerror = () => {
+    // Применяем спрайт
+    const sprite = els.sprite;
+
+    if (sceneData.character_image) {
+      sprite.src = sceneData.character_image;
+      sprite.style.display = 'block';
+
+      sprite.classList.remove('show', 'hide', 'blackout');
+
+      const applyEffect = () => {
+        setTimeout(() => {
+          if (sceneData.scene_effect == 'character_appears') {
             sprite.classList.add('show');
-          };
-        }
+          } else if (sceneData.scene_effect == 'character_disappears') {
+            sprite.classList.add('hide');
+          } else if (sceneData.scene_effect == 'blackout') {
+            sprite.classList.add('show', 'blackout');
+          } else {
+            sprite.classList.add('show');
+          }
+        }, 50);
+      };
+
+      if (sprite.complete) {
+        applyEffect();
       } else {
-        sprite.style.display = 'none';
-        sprite.classList.remove('show', 'hide', 'blackout');
+        sprite.onload = applyEffect;
+        sprite.onerror = () => {
+          sprite.classList.add('show');
+        };
       }
+    } else {
+      sprite.style.display = 'none';
+      sprite.classList.remove('show', 'hide', 'blackout');
+    }
 
-      // Текст и имя
-      els.speaker.innerHTML = sceneData.character_name || '';
+    // Текст и имя
+    els.speaker.innerHTML = sceneData.character_name || '';
 
-      els.text.innerHTML = sceneData.dialogue || '';
-      els.text.style.animation = 'none';
-      els.text.offsetHeight;
-      els.text.style.animation = 'textReveal 0.6s forwards';
-      els.text.scrollTop = els.text.scrollHeight;
+    els.text.innerHTML = sceneData.dialogue || '';
+    els.text.style.animation = 'none';
+    els.text.offsetHeight;
+    els.text.style.animation = 'textReveal 0.6s forwards';
+    els.text.scrollTop = els.text.scrollHeight;
 
-      // Обновление алмазов
-      const diamondsCount = sceneData.current_user_diamonds || {{ user.diamonds }};
-      els.diamondAmount.textContent = diamondsCount;
-      els.modalDiamondBalance.textContent = diamondsCount;
+    // Обновление алмазов
+    const diamondsCount = sceneData.current_user_diamonds || {{ user.diamonds }};
+    els.diamondAmount.textContent = diamondsCount;
+    els.modalDiamondBalance.textContent = diamondsCount;
 
-      // Рендер выборов
-      renderChoices();
+    // Рендер выборов
+    renderChoices();
 
-      // Скрываем экран загрузки
-      els.bg.classList.remove('fade');
-      els.loading.classList.add('hidden');
-    }, 50);
+    // Скрываем экран загрузки (теперь действительно когда всё загрузилось)
+    els.bg.classList.remove('fade');
+    els.loading.classList.add('hidden');
   }
 
   function hideChoices() {
