@@ -1239,18 +1239,18 @@ def change_lock_status_of_story(story_id: int):
         story = s.get(Story, story_id)
 
         if not story:
-            return jsonify({
+            return {
                 'success': False,
                 'message': 'Неправильный ID!'
-            }, 404)
+            }
 
         story.is_unlocked = not story.is_unlocked
         s.commit()
 
-        return jsonify({
+        return {
             'success': True,
             'is_unlocked': story.is_unlocked
-        }, 200)
+        }
 
 
 @app.route('/codes/move/<uuid>')
