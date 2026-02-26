@@ -558,6 +558,7 @@
   let gameInfo = {{ game_info|tojson }};
   let sceneData = {{ scene_data|tojson }};
   let storyId = {{ story_id }};
+  let tmpData = {'character_image': null};
 
   // Элементы DOM
   const els = {
@@ -583,7 +584,7 @@
       }
       const img = new Image();
       img.onload = () => resolve(img);
-      img.onerror = () => resolve(img); // Resolve even on error to not block
+      img.onerror = () => resolve(img);
       img.src = src;
     });
   }
@@ -623,7 +624,7 @@
       loadPromises.push(loadBackground(sceneData.background));
     }
 
-    if (sceneData.character_image) {
+    if (sceneData.character_image && sceneData.character_image != tmpData.character_image) {
       loadPromises.push(loadImage(sceneData.character_image));
     }
 
@@ -636,7 +637,9 @@
     const sprite = els.sprite;
 
     if (sceneData.character_image) {
-      sprite.src = sceneData.character_image;
+      if (sceneData.character_image != tmpData.character_image) {
+        sprite.src = sceneData.character_image;
+      }
       sprite.style.display = 'block';
 
       sprite.classList.remove('show', 'hide', 'blackout');
@@ -811,6 +814,7 @@
       const data = await response.json();
 
       if (response.ok && data.success) {
+        tmpData.character_image = sceneData.character_image;
         sceneData = data.next_scene;
         els.text.style.opacity = '0';
         setTimeout(() => {
@@ -840,6 +844,7 @@
       const data = await response.json();
 
       if (response.ok && data.success) {
+        tmpData.character_image = sceneData.character_image;
         sceneData = data.next_scene;
         els.text.style.opacity = '0';
         setTimeout(() => loadScene(), 50);
@@ -862,6 +867,7 @@
       const data = await response.json();
 
       if (response.ok && data.success) {
+        tmpData.character_image = sceneData.character_image;
         sceneData = data.next_scene;
         els.text.style.opacity = '0';
         setTimeout(() => loadScene(), 20);
