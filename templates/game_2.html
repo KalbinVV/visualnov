@@ -624,7 +624,7 @@
       loadPromises.push(loadBackground(sceneData.background));
     }
 
-    if (sceneData.character_image && sceneData.character_image != tmpData.character_image) {
+    if (sceneData.character_image && sceneData.character_image != sprite.src) {
       loadPromises.push(loadImage(sceneData.character_image));
     }
 
@@ -637,7 +637,7 @@
     const sprite = els.sprite;
 
     if (sceneData.character_image) {
-      if (sceneData.character_image != tmpData.character_image) {
+      if (sceneData.character_image != sprite.src) {
         sprite.src = sceneData.character_image;
       }
       sprite.style.display = 'block';
