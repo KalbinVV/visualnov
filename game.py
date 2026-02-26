@@ -54,10 +54,14 @@ class GameService:
         return games_list
 
     def can_access_game(self, user_id: int, story_id: int) -> tuple[bool, str]:
+        user = self.db.get_user_by_id(user_id)
         story = self.story_service.get_story_by_id(story_id)
 
         if not story:
             return False, '404'
+
+        if user.is_admin:
+            return True, 'Admin bypass'
 
         if not story.is_published:
             return False, 'История еще не опубликована'
