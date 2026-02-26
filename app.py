@@ -1240,7 +1240,7 @@ def change_lock_status_of_story(story_id: int):
 
         if not story:
             return jsonify({
-                'status': False,
+                'success': False,
                 'message': 'Неправильный ID!'
             }, 404)
 
@@ -1248,7 +1248,7 @@ def change_lock_status_of_story(story_id: int):
         s.commit()
 
         return jsonify({
-            'status': True,
+            'success': True,
             'is_unlocked': story.is_unlocked
         }, 200)
 
