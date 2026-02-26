@@ -623,7 +623,7 @@
       loadPromises.push(loadBackground(sceneData.background));
     }
 
-    if (sceneData.character_image && sceneData.character_image != sprite.src) {
+    if (sceneData.character_image && sceneData.character_image != els.sprite.src) {
       loadPromises.push(loadImage(sceneData.character_image));
     }
 
