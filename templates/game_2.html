@@ -865,9 +865,10 @@
       const data = await response.json();
 
       if (response.ok && data.success) {
+        tmpData.character_image = sceneData.character_image
         sceneData = data.next_scene;
         els.text.style.opacity = '0';
-        setTimeout(() => loadScene(), 50);
+        setTimeout(() => loadScene(), 20);
       } else {
         if (data.is_ending) {
           window.location.href = `/ending/${storyId}/`;
