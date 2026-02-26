@@ -1266,6 +1266,8 @@ async function toggleLockStatus() {
     const response = await fetch(`/api/stories/${currentStoryId}/lock_status_toggle`);
     const data = await response.json();
 
+    console.log(data)
+
     if (data.success) {
       alert('Текущий статус истории:' + data.is_unlocked ? 'Разблокирована' : 'Заблокирована')
     } else {
