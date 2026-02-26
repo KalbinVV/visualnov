@@ -623,7 +623,7 @@
       loadPromises.push(loadBackground(sceneData.background));
     }
 
-    if (sceneData.character_image && sceneData.character_image != els.sprite.src) {
+    if (sceneData.character_image) {
       loadPromises.push(loadImage(sceneData.character_image));
     }
 
@@ -636,10 +636,7 @@
     const sprite = els.sprite;
 
     if (sceneData.character_image) {
-      if (sceneData.character_image != sprite.src) {
-        sprite.src = sceneData.character_image;
-      }
-
+      sprite.src = sceneData.character_image;
       sprite.style.display = 'block';
 
       sprite.classList.remove('show', 'hide', 'blackout');
@@ -667,9 +664,7 @@
         };
       }
     } else {
-      if (sprite.src != sceneData.character_image) {
-        sprite.style.display = 'none';
-      }
+      sprite.style.display = 'none';
       sprite.classList.remove('show', 'hide', 'blackout');
     }
 
