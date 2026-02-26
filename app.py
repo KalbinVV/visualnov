@@ -1294,7 +1294,7 @@ def generate_move_code(story_id: int, scene_id: int):
 
 
 @app.route('/api/music/stories/<int:story_id>/tracks', methods=['GET'])
-@admin_required
+@login_required
 def get_story_tracks(story_id):
     try:
         with Session(db.engine) as s:

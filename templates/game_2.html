@@ -777,13 +777,7 @@
   };
 
   const musicPlayer = {
-    tracks: [
-      { id: 1, title: "To north", artist: "Ambient Sounds", url: "/static/music/p1/to_north-piano.mp3" },
-      { id: 2, title: "Road", artist: "Horror Vibes", url: "/static/music/p1/road-dark-slow.mp3" },
-      { id: 3, title: "Sea", artist: "Love Story", url: "/static/music/p1/sea-peaceful-cinematic.mp3" },
-      { id: 4, title: "Freight", artist: "Future Bass", url: "/static/music/p1/freight_hop-action.mp3" },
-      { id: 5, title: "Ending", artist: "", url: "/static/music/p1/end_titles-ending.mp3" }
-    ],
+    tracks: [],
     currentTrackIndex: 0,
     autoPlayAttempted: false,
     audio: null,
@@ -791,8 +785,24 @@
     updateInterval: null,
 
     init: function() {
+      this.loadMusic();
       this.renderList();
       this.tryAutoPlay();
+    },
+
+    loadMusic: function() {
+      const response = fetch(`/api/music/stories/${storyId}/tracks`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        data.tracks.forEach((track, index) => {
+          tracks.push(track)
+        })
+      }
     },
 
     renderList: function() {
@@ -805,7 +815,7 @@
         item.innerHTML = `
           <div class="track-info">
             <span class="track-title">${track.title}</span>
-            <span class="track-artist">${track.artist}</span>
+            <span class="track-artist">${track.author}</span>
           </div>
           <div class="track-status">
             ${index === this.currentTrackIndex && this.isPlaying ? '🔊' : ''}
@@ -869,12 +879,12 @@
         this.audio = null;
       }
 
-      this.audio = new Audio(track.url);
+      this.audio = new Audio(track.file_path);
       this.audio.loop = false;
       this.audio.volume = 0.5;
 
       els.nowPlayingTitle.textContent = track.title;
-      els.nowPlayingArtist.textContent = track.artist;
+      els.nowPlayingArtist.textContent = track.author;
 
       this.setupProgressListener();
 
