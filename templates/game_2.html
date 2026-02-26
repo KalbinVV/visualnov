@@ -557,6 +557,7 @@
   // Инициализация данных из Jinja2
   let gameInfo = {{ game_info|tojson }};
   let sceneData = {{ scene_data|tojson }};
+  let tmpData = {'character_image': null};
   let storyId = {{ story_id }};
 
   // Элементы DOM
@@ -623,7 +624,7 @@
       loadPromises.push(loadBackground(sceneData.background));
     }
 
-    if (sceneData.character_image) {
+    if (sceneData.character_image && sceneData.character_image != tmpData.character_image) {
       loadPromises.push(loadImage(sceneData.character_image));
     }
 
@@ -811,6 +812,7 @@
       const data = await response.json();
 
       if (response.ok && data.success) {
+        tmpData.character_image = sceneData.character_image
         sceneData = data.next_scene;
         els.text.style.opacity = '0';
         setTimeout(() => {
@@ -840,6 +842,7 @@
       const data = await response.json();
 
       if (response.ok && data.success) {
+        tmpData.character_image = sceneData.character_image
         sceneData = data.next_scene;
         els.text.style.opacity = '0';
         setTimeout(() => loadScene(), 50);
