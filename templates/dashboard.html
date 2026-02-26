@@ -785,11 +785,10 @@ function renderGames(games) {
     btnHtml = `<button class="btn-play" onclick="window.location.href='/game/${game.id}'">Начать</button>`;
 
     const badgeClass = 'badge-free';
+    let badgeText = 'Доступно';
 
-    if (game.is_unlocked) {
-      const badgeText = 'Доступно';
-    } else {
-      const badgeText = 'Недоступно';
+    if (!game.is_unlocked) {
+      badgeText = 'Недоступно';
     }
 
     card.innerHTML = `
