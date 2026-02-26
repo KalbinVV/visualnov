@@ -264,6 +264,7 @@
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
       animation: fadeInUp 0.7s ease-out 0.3s forwards;
       opacity: 0;
+      transition: opacity 0.3s, transform 0.3s;
     }
 
     .music-info {
@@ -295,6 +296,7 @@
 
     .music-details {
       min-width: 0;
+      text-align: left;
     }
 
     .music-title {
@@ -304,6 +306,7 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      color: var(--text-primary);
     }
 
     .music-artist {
@@ -356,20 +359,16 @@
       background: rgba(255, 255, 255, 0.12);
       border-radius: 2px;
       overflow: hidden;
+      cursor: pointer;
     }
 
     .progress-bar {
       height: 100%;
-      width: 35%;
+      width: 0%;
       background: linear-gradient(90deg, var(--accent), var(--accent-light));
       border-radius: 2px;
       position: relative;
-      animation: progress 8s linear infinite;
-    }
-
-    @keyframes progress {
-      0% { width: 0%; }
-      100% { width: 100%; }
+      transition: width 0.1s linear;
     }
 
     .progress-bar::after {
@@ -383,6 +382,12 @@
       border-radius: 50%;
       background: white;
       box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .progress-container:hover .progress-bar::after {
+      opacity: 1;
     }
 
     /* Choices Summary */
@@ -787,7 +792,7 @@
       <div class="game-title">{{ story_title }}</div>
     </div>
     <div class="top-right">
-      <button class="icon-btn" onclick="toggleMusic()" aria-label="Музыка">
+      <button class="icon-btn" onclick="toggleMusicVisibility()" aria-label="Музыка">
         <svg class="icon" viewBox="0 0 24 24">
           <path d="M9 18V5l12-2v13"/>
           <circle cx="6" cy="18" r="3"/>
@@ -817,8 +822,8 @@
             </svg>
           </div>
           <div class="music-details">
-            <div class="music-title">Эпилог: Новые горизонты</div>
-            <div class="music-artist">Атмосферная тема финала</div>
+            <div class="music-title" id="trackTitle">Загрузка...</div>
+            <div class="music-artist" id="trackArtist">—</div>
           </div>
         </div>
         <div class="music-controls">
@@ -836,8 +841,8 @@
             </svg>
           </button>
         </div>
-        <div class="progress-container">
-          <div class="progress-bar"></div>
+        <div class="progress-container" id="progressContainer">
+          <div class="progress-bar" id="progressBar"></div>
         </div>
       </div>
     </section>
@@ -895,7 +900,26 @@
   </div>
 
   <script>
-    const storyId = {{ story_id }}
+    const storyId = {{ story_id }};
+
+    // Конфигурация музыки
+    const tracks = [
+      { title: "Эпилог: Новые горизонты", artist: "Атмосферная тема", url: "/static/music/p1/to_north-piano.mp3" },
+      { title: "Воспоминания", artist: "Лирическая тема", url: "/static/music/p1/sea-peaceful-cinematic.mp3" },
+      { title: "Тихая ночь", artist: "Эмбиент", url: "/static/music/p1/end_titles-ending.mp3" }
+    ];
+
+    let currentTrackIndex = 0;
+    let audio = new Audio();
+    let isPlaying = false;
+    let updateInterval;
+
+    const playIcon = document.getElementById('playIcon');
+    const pauseIcon = document.getElementById('pauseIcon');
+    const progressBar = document.getElementById('progressBar');
+    const progressContainer = document.getElementById('progressContainer');
+    const trackTitleEl = document.getElementById('trackTitle');
+    const trackArtistEl = document.getElementById('trackArtist');
 
     function initParticles() {
       const container = document.getElementById('particles');
@@ -905,7 +929,6 @@
         const particle = document.createElement('div');
         particle.className = 'particle';
 
-        // Random properties
         const size = Math.random() * 6 + 2;
         const posX = Math.random() * 100;
         const delay = Math.random() * 15;
@@ -922,28 +945,72 @@
       }
     }
 
-    // Music player functionality
-    let isPlaying = false;
-    const playIcon = document.getElementById('playIcon');
-    const pauseIcon = document.getElementById('pauseIcon');
+    function loadTrack(index) {
+      const track = tracks[index];
+      audio.src = track.url;
+      trackTitleEl.textContent = track.title;
+      trackArtistEl.textContent = track.artist;
 
-    function toggleMusicPlayback() {
-      isPlaying = !isPlaying;
+      audio.load();
 
       if (isPlaying) {
-        playIcon.style.display = 'none';
-        pauseIcon.style.display = 'block';
-        // In real implementation: audio.play()
-        console.log('Music started playing');
-      } else {
-        playIcon.style.display = 'block';
-        pauseIcon.style.display = 'none';
-        // In real implementation: audio.pause()
-        console.log('Music paused');
+        audio.play().catch(e => {
+          console.log("Autoplay blocked, waiting for interaction");
+          isPlaying = false;
+          updatePlayPauseIcon();
+        });
       }
     }
 
-    function toggleMusic() {
+    function toggleMusicPlayback() {
+      if (!audio.src) {
+        loadTrack(currentTrackIndex);
+      }
+
+      if (isPlaying) {
+        audio.pause();
+        isPlaying = false;
+      } else {
+        audio.play().then(() => {
+          isPlaying = true;
+          startProgressLoop();
+        }).catch(e => console.error(e));
+      }
+      updatePlayPauseIcon();
+    }
+
+    function updatePlayPauseIcon() {
+      if (isPlaying) {
+        playIcon.style.display = 'none';
+        pauseIcon.style.display = 'block';
+      } else {
+        playIcon.style.display = 'block';
+        pauseIcon.style.display = 'none';
+      }
+    }
+
+    function startProgressLoop() {
+      if (updateInterval) clearInterval(updateInterval);
+      updateInterval = setInterval(() => {
+        if (audio.duration) {
+          const percent = (audio.currentTime / audio.duration) * 100;
+          progressBar.style.width = `${percent}%`;
+        }
+      }, 100);
+    }
+
+    function skipTrack() {
+      currentTrackIndex = (currentTrackIndex + 1) % tracks.length;
+      loadTrack(currentTrackIndex);
+      if (isPlaying) audio.play();
+
+      // Анимация кнопки
+      const btn = event.currentTarget;
+      btn.style.transform = 'scale(0.9)';
+      setTimeout(() => btn.style.transform = '', 150);
+    }
+
+    function toggleMusicVisibility() {
       const player = document.getElementById('musicPlayer');
       player.style.transition = 'all 0.3s ease';
 
@@ -956,21 +1023,23 @@
       }
     }
 
-    function skipTrack() {
-      // In real implementation: load next track
-      console.log('Skipping to next track');
-      // Visual feedback
-      const btn = event.currentTarget;
-      btn.style.transform = 'scale(0.9)';
-      setTimeout(() => {
-        btn.style.transform = '';
-      }, 150);
-    }
+    // Обработка клика по прогресс-бару
+    progressContainer.addEventListener('click', (e) => {
+      if (!audio.duration) return;
+      const rect = progressContainer.getBoundingClientRect();
+      const clickX = e.clientX - rect.left;
+      const width = rect.width;
+      const duration = audio.duration;
 
-    // Navigation functions
+      audio.currentTime = (clickX / width) * duration;
+    });
+
+    // Автопереключение трека
+    audio.addEventListener('ended', () => {
+      skipTrack();
+    });
+
     function goBack() {
-      // In real implementation: navigate to dashboard
-      console.log('Navigating back to dashboard');
       if (window.history.length > 1) {
         window.history.back();
       } else {
@@ -982,31 +1051,27 @@
       if (confirm('Вы уверены? Весь ваш результат будет потерян')) {
         const response = await fetch(`/api/stories/${storyId}/start_again`, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          }
+          headers: { 'Content-Type': 'application/json' }
         });
 
         const data = await response.json();
 
         if (response.ok && data.success) {
-          window.location.href = `/game/${storyId}`
+          window.location.href = `/game/${storyId}`;
         }
       }
     }
 
+    function returnToDashboard() {
+      window.location.href = "/dashboard";
+    }
 
-    // Initialize on load
     document.addEventListener('DOMContentLoaded', function() {
       initParticles();
 
-      // Auto-play music after user interaction (browser policy)
-      document.body.addEventListener('click', function initAudio() {
-        // In real implementation: initialize audio context
-        document.body.removeEventListener('click', initAudio);
-      }, { once: true });
+      // Инициализация первого трека (без автовоспроизведения, чтобы не блокировал браузер)
+      loadTrack(currentTrackIndex);
 
-      // Add touch feedback for mobile
       document.querySelectorAll('.action-btn, .icon-btn, .music-btn').forEach(btn => {
         btn.addEventListener('touchstart', function() {
           this.style.transform = 'scale(0.97)';
@@ -1017,11 +1082,6 @@
       });
     });
 
-    function returnToDashboard() {
-      window.location.href = "/dashboard"
-    }
-
-    // Handle window resize for particles
     window.addEventListener('resize', function() {
       const container = document.getElementById('particles');
       container.innerHTML = '';
