@@ -784,22 +784,19 @@
     isPlaying: false,
     updateInterval: null,
 
-    init: function() {
-      this.loadMusic();
+    async init: function() {
+      await this.loadMusic();
       this.renderList();
       this.tryAutoPlay();
     },
 
-    loadMusic: function() {
-      let data = null;
-
-      fetch(`/api/music/stories/${storyId}/tracks`, {
+    loadMusic: async function() {
+      const response = await fetch(`/api/music/stories/${storyId}/tracks`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' }
-      }).then((response) => {
-        data = response.json();
-        console.log(data);
       });
+
+      const data = await response.json();
 
       if (data.success) {
         data.tracks.forEach((track, index) => {
