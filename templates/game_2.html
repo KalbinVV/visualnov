@@ -791,12 +791,15 @@
     },
 
     loadMusic: function() {
-      const response = fetch(`/api/music/stories/${storyId}/tracks`, {
+      let data = null;
+
+      fetch(`/api/music/stories/${storyId}/tracks`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' }
+      }).then((response) => {
+        data = response.json();
+        console.log(data);
       });
-
-      const data = response.json();
 
       if (data.success) {
         data.tracks.forEach((track, index) => {
