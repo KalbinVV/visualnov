@@ -1267,7 +1267,7 @@ async function toggleLockStatus() {
     const data = await response.json();
 
     if (data.success) {
-      alert('Текущий статус истории:' + 'Разблокирована' if data.is_unlocked else 'Заблокирована')
+      alert('Текущий статус истории:' + data.is_unlocked ? ''Разблокирована'' : 'Заблокирована')
     } else {
       console.error('Ошибка изменения статуса истории:', data.message);
       alert('Не удалось изменить статус истории!')
