@@ -1242,7 +1242,14 @@ def code_move_to(uuid: str):
         if not code:
             return render_template('error.html', message='Код не найден', code=404), 404
 
-        current_save = db.load_game_raw(user.id, code.story_id)
+        current_save = s.query(GameSave).filter_by(user_id=user.id,
+                                                   story_id=code.story_id).first()
+
+        if not current_save:
+            return render_template('error.html',
+                                   message='Сначала инициализируйтесь в игре перед тем как использовать коды!',
+                                   code=403), 403
+
         current_save.scene_id = code.scene_id
 
         s.commit()
