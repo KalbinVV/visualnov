@@ -673,9 +673,26 @@
     currentTrackIndex: -1,
     audio: null,
     isPlaying: false,
+    autoPlayAttempted: false,
 
     init: function() {
       this.renderList();
+      this.tryAutoPlay();
+    },
+
+    tryAutoPlay: function() {
+       if (this.autoPlayAttempted) return;
+       this.autoPlayAttempted = true;
+
+       const playPromise = this.audio ? this.audio.play() : Promise.reject();
+
+       playPromise.catch(() => {
+           document.addEventListener('click', () => {
+               if (!this.isPlaying && this.currentTrackIndex >= 0) {
+                   this.playTrack(this.currentTrackIndex);
+               }
+           }, { once: true });
+       });
     },
 
     renderList: function() {
