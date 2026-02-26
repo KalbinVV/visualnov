@@ -881,7 +881,7 @@
           Опубликовать
         </button>
 
-        <button class="btn-editor">Разблокировать/Заблокировать историю</button>
+        <button class="btn-editor" onclick="toggleLockStatus">Разблокировать/Заблокировать историю</button>
       </div>
     </div>
 
@@ -1260,6 +1260,24 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('sceneForm').addEventListener('submit', saveScene);
   document.getElementById('choiceForm').addEventListener('submit', saveChoice);
 });
+
+async function toggleLockStatus() {
+  try {
+    const response = await fetch(`/api/stories/${currentStoryId}/lock_status_toggle`);
+    const data = await response.json();
+
+    if (data.success) {
+      alert('Текущий статус истории:' + 'Разблокирована' if data.is_unlocked else 'Заблокирована')
+    } else {
+      console.error('Ошибка изменения статуса истории:', data.message);
+      alert('Не удалось изменить статус истории!')
+    }
+
+  } catch (error) {
+    console.error('Ошибка изменения статуса истории:', error);
+    alert('Ошибка изменения статуса истории');
+  }
+}
 
 // Загрузка глав
 async function loadChapters() {

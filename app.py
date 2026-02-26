@@ -1232,7 +1232,28 @@ def reset_user_progress(user_id):
         return jsonify({'error': f'Ошибка сброса прогресса: {str(e)}'}), 500
 
 
-@app.route('/codes/move/<uuid>')
+@app.route('/api/stories/int:story_id/lock_status_toggle')
+@admin_required
+def change_lock_status_of_story(story_id: int):
+    with Session(db.engine) as s:
+        story = s.get(Story, story_id)
+
+        if not story:
+            return jsonify({
+                'status': False,
+                'message': 'Неправильный ID!'
+            }, 404)
+
+        story.is_unlocked = not story.is_unlocked
+        s.commit()
+
+        return jsonify({
+            'status': True,
+            'is_unlocked': story.is_unlocked
+        }, 200)
+
+
+@app.route('/codes/move/<str:uuid>')
 @login_required
 def code_move_to(uuid: str):
     with Session(db.engine) as s:
@@ -1257,7 +1278,7 @@ def code_move_to(uuid: str):
         return redirect(f'/game/{code.story_id}')
 
 
-@app.route('/admin/codes/move/<story_id>/<scene_id>')
+@app.route('/admin/codes/move/<int:story_id>/<int:scene_id>')
 @admin_required
 def generate_move_code(story_id: int, scene_id: int):
     with Session(db.engine) as s:
