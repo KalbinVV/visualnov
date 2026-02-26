@@ -799,6 +799,8 @@
       const data = await response.json();
 
       if (data.success) {
+        console.log(data)
+
         data.tracks.forEach((track, index) => {
           tracks.push(track)
         })
