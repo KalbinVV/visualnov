@@ -1232,7 +1232,7 @@ def reset_user_progress(user_id):
         return jsonify({'error': f'Ошибка сброса прогресса: {str(e)}'}), 500
 
 
-@app.route('/api/stories/int:story_id/lock_status_toggle')
+@app.route('/api/stories/<int:story_id>/lock_status_toggle')
 @admin_required
 def change_lock_status_of_story(story_id: int):
     with Session(db.engine) as s:
