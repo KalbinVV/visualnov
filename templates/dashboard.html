@@ -780,24 +780,11 @@ function renderGames(games) {
   games.forEach((game, index) => {
     const card = document.createElement('div');
     card.className = 'game-card';
-    card.style.animationDelay = `${index * 0.1}s`; // Каскадная анимация
+    card.style.animationDelay = `${index * 0.1}s`;
 
-    const hasSave = game.saves && game.saves.length > 0;
-    const isPremium = game.premium;
+    btnHtml = `<button class="btn-play" onclick="window.location.href='/game/${game.id}'">Начать</button>`;
 
-    // Кнопка действия
-    let btnHtml = '';
-    if (hasSave) {
-      btnHtml = `<button class="btn-play" onclick="window.location.href='/game/${game.id}'">Продолжить</button>`;
-    } else if (isPremium) {
-      btnHtml = `<button class="btn-play" onclick="handleGameClick(${JSON.stringify(game).replace(/"/g, '&quot;')})">Купить</button>`;
-    } else {
-      btnHtml = `<button class="btn-play" onclick="window.location.href='/game/${game.id}'">Начать</button>`;
-    }
-
-    // Бейдж
-    const badgeClass = isPremium ? 'badge-premium' : 'badge-free';
-    const badgeText = isPremium ? 'PREMIUM' : 'FREE';
+    const badgeClass = 'badge-free';
 
     card.innerHTML = `
       <div class="card-image-wrapper">
@@ -819,46 +806,7 @@ function renderGames(games) {
 }
 
 function handleGameClick(game) {
-  if (game.premium && (!game.saves || game.saves.length === 0)) {
-    checkGameAccess(game.id);
-  } else {
     window.location.href = `/game/${game.id}`;
-  }
-}
-
-async function checkGameAccess(gameId) {
-  try {
-    const response = await fetch(`/api/games/${gameId}/access`);
-    const data = await response.json();
-
-    if (data.accessible) {
-      window.location.href = `/game/${gameId}`;
-    } else {
-      const price = gameId === 'midnight_encounter' ? 50 : 100;
-      if (confirm(`Открыть доступ к истории за ${price} 💎?`)) {
-        purchaseGame(gameId);
-      }
-    }
-  } catch (error) {
-    alert('Ошибка проверки доступа');
-  }
-}
-
-async function purchaseGame(gameId) {
-  try {
-    const response = await fetch(`/api/games/${gameId}/purchase`, { method: 'POST' });
-    const data = await response.json();
-
-    if (response.ok && data.success) {
-      document.getElementById('diamondAmount').textContent = data.user.diamonds;
-      document.getElementById('modalDiamondBalance').textContent = data.user.diamonds;
-      window.location.href = `/game/${gameId}`;
-    } else {
-      alert(data.error || 'Ошибка покупки');
-    }
-  } catch (error) {
-    alert('Ошибка сети');
-  }
 }
 
 async function logout() {
@@ -867,7 +815,6 @@ async function logout() {
   window.location.href = '/login';
 }
 
-/* Modal Logic */
 function showDiamondModal() {
   const modal = document.getElementById('diamondModal');
   const current = document.getElementById('diamondAmount').textContent;
