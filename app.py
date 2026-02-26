@@ -1566,7 +1566,8 @@ def get_active_story_tracks(story_id):
 @app.route('/admin/music')
 @admin_required
 def admin_music_editor():
-    return render_template('admin/music.html'), 200
+    return render_template('admin/music.html',
+                           user=db.get_user_by_id(session['user_id'])), 200
 
 
 @app.errorhandler(404)
