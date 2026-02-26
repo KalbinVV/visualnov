@@ -614,36 +614,31 @@
   });
 
   async function loadScene() {
-    // Показываем экран загрузки
     els.loading.classList.remove('hidden');
     els.bg.classList.add('fade');
 
-    // Собираем все промисы для загрузки
     const loadPromises = [];
 
-    // Загрузка фона
     if (sceneData.background) {
       loadPromises.push(loadBackground(sceneData.background));
     }
 
-    // Загрузка спрайта персонажа
     if (sceneData.character_image) {
       loadPromises.push(loadImage(sceneData.character_image));
     }
 
-    // Ждем загрузки всех ресурсов (или сразу продолжаем если ничего нет)
     await Promise.all(loadPromises);
 
-    // Применяем фон
     if (sceneData.background) {
       els.bg.style.backgroundImage = `url('${sceneData.background}')`;
     }
 
-    // Применяем спрайт
     const sprite = els.sprite;
 
     if (sceneData.character_image) {
-      sprite.src = sceneData.character_image;
+      if (sprite.src != sceneData.character_image) {
+        sprite.src = sceneData.character_image;
+      }
       sprite.style.display = 'block';
 
       sprite.classList.remove('show', 'hide', 'blackout');
