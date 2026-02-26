@@ -113,10 +113,34 @@
       <h3>Саундтрек</h3>
     </div>
 
+    <div class="now-playing">
+      <div class="now-playing-info">
+        <span class="now-playing-title" id="nowPlayingTitle">Нет трека</span>
+        <span class="now-playing-artist" id="nowPlayingArtist">—</span>
+      </div>
+      <div class="now-playing-time">
+        <span id="currentTime">0:00</span>
+        <span class="time-separator">/</span>
+        <span id="totalTime">0:00</span>
+      </div>
+    </div>
+
+    <div class="progress-container">
+      <div class="progress-bar" id="progressBar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+    </div>
+
     <div class="player-controls">
-      <button class="control-btn" onclick="musicPlayer.prevTrack()">⏮</button>
-      <button class="control-btn play-pause" onclick="musicPlayer.togglePlay()" id="playPauseBtn">▶</button>
-      <button class="control-btn" onclick="musicPlayer.nextTrack()">⏭</button>
+      <button class="control-btn" onclick="musicPlayer.prevTrack()">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+      </button>
+      <button class="control-btn play-pause" onclick="musicPlayer.togglePlay()" id="playPauseBtn">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" id="playPauseIcon"><path d="M8 5v14l11-7z"/></svg>
+      </button>
+      <button class="control-btn" onclick="musicPlayer.nextTrack()">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+      </button>
     </div>
 
     <div class="track-list-container">
@@ -527,16 +551,87 @@
   .music-modal.show { opacity: 1; pointer-events: auto; }
 
   .music-panel {
-    max-width: 400px;
+    max-width: 450px;
+    width: 90%;
     display: flex;
     flex-direction: column;
-    max-height: 80vh;
+    max-height: 85vh;
   }
 
   .music-icon-large {
     font-size: 40px; margin-bottom: 16px; display: block;
     filter: drop-shadow(0 0 10px var(--primary-glow));
     animation: float 3s ease-in-out infinite;
+  }
+
+  .now-playing {
+    background: rgba(0,0,0,0.3);
+    border-radius: 16px;
+    padding: 16px 20px;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .now-playing-info {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    min-width: 0;
+  }
+
+  .now-playing-title {
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--text-main);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+  }
+
+  .now-playing-artist {
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  .now-playing-time {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .time-separator {
+    margin: 0 4px;
+    opacity: 0.5;
+  }
+
+  .progress-container {
+    margin-bottom: 16px;
+    padding: 0 8px;
+  }
+
+  .progress-bar {
+    width: 100%;
+    height: 6px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 3px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--primary);
+    border-radius: 3px;
+    width: 0%;
+    transition: width 0.1s linear;
+    box-shadow: 0 0 10px var(--primary-glow);
   }
 
   .player-controls {
@@ -554,20 +649,20 @@
     background: transparent;
     border: none;
     color: var(--text-main);
-    font-size: 24px;
     cursor: pointer;
     padding: 8px;
     transition: color 0.2s, transform 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   .control-btn:hover { color: var(--primary); transform: scale(1.1); }
 
   .control-btn.play-pause {
-    width: 48px; height: 48px;
+    width: 56px; height: 56px;
     background: var(--primary);
     border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 20px;
-    box-shadow: 0 0 15px var(--primary-glow);
+    box-shadow: 0 0 20px var(--primary-glow);
   }
   .control-btn.play-pause:hover { background: var(--primary-dark); transform: scale(1.1); }
 
@@ -575,6 +670,7 @@
     flex-grow: 1;
     overflow-y: auto;
     padding-right: 5px;
+    max-height: 300px;
   }
   .track-list-container::-webkit-scrollbar { width: 4px; }
   .track-list-container::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 2px; }
@@ -582,14 +678,17 @@
   .track-item {
     display: flex;
     align-items: center;
-    padding: 12px;
+    padding: 14px 16px;
     border-radius: 12px;
     cursor: pointer;
-    transition: background 0.2s;
+    transition: background 0.2s, transform 0.2s;
     margin-bottom: 8px;
     border: 1px solid transparent;
   }
-  .track-item:hover { background: rgba(255,255,255,0.05); }
+  .track-item:hover {
+    background: rgba(255,255,255,0.05);
+    transform: translateX(4px);
+  }
 
   .track-item.active {
     background: rgba(139, 92, 246, 0.15);
@@ -627,6 +726,11 @@
     .choice-btn { padding: 14px 18px; font-size: 15px; }
 
     .currency-pill { top: 70px; right: 16px; padding: 6px 12px; font-size: 13px; }
+
+    .music-panel { width: 95%; max-width: none; }
+    .now-playing-title { max-width: 150px; font-size: 14px; }
+    .control-btn.play-pause { width: 50px; height: 50px; }
+    .track-list-container { max-height: 250px; }
   }
 
   @media (max-height: 600px) {
@@ -636,6 +740,10 @@
     }
     .character-sprite { height: 65vh; }
     .choice-btn { padding: 12px; font-size: 14px; }
+
+    .music-panel { max-height: 90vh; }
+    .track-list-container { max-height: 200px; }
+    .now-playing { padding: 12px 16px; }
   }
 </style>
 
@@ -659,7 +767,14 @@
     modalDiamondBalance: document.getElementById('modalDiamondBalance'),
     dialogueContainer: document.getElementById('dialogueContainer'),
     trackList: document.getElementById('trackList'),
-    playPauseBtn: document.getElementById('playPauseBtn')
+    playPauseBtn: document.getElementById('playPauseBtn'),
+    playPauseIcon: document.getElementById('playPauseIcon'),
+    nowPlayingTitle: document.getElementById('nowPlayingTitle'),
+    nowPlayingArtist: document.getElementById('nowPlayingArtist'),
+    currentTime: document.getElementById('currentTime'),
+    totalTime: document.getElementById('totalTime'),
+    progressBar: document.getElementById('progressBar'),
+    progressFill: document.getElementById('progressFill')
   };
 
   const musicPlayer = {
@@ -670,29 +785,15 @@
       { id: 4, title: "Freight", artist: "Future Bass", url: "/static/music/p1/freight_hop-action.mp3" },
       { id: 5, title: "Ending", artist: "", url: "/static/music/p1/end_titles-ending.mp3" }
     ],
-    currentTrackIndex: -1,
+    currentTrackIndex: 0,
+    autoPlayAttempted: false,
     audio: null,
     isPlaying: false,
-    autoPlayAttempted: false,
+    updateInterval: null,
 
     init: function() {
       this.renderList();
       this.tryAutoPlay();
-    },
-
-    tryAutoPlay: function() {
-       if (this.autoPlayAttempted) return;
-       this.autoPlayAttempted = true;
-
-       const playPromise = this.audio ? this.audio.play() : Promise.reject();
-
-       playPromise.catch(() => {
-           document.addEventListener('click', () => {
-               if (!this.isPlaying && this.currentTrackIndex >= 0) {
-                   this.playTrack(this.currentTrackIndex);
-               }
-           }, { once: true });
-       });
     },
 
     renderList: function() {
@@ -715,12 +816,52 @@
       });
     },
 
-    playTrack: function(index) {
-      if (this.currentTrackIndex === index && this.isPlaying) {
-        this.pause();
-        return;
+    tryAutoPlay: function() {
+      if (this.autoPlayAttempted) return;
+      this.autoPlayAttempted = true;
+
+      setTimeout(() => {
+        this.playTrack(this.currentTrackIndex);
+      }, 500);
+    },
+
+    formatTime: function(seconds) {
+      if (isNaN(seconds)) return '0:00';
+      const mins = Math.floor(seconds / 60);
+      const secs = Math.floor(seconds % 60);
+      return `${mins}:${secs.toString().padStart(2, '0')}`;
+    },
+
+    updateProgress: function() {
+      if (!this.audio) return;
+
+      const current = this.audio.currentTime;
+      const duration = this.audio.duration;
+
+      els.currentTime.textContent = this.formatTime(current);
+      els.totalTime.textContent = this.formatTime(duration);
+
+      if (duration > 0) {
+        const progress = (current / duration) * 100;
+        els.progressFill.style.width = `${progress}%`;
+      }
+    },
+
+    setupProgressListener: function() {
+      if (this.updateInterval) {
+        clearInterval(this.updateInterval);
       }
 
+      this.updateInterval = setInterval(() => {
+        this.updateProgress();
+      }, 100);
+
+      this.audio.addEventListener('ended', () => {
+        this.nextTrack();
+      });
+    },
+
+    playTrack: function(index) {
       this.currentTrackIndex = index;
       const track = this.tracks[index];
 
@@ -730,15 +871,20 @@
       }
 
       this.audio = new Audio(track.url);
-      this.audio.loop = true;
+      this.audio.loop = false;
       this.audio.volume = 0.5;
+
+      els.nowPlayingTitle.textContent = track.title;
+      els.nowPlayingArtist.textContent = track.artist;
+
+      this.setupProgressListener();
 
       this.audio.play().then(() => {
         this.isPlaying = true;
+        this.updatePlayPauseIcon();
         this.renderList();
       }).catch(err => {
         console.error("Ошибка воспроизведения:", err);
-        alert("Не удалось загрузить трек");
       });
     },
 
@@ -759,6 +905,7 @@
       if (this.audio) {
         this.audio.pause();
         this.isPlaying = false;
+        this.updatePlayPauseIcon();
         this.renderList();
       }
     },
@@ -767,7 +914,16 @@
       if (this.audio) {
         this.audio.play();
         this.isPlaying = true;
+        this.updatePlayPauseIcon();
         this.renderList();
+      }
+    },
+
+    updatePlayPauseIcon: function() {
+      if (this.isPlaying) {
+        els.playPauseIcon.innerHTML = '<path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>';
+      } else {
+        els.playPauseIcon.innerHTML = '<path d="M8 5v14l11-7z"/>';
       }
     },
 
@@ -820,6 +976,17 @@
         hideMenu();
         toggleMusicModal();
       }
+    });
+
+    els.progressBar.addEventListener('click', function(e) {
+      if (!musicPlayer.audio) return;
+
+      const rect = els.progressBar.getBoundingClientRect();
+      const clickX = e.clientX - rect.left;
+      const width = rect.width;
+      const percentage = clickX / width;
+
+      musicPlayer.audio.currentTime = percentage * musicPlayer.audio.duration;
     });
   });
 
