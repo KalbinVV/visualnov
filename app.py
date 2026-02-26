@@ -1253,7 +1253,7 @@ def change_lock_status_of_story(story_id: int):
         }, 200)
 
 
-@app.route('/codes/move/<str:uuid>')
+@app.route('/codes/move/<uuid>')
 @login_required
 def code_move_to(uuid: str):
     with Session(db.engine) as s:
