@@ -785,7 +785,12 @@ function renderGames(games) {
     btnHtml = `<button class="btn-play" onclick="window.location.href='/game/${game.id}'">Начать</button>`;
 
     const badgeClass = 'badge-free';
-    const badgeText = 'Доступно';
+
+    if (game.is_unlocked) {
+      const badgeText = 'Доступно';
+    else {
+      const badgeText = 'Недоступно';
+    }
 
     card.innerHTML = `
       <div class="card-image-wrapper">
