@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
+from datetime import datetime
 
 from flask import Flask, request, jsonify, session, render_template, redirect, url_for, make_response
 from functools import wraps
 import sys
 
-from sqlalchemy import update
+from sqlalchemy import update, select
 from sqlalchemy.orm import Session
 
 from config import config
 from database import Database, User, Choice, Scene, Story, GameSave, DiamondCode, DiamondCodesHistory, TeamCode, \
-    ChoiceHistory, MoveCode
+    ChoiceHistory, MoveCode, Music
 from auth import AuthService
 from game import GameService
 
@@ -29,7 +29,9 @@ from werkzeug.utils import secure_filename
 import os
 
 app.config['UPLOAD_FOLDER'] = 'static/images'
-app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'webp', 'avif'}
+app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'webp', 'avif', 'mp3', 'wav', 'ogg', 'm4a'}
+
+MAX_FILE_SIZE = 10 * 1024 * 1024
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -1289,6 +1291,282 @@ def generate_move_code(story_id: int, scene_id: int):
         s.commit()
 
         return f'/codes/move/{move_code.code}'
+
+
+@app.route('/api/music/stories/<int:story_id>/tracks', methods=['GET'])
+@admin_required
+def get_story_tracks(story_id):
+    try:
+        with Session(db.engine) as s:
+            tracks = s.execute(
+                select(Music).where(Music.story_id == story_id)
+            ).scalars().all()
+
+            return jsonify({
+                'success': True,
+                'tracks': [{
+                    'id': track.id,
+                    'story_id': track.story_id,
+                    'title': track.title,
+                    'author': track.author,
+                    'file_path': track.file_path
+                } for track in tracks]
+            }), 200
+
+    except Exception as e:
+        app.logger.error(f"Error getting tracks: {str(e)}")
+        return jsonify({'success': False, 'message': 'Ошибка сервера'}), 500
+
+
+@app.route('/api/music/stories/<int:story_id>/tracks', methods=['POST'])
+@admin_required
+def add_track_to_story(story_id):
+    try:
+        with Session(db.engine) as s:
+            data = request.get_json()
+
+            if not data:
+                return jsonify({'success': False, 'message': 'Необходимо передать данные'}), 400
+
+            title = data.get('title')
+            author = data.get('author')
+            file_path = data.get('file_path')
+
+            if not title or not author or not file_path:
+                return jsonify({'success': False, 'message': 'Необходимо указать title, author и file_path'}), 400
+
+            track = Music(
+                story_id=story_id,
+                title=title,
+                author=author,
+                file_path=file_path
+            )
+
+            s.add(track)
+            s.commit()
+
+            return jsonify({
+                'success': True,
+                'message': 'Трек добавлен',
+                'track': {
+                    'id': track.id,
+                    'story_id': track.story_id,
+                    'title': track.title,
+                    'author': track.author,
+                    'file_path': track.file_path
+                }
+            }), 201
+
+    except Exception as e:
+        s.rollback()
+        app.logger.error(f"Error adding track: {str(e)}")
+        return jsonify({'success': False, 'message': 'Ошибка сервера'}), 500
+
+
+@app.route('/api/music/stories/<int:story_id>/tracks/upload', methods=['POST'])
+@admin_required
+def upload_track_file(story_id):
+    try:
+        with Session(db.engine) as s:
+            if 'file' not in request.files:
+                return jsonify({'success': False, 'message': 'Файл не найден'}), 400
+
+            file = request.files['file']
+
+            if file.filename == '':
+                return jsonify({'success': False, 'message': 'Файл не выбран'}), 400
+
+            if not allowed_file(file.filename):
+                return jsonify({'success': False, 'message': 'Недопустимый формат файла'}), 400
+
+            if file.content_length and file.content_length > MAX_FILE_SIZE:
+                return jsonify({'success': False, 'message': 'Файл слишком большой (макс. 10MB)'}), 400
+
+            title = request.form.get('title')
+            author = request.form.get('author')
+
+            if not title or not author:
+                return jsonify({'success': False, 'message': 'Необходимо указать title и author'}), 400
+
+            story = s.get(Story, story_id)
+            if not story:
+                return jsonify({'success': False, 'message': 'История не найдена'}), 404
+
+            filename = secure_filename(file.filename)
+            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+            filename = f"{story_id}_{timestamp}_{filename}"
+
+            upload_folder = app.config.get('MUSIC_UPLOAD_FOLDER', 'static/music')
+            os.makedirs(upload_folder, exist_ok=True)
+
+            file_path = os.path.join(upload_folder, filename)
+            file.save(file_path)
+
+            file_url = f"/static/music/{filename}"
+
+            track = Music(
+                story_id=story_id,
+                title=title,
+                author=author,
+                file_path=file_url
+            )
+
+            s.add(track)
+            s.commit()
+
+            return jsonify({
+                'success': True,
+                'message': 'Трек загружен',
+                'track': {
+                    'id': track.id,
+                    'story_id': track.story_id,
+                    'title': track.title,
+                    'author': track.author,
+                    'file_path': track.file_path
+                }
+            }), 201
+
+    except Exception as e:
+        s.rollback()
+        app.logger.error(f"Error uploading track: {str(e)}")
+        return jsonify({'success': False, 'message': 'Ошибка сервера'}), 500
+
+
+@app.route('/api/music/stories/<int:story_id>/tracks/<int:track_id>', methods=['GET'])
+@admin_required
+def get_track(story_id, track_id):
+    try:
+        with Session(db.engine) as s:
+            track = s.get(Music, track_id)
+
+            if not track or track.story_id != story_id:
+                return jsonify({'success': False, 'message': 'Трек не найден'}), 404
+
+            return jsonify({
+                'success': True,
+                'track': {
+                    'id': track.id,
+                    'story_id': track.story_id,
+                    'title': track.title,
+                    'author': track.author,
+                    'file_path': track.file_path
+                }
+            }), 200
+    except Exception as e:
+        app.logger.error(f"Error getting track: {str(e)}")
+        return jsonify({'success': False, 'message': 'Ошибка сервера'}), 500
+
+
+@app.route('/api/music/stories/<int:story_id>/tracks/<int:track_id>', methods=['PUT'])
+@admin_required
+def update_track(story_id, track_id):
+    try:
+        with Session(db.engine) as s:
+            track = s.get(Music, track_id)
+
+            if not track or track.story_id != story_id:
+                return jsonify({'success': False, 'message': 'Трек не найден'}), 404
+
+            data = request.get_json()
+
+            if not data:
+                return jsonify({'success': False, 'message': 'Необходимо передать данные'}), 400
+
+            if 'title' in data:
+                track.title = data['title']
+            if 'author' in data:
+                track.author = data['author']
+            if 'file_path' in data:
+                track.file_path = data['file_path']
+
+            s.commit()
+
+            return jsonify({
+                'success': True,
+                'message': 'Трек обновлен',
+                'track': {
+                    'id': track.id,
+                    'story_id': track.story_id,
+                    'title': track.title,
+                    'author': track.author,
+                    'file_path': track.file_path
+                }
+            }), 200
+
+    except Exception as e:
+        s.rollback()
+        app.logger.error(f"Error updating track: {str(e)}")
+        return jsonify({'success': False, 'message': 'Ошибка сервера'}), 500
+
+
+@app.route('/api/music/stories/<int:story_id>/tracks/<int:track_id>', methods=['DELETE'])
+@admin_required
+def delete_track(story_id, track_id):
+    try:
+        with Session(db.engine) as s:
+            track = s.get(Music, track_id)
+
+            if not track or track.story_id != story_id:
+                return jsonify({'success': False, 'message': 'Трек не найден'}), 404
+
+            if track.file_path.startswith('/static/music/'):
+                file_path = os.path.join(
+                    app.config.get('STATIC_FOLDER', 'static'),
+                    track.file_path.lstrip('/')
+                )
+                if os.path.exists(file_path):
+                    try:
+                        os.remove(file_path)
+                    except Exception as e:
+                        app.logger.warning(f"Could not delete file: {str(e)}")
+
+            s.delete(track)
+            s.commit()
+
+            return jsonify({
+                'success': True,
+                'message': 'Трек удален'
+            }), 200
+
+    except Exception as e:
+        s.rollback()
+        app.logger.error(f"Error deleting track: {str(e)}")
+        return jsonify({'success': False, 'message': 'Ошибка сервера'}), 500
+
+
+@app.route('/api/music/stories/<int:story_id>/tracks/active', methods=['GET'])
+@login_required
+def get_active_story_tracks(story_id):
+    try:
+        with Session(db.engine) as s:
+            story = s.get(Story, story_id)
+
+            if not story:
+                return jsonify({'success': False, 'message': 'История не найдена'}), 404
+
+            tracks = s.execute(
+                select(Music).where(Music.story_id == story_id)
+            ).scalars().all()
+
+            return jsonify({
+                'success': True,
+                'tracks': [{
+                    'id': track.id,
+                    'title': track.title,
+                    'author': track.author,
+                    'file_path': track.file_path
+                } for track in tracks]
+            }), 200
+
+    except Exception as e:
+        app.logger.error(f"Error getting active tracks: {str(e)}")
+        return jsonify({'success': False, 'message': 'Ошибка сервера'}), 500
+
+
+@app.route('/admin/music')
+@admin_required
+def admin_music_editor():
+    return render_template('admin/music.html'), 200
 
 
 @app.errorhandler(404)

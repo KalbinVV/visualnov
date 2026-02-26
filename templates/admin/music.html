@@ -1,0 +1,1140 @@
+{% extends "base.html" %}
+
+{% block title %}Админка — Управление Музыкой{% endblock %}
+
+{% block content %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
+
+<div class="dashboard-wrapper">
+
+  <nav class="glass-nav">
+    <div class="nav-content">
+      <div class="brand">
+        <span class="brand-icon">⚙️</span>
+        <span class="brand-text">USSC <span class="highlight">Admin</span></span>
+      </div>
+
+      <div class="nav-actions">
+        <a href="{{ url_for('admin_page') }}" class="nav-link">Истории</a>
+        <a href="{{ url_for('music_admin_page') }}" class="nav-link active">Музыка</a>
+        <a href="{{ url_for('dashboard_page') }}" class="nav-link">На сайт</a>
+        
+        <div class="profile-trigger">
+          <div class="avatar-ring">
+            {% if user.avatar_url %}
+              <img src="{{ user.avatar_url }}" alt="User">
+            {% else %}
+              <span class="avatar-placeholder">{{ user.display_name[0] }}</span>
+            {% endif %}
+          </div>
+          <div class="profile-dropdown">
+            <a href="{{ url_for('profile_page') }}" class="dropdown-item">
+              <span>👤</span> Профиль
+            </a>
+            <div class="dropdown-divider"></div>
+            <a href="#" onclick="logout()" class="dropdown-item danger">
+              <span>🚪</span> Выйти
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="main-stage">
+
+    <section class="hero-section fade-in-up">
+      <div class="hero-content">
+        <h1 class="hero-title">Управление <br><span class="text-gradient">Музыкой</span></h1>
+        <p class="hero-subtitle">Добавляйте, редактируйте и удаляйте музыкальные треки для историй</p>
+      </div>
+      <div class="hero-decoration"></div>
+    </section>
+
+    <section class="admin-section">
+      <div class="section-header">
+        <h2>Выберите историю</h2>
+        <button class="btn-primary" onclick="showAddStoryModal()">
+          <span>➕</span> Добавить историю
+        </button>
+      </div>
+
+      <div class="stories-grid" id="storiesGrid">
+        <div class="loader-skeleton">
+          <div class="skeleton-card"></div>
+          <div class="skeleton-card"></div>
+          <div class="skeleton-card"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="admin-section" id="tracksSection" style="display: none;">
+      <div class="section-header">
+        <h2>Треки истории: <span id="currentStoryTitle" class="text-gradient"></span></h2>
+        <div class="header-actions">
+          <button class="btn-secondary" onclick="closeTracksView()">
+            <span>←</span> Назад
+          </button>
+          <button class="btn-primary" onclick="showAddTrackModal()">
+            <span>➕</span> Добавить трек
+          </button>
+        </div>
+      </div>
+
+      <div class="tracks-list" id="tracksList">
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<div class="modal" id="addTrackModal">
+  <div class="modal-backdrop" onclick="hideAddTrackModal()"></div>
+  <div class="modal-content glass-panel">
+    <button class="modal-close" onclick="hideAddTrackModal()">✕</button>
+    <h3 class="modal-title">Добавить трек</h3>
+    
+    <form id="addTrackForm" onsubmit="submitTrack(event)">
+      <div class="form-group">
+        <label>Название трека</label>
+        <input type="text" id="trackTitle" required placeholder="Например: Эпилог">
+      </div>
+      
+      <div class="form-group">
+        <label>Автор</label>
+        <input type="text" id="trackAuthor" required placeholder="Например: Ambient Sounds">
+      </div>
+      
+      <div class="form-group">
+        <label>Файл</label>
+        <div class="file-upload">
+          <input type="file" id="trackFile" accept=".mp3,.wav,.ogg,.m4a" required>
+          <div class="file-upload-label">
+            <span>📁</span> Выберите файл или перетащите
+          </div>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label>Или URL файла</label>
+        <input type="url" id="trackUrl" placeholder="https://example.com/music.mp3">
+      </div>
+      
+      <div class="form-actions">
+        <button type="button" class="btn-secondary" onclick="hideAddTrackModal()">Отмена</button>
+        <button type="submit" class="btn-primary">Добавить</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal" id="editTrackModal">
+  <div class="modal-backdrop" onclick="hideEditTrackModal()"></div>
+  <div class="modal-content glass-panel">
+    <button class="modal-close" onclick="hideEditTrackModal()">✕</button>
+    <h3 class="modal-title">Редактировать трек</h3>
+    
+    <form id="editTrackForm" onsubmit="updateTrack(event)">
+      <input type="hidden" id="editTrackId">
+      
+      <div class="form-group">
+        <label>Название трека</label>
+        <input type="text" id="editTrackTitle" required>
+      </div>
+      
+      <div class="form-group">
+        <label>Автор</label>
+        <input type="text" id="editTrackAuthor" required>
+      </div>
+      
+      <div class="form-group">
+        <label>URL файла</label>
+        <input type="url" id="editTrackUrl" required>
+      </div>
+      
+      <div class="form-actions">
+        <button type="button" class="btn-secondary" onclick="hideEditTrackModal()">Отмена</button>
+        <button type="submit" class="btn-primary">Сохранить</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal" id="addStoryModal">
+  <div class="modal-backdrop" onclick="hideAddStoryModal()"></div>
+  <div class="modal-content glass-panel">
+    <button class="modal-close" onclick="hideAddStoryModal()">✕</button>
+    <h3 class="modal-title">Добавить историю</h3>
+    
+    <form id="addStoryForm" onsubmit="submitStory(event)">
+      <div class="form-group">
+        <label>Название истории</label>
+        <input type="text" id="storyTitle" required>
+      </div>
+      
+      <div class="form-group">
+        <label>Описание</label>
+        <textarea id="storyDescription" rows="3"></textarea>
+      </div>
+      
+      <div class="form-actions">
+        <button type="button" class="btn-secondary" onclick="hideAddStoryModal()">Отмена</button>
+        <button type="submit" class="btn-primary">Создать</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<style>
+  :root {
+    --bg-deep: #050508;
+    --bg-surface: #0f0f16;
+    --primary: #8b5cf6;
+    --primary-glow: rgba(139, 92, 246, 0.5);
+    --accent: #d8b4fe;
+    --text-main: #ffffff;
+    --text-muted: #94a3b8;
+    --glass-bg: rgba(20, 20, 30, 0.6);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --danger: #ef4444;
+    --success: #10b981;
+
+    --font-display: 'Playfair Display', serif;
+    --font-ui: 'Inter', sans-serif;
+
+    --radius-lg: 24px;
+    --radius-md: 16px;
+    --radius-sm: 8px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--font-ui);
+    background-color: var(--bg-deep);
+    background-image:
+      radial-gradient(circle at 10% 20%, rgba(139, 92, 246, 0.08) 0%, transparent 40%),
+      radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.05) 0%, transparent 40%);
+    color: var(--text-main);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  .glass-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 80px;
+    background: rgba(5, 5, 8, 0.7);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--glass-border);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .nav-content {
+    width: 100%;
+    max-width: 1400px;
+    padding: 0 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .brand {
+    font-family: var(--font-display);
+    font-size: 24px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .brand-icon { font-size: 28px; }
+  .highlight { color: var(--primary); font-style: italic; }
+
+  .nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+
+  .nav-link {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: color 0.2s;
+    padding: 8px 16px;
+    border-radius: 8px;
+  }
+
+  .nav-link:hover, .nav-link.active {
+    color: var(--text-main);
+    background: rgba(255,255,255,0.05);
+  }
+
+  .profile-trigger {
+    position: relative;
+    cursor: pointer;
+  }
+
+  .avatar-ring {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    padding: 2px;
+    background: linear-gradient(135deg, var(--primary), transparent);
+  }
+
+  .avatar-ring img, .avatar-placeholder {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    background: var(--bg-surface);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    border: 2px solid var(--bg-deep);
+  }
+
+  .profile-dropdown {
+    position: absolute;
+    top: 60px;
+    right: 0;
+    width: 220px;
+    background: rgba(15, 15, 22, 0.95);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    padding: 8px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+  }
+
+  .profile-trigger:hover .profile-dropdown {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    color: var(--text-muted);
+    text-decoration: none;
+    border-radius: var(--radius-sm);
+    transition: all 0.2s;
+    font-size: 14px;
+  }
+
+  .dropdown-item:hover {
+    background: rgba(255,255,255,0.05);
+    color: var(--text-main);
+  }
+
+  .dropdown-item.danger:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+  }
+
+  .dropdown-divider {
+    height: 1px;
+    background: var(--glass-border);
+    margin: 6px 0;
+  }
+
+  .main-stage {
+    padding-top: 120px;
+    padding-bottom: 60px;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding-left: 32px;
+    padding-right: 32px;
+  }
+
+  .hero-section {
+    margin-bottom: 60px;
+    position: relative;
+    padding: 40px;
+    border-radius: var(--radius-lg);
+    background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
+    border: 1px solid var(--glass-border);
+    overflow: hidden;
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 2;
+    max-width: 600px;
+  }
+
+  .hero-title {
+    font-family: var(--font-display);
+    font-size: 48px;
+    line-height: 1.1;
+    margin-bottom: 16px;
+    font-weight: 700;
+  }
+
+  .text-gradient {
+    background: linear-gradient(90deg, var(--primary), var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-style: italic;
+  }
+
+  .hero-subtitle {
+    font-size: 18px;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  .hero-decoration {
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, var(--primary-glow) 0%, transparent 70%);
+    opacity: 0.2;
+    filter: blur(60px);
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  .admin-section {
+    margin-bottom: 60px;
+  }
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+
+  .section-header h2 {
+    font-family: var(--font-display);
+    font-size: 32px;
+    font-weight: 600;
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 12px;
+  }
+
+  .stories-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 32px;
+  }
+
+  .story-card {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    transition: all 0.4s;
+    cursor: pointer;
+    opacity: 0;
+    animation: fadeInUp 0.6s forwards;
+  }
+
+  .story-card:hover {
+    transform: translateY(-8px);
+    border-color: var(--primary);
+    box-shadow: 0 20px 40px -10px rgba(0,0,0,0.5), 0 0 20px rgba(139, 92, 246, 0.15);
+  }
+
+  .story-title {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--text-main);
+  }
+
+  .story-desc {
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-bottom: 16px;
+  }
+
+  .story-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 16px;
+    border-top: 1px solid var(--glass-border);
+  }
+
+  .track-count {
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  .btn-primary {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 15px var(--primary-glow);
+  }
+
+  .btn-primary:hover {
+    transform: scale(1.05);
+    filter: brightness(1.1);
+  }
+
+  .btn-secondary {
+    background: transparent;
+    border: 1px solid var(--glass-border);
+    color: var(--text-muted);
+    padding: 12px 24px;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-secondary:hover {
+    border-color: var(--text-main);
+    color: var(--text-main);
+  }
+
+  .btn-danger {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid var(--danger);
+    color: var(--danger);
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-danger:hover {
+    background: var(--danger);
+    color: white;
+  }
+
+  .btn-small {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+
+  .tracks-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .track-card {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    transition: all 0.3s;
+    opacity: 0;
+    animation: fadeInUp 0.6s forwards;
+  }
+
+  .track-card:hover {
+    border-color: var(--primary);
+    background: rgba(255,255,255,0.05);
+  }
+
+  .track-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    flex-shrink: 0;
+  }
+
+  .track-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .track-title {
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--text-main);
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .track-author {
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  .track-file {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 4px;
+    opacity: 0.7;
+  }
+
+  .track-actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  .modal {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+  }
+
+  .modal.show {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+  }
+
+  .modal-content {
+    position: relative;
+    width: 100%;
+    max-width: 500px;
+    padding: 40px 32px;
+    border-radius: 32px;
+    background: rgba(20, 20, 30, 0.8);
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    transform: scale(0.9) translateY(20px);
+    transition: all 0.4s;
+  }
+
+  .modal.show .modal-content {
+    transform: scale(1) translateY(0);
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 20px;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+    transition: all 0.2s;
+  }
+
+  .modal-close:hover {
+    background: rgba(255,255,255,0.1);
+    color: var(--text-main);
+  }
+
+  .modal-title {
+    font-family: var(--font-display);
+    font-size: 24px;
+    color: var(--text-main);
+    margin-bottom: 24px;
+    text-align: center;
+  }
+
+  .form-group {
+    margin-bottom: 20px;
+  }
+
+  .form-group label {
+    display: block;
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+
+  .form-group input,
+  .form-group textarea {
+    width: 100%;
+    padding: 12px 16px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    color: var(--text-main);
+    font-size: 14px;
+    font-family: var(--font-ui);
+    transition: all 0.2s;
+  }
+
+  .form-group input:focus,
+  .form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: rgba(255,255,255,0.08);
+  }
+
+  .file-upload {
+    position: relative;
+  }
+
+  .file-upload input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  .file-upload-label {
+    padding: 20px;
+    background: rgba(255,255,255,0.05);
+    border: 2px dashed var(--glass-border);
+    border-radius: 12px;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 14px;
+    transition: all 0.2s;
+  }
+
+  .file-upload:hover .file-upload-label {
+    border-color: var(--primary);
+    color: var(--text-main);
+  }
+
+  .form-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 24px;
+  }
+
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    padding: 16px 24px;
+    background: rgba(20, 20, 30, 0.95);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    color: var(--text-main);
+    font-size: 14px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    transform: translateY(100px);
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 3000;
+  }
+
+  .toast.show {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  .toast.success {
+    border-color: var(--success);
+  }
+
+  .toast.error {
+    border-color: var(--danger);
+  }
+
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .fade-in-up {
+    animation: fadeInUp 0.8s ease-out forwards;
+  }
+
+  .loader-skeleton {
+    display: contents;
+  }
+  .skeleton-card {
+    height: 200px;
+    background: rgba(255,255,255,0.03);
+    border-radius: var(--radius-lg);
+    animation: pulse 1.5s infinite;
+  }
+  @keyframes pulse {
+    0% { opacity: 0.5; }
+    50% { opacity: 0.8; }
+    100% { opacity: 0.5; }
+  }
+
+  @media (max-width: 768px) {
+    .nav-content { padding: 0 20px; }
+    .hero-title { font-size: 32px; }
+    .main-stage { padding-top: 100px; padding-left: 20px; padding-right: 20px; }
+    .stories-grid { grid-template-columns: 1fr; }
+    .section-header { flex-direction: column; align-items: flex-start; }
+    .header-actions { width: 100%; justify-content: space-between; }
+    .track-card { flex-direction: column; align-items: flex-start; }
+    .track-actions { width: 100%; justify-content: flex-end; }
+  }
+</style>
+
+<script>
+let currentStoryId = null;
+let currentStoryTitle = null;
+
+document.addEventListener('DOMContentLoaded', function() {
+  loadStories();
+});
+
+async function loadStories() {
+  try {
+    const response = await fetch('/api/admin/stories');
+    const data = await response.json();
+
+    if (data.success && data.stories) {
+      renderStories(data.stories);
+    } else {
+      document.getElementById('storiesGrid').innerHTML = '<p style="color:var(--text-muted); text-align:center; grid-column: 1/-1;">Нет историй</p>';
+    }
+  } catch (error) {
+    console.error('Ошибка:', error);
+    showToast('Ошибка загрузки историй', 'error');
+  }
+}
+
+function renderStories(stories) {
+  const grid = document.getElementById('storiesGrid');
+  grid.innerHTML = '';
+
+  stories.forEach((story, index) => {
+    const card = document.createElement('div');
+    card.className = 'story-card';
+    card.style.animationDelay = `${index * 0.1}s`;
+    card.onclick = () => openStoryTracks(story.id, story.title);
+
+    card.innerHTML = `
+      <h3 class="story-title">${story.title}</h3>
+      <p class="story-desc">${story.description || 'Нет описания'}</p>
+      <div class="story-meta">
+        <span class="track-count">🎵 ${story.track_count || 0} треков</span>
+        <span style="font-size:12px; color:var(--text-muted)">ID: ${story.id}</span>
+      </div>
+    `;
+
+    grid.appendChild(card);
+  });
+}
+
+async function openStoryTracks(storyId, storyTitle) {
+  currentStoryId = storyId;
+  currentStoryTitle = storyTitle;
+  
+  document.getElementById('currentStoryTitle').textContent = storyTitle;
+  document.getElementById('storiesGrid').parentElement.style.display = 'none';
+  document.getElementById('tracksSection').style.display = 'block';
+  
+  await loadTracks(storyId);
+}
+
+function closeTracksView() {
+  currentStoryId = null;
+  currentStoryTitle = null;
+  document.getElementById('tracksSection').style.display = 'none';
+  document.getElementById('storiesGrid').parentElement.style.display = 'block';
+}
+
+async function loadTracks(storyId) {
+  try {
+    const response = await fetch(`/api/music/stories/${storyId}/tracks`);
+    const data = await response.json();
+
+    if (data.success && data.tracks) {
+      renderTracks(data.tracks);
+    } else {
+      document.getElementById('tracksList').innerHTML = '<p style="color:var(--text-muted); text-align:center;">Нет треков</p>';
+    }
+  } catch (error) {
+    console.error('Ошибка:', error);
+    showToast('Ошибка загрузки треков', 'error');
+  }
+}
+
+function renderTracks(tracks) {
+  const list = document.getElementById('tracksList');
+  list.innerHTML = '';
+
+  if (tracks.length === 0) {
+    list.innerHTML = '<p style="color:var(--text-muted); text-align:center; padding: 40px;">Нет треков. Добавьте первый трек!</p>';
+    return;
+  }
+
+  tracks.forEach((track, index) => {
+    const card = document.createElement('div');
+    card.className = 'track-card';
+    card.style.animationDelay = `${index * 0.1}s`;
+
+    card.innerHTML = `
+      <div class="track-icon">🎵</div>
+      <div class="track-info">
+        <div class="track-title">${track.title}</div>
+        <div class="track-author">${track.author}</div>
+        <div class="track-file">${track.file_path}</div>
+      </div>
+      <div class="track-actions">
+        <button class="btn-secondary btn-small" onclick="editTrack(${track.id}, '${track.title}', '${track.author}', '${track.file_path}')">
+          ✏️
+        </button>
+        <button class="btn-danger btn-small" onclick="deleteTrack(${track.id})">
+          🗑️
+        </button>
+      </div>
+    `;
+
+    list.appendChild(card);
+  });
+}
+
+function showAddTrackModal() {
+  document.getElementById('addTrackModal').classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+
+function hideAddTrackModal() {
+  document.getElementById('addTrackModal').classList.remove('show');
+  document.getElementById('addTrackForm').reset();
+  document.body.style.overflow = '';
+}
+
+function showEditTrackModal() {
+  document.getElementById('editTrackModal').classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+
+function hideEditTrackModal() {
+  document.getElementById('editTrackModal').classList.remove('show');
+  document.getElementById('editTrackForm').reset();
+  document.body.style.overflow = '';
+}
+
+function showAddStoryModal() {
+  document.getElementById('addStoryModal').classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+
+function hideAddStoryModal() {
+  document.getElementById('addStoryModal').classList.remove('show');
+  document.getElementById('addStoryForm').reset();
+  document.body.style.overflow = '';
+}
+
+function editTrack(id, title, author, file_path) {
+  document.getElementById('editTrackId').value = id;
+  document.getElementById('editTrackTitle').value = title;
+  document.getElementById('editTrackAuthor').value = author;
+  document.getElementById('editTrackUrl').value = file_path;
+  showEditTrackModal();
+}
+
+async function submitTrack(event) {
+  event.preventDefault();
+  
+  const title = document.getElementById('trackTitle').value;
+  const author = document.getElementById('trackAuthor').value;
+  const file = document.getElementById('trackFile').files[0];
+  const url = document.getElementById('trackUrl').value;
+  
+  if (!currentStoryId) {
+    showToast('Выберите историю', 'error');
+    return;
+  }
+  
+  try {
+    let response;
+    
+    if (file) {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('title', title);
+      formData.append('author', author);
+      
+      response = await fetch(`/api/music/stories/${currentStoryId}/tracks/upload`, {
+        method: 'POST',
+        body: formData
+      });
+    } else if (url) {
+      response = await fetch(`/api/music/stories/${currentStoryId}/tracks`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, author, file_path: url })
+      });
+    } else {
+      showToast('Загрузите файл или укажите URL', 'error');
+      return;
+    }
+    
+    const data = await response.json();
+    
+    if (data.success) {
+      showToast('Трек добавлен', 'success');
+      hideAddTrackModal();
+      await loadTracks(currentStoryId);
+    } else {
+      showToast(data.message || 'Ошибка', 'error');
+    }
+  } catch (error) {
+    console.error('Ошибка:', error);
+    showToast('Ошибка подключения', 'error');
+  }
+}
+
+async function updateTrack(event) {
+  event.preventDefault();
+  
+  const id = document.getElementById('editTrackId').value;
+  const title = document.getElementById('editTrackTitle').value;
+  const author = document.getElementById('editTrackAuthor').value;
+  const file_path = document.getElementById('editTrackUrl').value;
+  
+  try {
+    const response = await fetch(`/api/music/stories/${currentStoryId}/tracks/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title, author, file_path })
+    });
+    
+    const data = await response.json();
+    
+    if (data.success) {
+      showToast('Трек обновлен', 'success');
+      hideEditTrackModal();
+      await loadTracks(currentStoryId);
+    } else {
+      showToast(data.message || 'Ошибка', 'error');
+    }
+  } catch (error) {
+    console.error('Ошибка:', error);
+    showToast('Ошибка подключения', 'error');
+  }
+}
+
+async function deleteTrack(trackId) {
+  if (!confirm('Удалить этот трек?')) return;
+  
+  try {
+    const response = await fetch(`/api/music/stories/${currentStoryId}/tracks/${trackId}`, {
+      method: 'DELETE'
+    });
+    
+    const data = await response.json();
+    
+    if (data.success) {
+      showToast('Трек удален', 'success');
+      await loadTracks(currentStoryId);
+    } else {
+      showToast(data.message || 'Ошибка', 'error');
+    }
+  } catch (error) {
+    console.error('Ошибка:', error);
+    showToast('Ошибка подключения', 'error');
+  }
+}
+
+async function submitStory(event) {
+  event.preventDefault();
+  
+  const title = document.getElementById('storyTitle').value;
+  const description = document.getElementById('storyDescription').value;
+  
+  try {
+    const response = await fetch('/api/admin/stories', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title, description })
+    });
+    
+    const data = await response.json();
+    
+    if (data.success) {
+      showToast('История создана', 'success');
+      hideAddStoryModal();
+      await loadStories();
+    } else {
+      showToast(data.message || 'Ошибка', 'error');
+    }
+  } catch (error) {
+    console.error('Ошибка:', error);
+    showToast('Ошибка подключения', 'error');
+  }
+}
+
+function showToast(message, type = 'success') {
+  const toast = document.getElementById('toast');
+  toast.textContent = message;
+  toast.className = `toast show ${type}`;
+  
+  setTimeout(() => {
+    toast.classList.remove('show');
+  }, 3000);
+}
+
+async function logout() {
+  if (!confirm('Выйти из аккаунта?')) return;
+  await fetch('/api/logout', { method: 'POST' });
+  window.location.href = '/login';
+}
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    hideAddTrackModal();
+    hideEditTrackModal();
+    hideAddStoryModal();
+  }
+});
+</script>
+{% endblock %}

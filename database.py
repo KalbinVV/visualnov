@@ -350,6 +350,16 @@ class MoveCode(Base):
     scene_id: Mapped[int] = mapped_column(ForeignKey('scenes.id', ondelete='CASCADE'), nullable=False)
 
 
+class Music(Base):
+    __tablename__ = 'music'
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    story_id: Mapped[int] = mapped_column(ForeignKey('stories.id', ondelete='CASCADE'), nullable=False)
+    file_path: Mapped[str] = mapped_column(String, nullable=False)
+
+    title: Mapped[str] = mapped_column(String, nullable=False)
+    author: Mapped[str] = mapped_column(String, nullable=False)
+
 
 
 class Database:
