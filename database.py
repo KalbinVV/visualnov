@@ -145,6 +145,7 @@ class Story(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now())
     is_published: Mapped[bool] = mapped_column(default=False)
     author_id: Mapped[Optional[int]] = mapped_column(ForeignKey("users.id"))
+    is_unlocked: Mapped[Boolean] = mapped_column(Boolean, default=True)
 
     author: Mapped[Optional["User"]] = relationship("User", back_populates="authored_stories")
     chapters: Mapped[List["Chapter"]] = relationship("Chapter", back_populates="story", cascade="all, delete-orphan")

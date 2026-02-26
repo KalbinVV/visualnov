@@ -117,7 +117,6 @@ def api_register():
 
 @app.route('/api/login', methods=['POST'])
 def api_login():
-    """API авторизации"""
     try:
         data = request.get_json()
 
@@ -163,7 +162,6 @@ def api_login():
 @app.route('/api/logout', methods=['POST'])
 @api_login_required
 def api_logout():
-    """API выхода из системы"""
     try:
         session_token = request.headers.get('Authorization', '').replace('Bearer ', '')
 
@@ -298,99 +296,16 @@ def api_check_game_access(game_id: int):
         return jsonify({'error': f'Ошибка проверки доступа: {str(e)}'}), 500
 
 
-@app.route('/api/games/<game_key>/purchase', methods=['POST'])
-@api_login_required
-def api_purchase_game(game_key):
-    """API покупки игры"""
-    try:
-        success, message = game_service.purchase_game(session['user_id'], game_key)
-
-        if not success:
-            return jsonify({'error': message}), 400
-
-        # Обновление данных пользователя
-        user = db.get_user_by_id(session['user_id'])
-
-        return jsonify({
-            'success': True,
-            'message': message,
-            'user': {
-                'diamonds': user['diamonds']
-            }
-        }), 200
-
-    except Exception as e:
-        return jsonify({'error': f'Ошибка покупки: {str(e)}'}), 500
-
-
-@app.route('/api/games/<game_key>/load', methods=['GET'])
-@api_login_required
-def api_load_game(game_key):
-    """API загрузки игры"""
-    try:
-        save_slot = request.args.get('slot', 1, type=int)
-
-        game_state = game_service.load_game_state(session['user_id'], game_key, save_slot)
-
-        if not game_state:
-            return jsonify({'error': 'Игра не найдена'}), 404
-
-        # Получение текущей сцены
-        chapter = game_state.get('chapter', 1)
-        scene = game_state.get('scene', 1)
-
-        story_data = game_service.get_game_story(game_key, chapter, scene)
-
-        return jsonify({
-            'success': True,
-            'game_state': game_state,
-            'story': story_data
-        }), 200
-
-    except Exception as e:
-        return jsonify({'error': f'Ошибка загрузки игры: {str(e)}'}), 500
-
-
-@app.route('/api/games/<game_key>/save', methods=['POST'])
-@api_login_required
-def api_save_game(game_key):
-    """API сохранения игры"""
-    try:
-        data = request.get_json()
-
-        if not data:
-            return jsonify({'error': 'Нет данных'}), 400
-
-        game_state = data.get('game_state')
-        save_slot = data.get('slot', 1)
-
-        if not game_state:
-            return jsonify({'error': 'Нет данных для сохранения'}), 400
-
-        success = game_service.save_game_state(
-            session['user_id'],
-            game_key,
-            game_state,
-            save_slot
-        )
-
-        if not success:
-            return jsonify({'error': 'Ошибка сохранения'}), 500
-
-        return jsonify({
-            'success': True,
-            'message': 'Игра сохранена'
-        }), 200
-
-    except Exception as e:
-        return jsonify({'error': f'Ошибка сохранения игры: {str(e)}'}), 500
-
-
 @app.route('/api/games/<story_id>/choice', methods=['POST'])
 @api_login_required
 def api_make_choice(story_id: int):
     try:
         data = request.get_json()
+
+        accessible, message = game_service.can_access_game(session['user_id'], story_id)
+
+        if not accessible:
+            return render_template('error.html', message=message, code=403), 403
 
         choice_id = data.get('choice_id')
 
@@ -470,26 +385,15 @@ def api_make_input_choice(story_id: int):
         return jsonify({'error': f'Ошибка выбора: {str(e)}'}), 500
 
 
-@app.route('/api/progress', methods=['GET'])
-@api_login_required
-def api_get_progress():
-    """API получения прогресса пользователя"""
-    try:
-        progress = game_service.get_user_progress(session['user_id'])
-
-        return jsonify({
-            'success': True,
-            'progress': progress
-        }), 200
-
-    except Exception as e:
-        return jsonify({'error': f'Ошибка получения прогресса: {str(e)}'}), 500
-
-
 @app.route('/api/games/<story_id>/to_next_scene', methods=['POST'])
 @api_login_required
 def to_next_scene(story_id: int):
     with (Session(db.engine) as s):
+        accessible, message = game_service.can_access_game(session['user_id'], story_id)
+
+        if not accessible:
+            return render_template('error.html', message=message, code=403), 403
+
         user = s.get(User, session['user_id'])
 
         user_save = db.load_game_raw(user.id, story_id)

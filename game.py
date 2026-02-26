@@ -47,7 +47,8 @@ class GameService:
                 'premium': story.premium,
                 'diamonds_cost': story.diamonds_cost,
                 'id': story.id,
-                'cover_image': story.cover_image
+                'cover_image': story.cover_image,
+                'is_unlocked': story.is_unlocked
             })
 
         return games_list
@@ -55,29 +56,16 @@ class GameService:
     def can_access_game(self, user_id: int, story_id: int) -> tuple[bool, str]:
         story = self.story_service.get_story_by_id(story_id)
 
-        if story:
-            if not story.is_published:
-                return False, 'История еще не опубликована'
+        if not story:
+            return False, '404'
 
-            if not story.premium:
-                return True, 'История доступна'
+        if not story.is_published:
+            return False, 'История еще не опубликована'
 
+        if not story.is_unlocked:
+            return False, 'История заблокирована!'
 
-            user = self.db.get_user_by_id(user_id)
-            if not user:
-                return False, 'Пользователь не найден'
-
-            diamonds_cost = story.diamonds_cost
-            if user.diamonds < diamonds_cost:
-                return False, f'Недостаточно алмазов. Нужно {diamonds_cost}'
-
-            return True, 'История доступна за алмазы'
-
-        user = self.db.get_user_by_id(user_id)
-        if not user:
-            return False, 'Пользователь не найден'
-
-        return True, 'Игра доступна за алмазы'
+        return True, ''
 
 
     def save_choice(self, user_id: int, story_id: int, choice_id: int, scene_id: int):
