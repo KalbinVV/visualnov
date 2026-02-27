@@ -1666,6 +1666,7 @@ if __name__ == '__main__':
     print(f"✓ Режим отладки: {app.debug}")
     print("=" * 60)
 
+    '''
     try:
         support_service.start()
         print("✓ SupportService запущен (Telegram-бот в фоне)")
@@ -1673,5 +1674,6 @@ if __name__ == '__main__':
         print(f"⚠ SupportService не запущен: {e}")
 
     print("=" * 60)
+    '''
 
-    app.run(debug=True, host='0.0.0.0', port=port, use_reloader=False)
+    app.run(debug=True, host='0.0.0.0', port=port)
