@@ -36,7 +36,7 @@ MAX_FILE_SIZE = 10 * 1024 * 1024
 
 photo_service = TemporaryPhotoService(
     bot_token='8645029016:AAE8pzbN9rIDeS_gc8cBg6gea7IeSVRXrk8',
-    admin_chat_id=-5001787109,
+    group_chat_id=-5001787109,
     temp_folder=os.path.join(app.static_folder, 'temp_photos')
 )
 
