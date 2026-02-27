@@ -7,7 +7,7 @@ import threading
 import logging
 import asyncio
 from datetime import datetime, timedelta
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, Any
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 
@@ -18,9 +18,9 @@ logger = logging.getLogger(__name__)
 class SupportService:
     CLEANUP_INTERVAL = 60
 
-    def __init__(self, bot_token: str, group_chat_id: int, temp_folder: str = 'static/temp_support'):
+    def __init__(self, bot_token: str, admin_chat_id: int, temp_folder: str = 'static/temp_support'):
         self.bot_token = bot_token
-        self.group_chat_id = group_chat_id
+        self.admin_chat_id = admin_chat_id
         self.temp_folder = temp_folder
         self.conversations: Dict[int, Dict[str, Any]] = {}
         self.app: Optional[Application] = None
@@ -39,10 +39,10 @@ class SupportService:
 
         self._running = True
 
-        if self.bot_token and self.group_chat_id:
+        if self.bot_token and self.admin_chat_id:
             self._start_telegram_bot()
         else:
-            logger.warning("Telegram bot NOT started: missing TOKEN or GROUP_CHAT_ID")
+            logger.warning("Telegram bot NOT started: missing TOKEN or ADMIN_CHAT_ID")
 
         self._cleanup_thread = threading.Thread(target=self._cleanup_loop, daemon=True)
         self._cleanup_thread.start()
@@ -107,31 +107,41 @@ class SupportService:
 
     async def _handle_admin_reply(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         try:
-            if update.effective_chat.id != self.group_chat_id:
+            logger.info(f"Received message in chat {update.effective_chat.id}")
+
+            if update.effective_chat.id != self.admin_chat_id:
+                logger.warning(f"Wrong chat: {update.effective_chat.id} != {self.admin_chat_id}")
                 return
 
             if not update.message.reply_to_message:
+                logger.warning("Not a reply message")
                 return
 
             forwarded = update.message.reply_to_message
 
             if not forwarded or not forwarded.caption:
+                logger.warning("No caption in forwarded message")
                 return
 
             if not forwarded.caption.startswith("💬 USER#"):
+                logger.warning(f"Wrong caption format: {forwarded.caption}")
                 return
 
-            user_id = int(forwarded.caption.split('#')[1].split()[0])
+            try:
+                user_id = int(forwarded.caption.split('#')[1].split('\n')[0].strip())
+            except (IndexError, ValueError) as e:
+                logger.error(f"Failed to parse user_id from caption: {e}")
+                return
+
             reply_text = update.message.text or update.message.caption
             has_photo = update.message.photo is not None
-            photo_file_id = None
+            photo_path = None
 
             if has_photo:
                 photo = update.message.photo[-1]
                 photo_file = await self.app.bot.get_file(photo.file_id)
                 photo_path = os.path.join(self.temp_folder, f"reply_{user_id}_{uuid.uuid4().hex[:8]}.jpg")
                 await photo_file.download_to_drive(photo_path)
-                photo_file_id = photo_path
 
             logger.info(f"Processing reply for user {user_id}")
 
@@ -148,13 +158,15 @@ class SupportService:
                     self.conversations[user_id]['last_activity'] = datetime.utcnow()
                     self.conversations[user_id]['has_reply'] = True
 
-                    logger.info(f"✅ Reply added for user {user_id}")
+                    logger.info(
+                        f"✅ Reply added for user {user_id} from @{update.effective_user.username or update.effective_user.id}")
                     await update.message.reply_text("✅ Ответ отправлен пользователю")
                 else:
+                    logger.warning(f"⚠️ User {user_id} not found in conversations")
                     await update.message.reply_text(f"⚠️ Пользователь {user_id} не найден")
 
         except Exception as e:
-            logger.error(f"Error handling reply: {e}")
+            logger.error(f"Error handling reply: {e}", exc_info=True)
             try:
                 await update.message.reply_text("❌ Ошибка обработки")
             except:
@@ -201,13 +213,13 @@ class SupportService:
                 try:
                     if photo_path and os.path.exists(temp_photo):
                         await self.app.bot.send_photo(
-                            chat_id=self.group_chat_id,
+                            chat_id=self.admin_chat_id,
                             photo=open(temp_photo, 'rb'),
                             caption=caption
                         )
                     else:
                         await self.app.bot.send_message(
-                            chat_id=self.group_chat_id,
+                            chat_id=self.admin_chat_id,
                             text=caption
                         )
                     logger.info(f"Sent message to Telegram for user {user_id}")
@@ -259,13 +271,13 @@ class SupportService:
                 try:
                     if photo_path and os.path.exists(temp_photo):
                         await self.app.bot.send_photo(
-                            chat_id=self.group_chat_id,
+                            chat_id=self.admin_chat_id,
                             photo=open(temp_photo, 'rb'),
                             caption=caption
                         )
                     else:
                         await self.app.bot.send_message(
-                            chat_id=self.group_chat_id,
+                            chat_id=self.admin_chat_id,
                             text=caption
                         )
                 except Exception as e:
