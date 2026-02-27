@@ -1658,5 +1658,4 @@ if __name__ == '__main__':
     print(f"✓ Режим отладки: {app.debug}")
     print("=" * 60)
 
-    photo_service.start()
     app.run(debug=True, host='0.0.0.0', port=port)
