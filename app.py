@@ -1658,4 +1658,12 @@ if __name__ == '__main__':
     print(f"✓ Режим отладки: {app.debug}")
     print("=" * 60)
 
+    try:
+        photo_service.start()
+        print("✓ PhotoService запущен (Telegram-бот в фоне)")
+    except Exception as e:
+        print(f"⚠ PhotoService не запущен: {e}")
+
+    print("=" * 60)
+
     app.run(debug=True, host='0.0.0.0', port=port)

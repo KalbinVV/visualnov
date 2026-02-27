@@ -5,10 +5,11 @@ import uuid
 import shutil
 import threading
 import logging
+import asyncio
 from datetime import datetime, timedelta
 from typing import Optional, Dict, Any
-from telegram import Update, Bot
-from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes, CallbackContext
+from telegram import Update
+from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -17,15 +18,17 @@ logger = logging.getLogger(__name__)
 class TemporaryPhotoService:
     CLEANUP_INTERVAL = 300
 
-    def __init__(self, bot_token: str, admin_chat_id: int, temp_folder: str = 'static/temp_photos'):
+    def __init__(self, bot_token: str, group_chat_id: int, temp_folder: str = 'static/temp_photos'):
         self.bot_token = bot_token
-        self.admin_chat_id = admin_chat_id
+        self.group_chat_id = group_chat_id
         self.temp_folder = temp_folder
         self.submissions: Dict[str, Dict[str, Any]] = {}
         self.app: Optional[Application] = None
         self._lock = threading.Lock()
         self._cleanup_thread: Optional[threading.Thread] = None
+        self._bot_thread: Optional[threading.Thread] = None
         self._running = False
+        self._bot_initialized = threading.Event()
 
         os.makedirs(self.temp_folder, exist_ok=True)
 
@@ -33,20 +36,20 @@ class TemporaryPhotoService:
         if self._running:
             return
 
-        if self.bot_token:
+        self._running = True
+
+        if self.bot_token and self.group_chat_id:
             self._start_telegram_bot()
+        else:
+            logger.warning("Telegram bot NOT started: missing TOKEN or GROUP_CHAT_ID")
 
         self._cleanup_thread = threading.Thread(target=self._cleanup_loop, daemon=True)
         self._cleanup_thread.start()
-        self._running = True
+
         logger.info("PhotoService started")
 
     def _start_telegram_bot(self):
-
         def run_bot_async():
-            import asyncio
-            from telegram.ext import Application
-
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
 
@@ -60,8 +63,15 @@ class TemporaryPhotoService:
                     await self.app.start()
                     await self.app.updater.start_polling(drop_pending_updates=True)
 
+                    self._bot_initialized.set()
+                    logger.info("Telegram bot ready and polling")
+
                     while self._running:
                         await asyncio.sleep(1)
+
+                    await self.app.updater.stop()
+                    await self.app.stop()
+                    await self.app.shutdown()
 
                 loop.run_until_complete(start_polling_safe())
 
@@ -69,30 +79,36 @@ class TemporaryPhotoService:
                 logger.info("Bot polling cancelled")
             except Exception as e:
                 logger.error(f"Bot error: {e}")
+                self._bot_initialized.set()
             finally:
-                if self.app and self.app.running:
-                    loop.run_until_complete(self.app.stop())
+                try:
                     loop.run_until_complete(self.app.shutdown())
+                except:
+                    pass
                 loop.close()
                 logger.info("Bot thread cleaned up")
 
-        bot_thread = threading.Thread(target=run_bot_async, daemon=True)
-        bot_thread.start()
-        logger.info("Telegram bot thread started (async-safe)")
+        self._bot_thread = threading.Thread(target=run_bot_async, daemon=True)
+        self._bot_thread.start()
 
-    async def _cmd_start(self, update: Update, context: CallbackContext):
+        if not self._bot_initialized.wait(timeout=10):
+            logger.warning("Bot initialization timeout")
+
+    async def _cmd_start(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(
             "🤖 USSC Romance — Бот поддержки.\n"
             "Отвечайте на пересланные сообщения, чтобы отправить ответ пользователю."
         )
 
-    async def _handle_admin_reply(self, update: Update, context: CallbackContext):
-        if update.effective_chat.id != self.admin_chat_id:
+    async def _handle_admin_reply(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        if update.effective_chat.id != self.group_chat_id:
             return
+
         if not update.message.reply_to_message:
             return
 
         forwarded = update.message.reply_to_message
+
         if not forwarded or not forwarded.caption or not forwarded.caption.startswith("📸 SUB#"):
             return
 
@@ -104,10 +120,11 @@ class TemporaryPhotoService:
                 if sub_id in self.submissions:
                     self.submissions[sub_id]['reply'] = reply_text
                     self.submissions[sub_id]['replied_at'] = datetime.utcnow()
-                    logger.info(f"Reply received for submission {sub_id}")
+                    logger.info(f"Reply received for submission {sub_id} from {update.effective_user.username}")
                     await update.message.reply_text("✅ Ответ доставлен пользователю")
                 else:
                     await update.message.reply_text("⚠️ Обращение уже удалено или истекло")
+
         except Exception as e:
             logger.error(f"Error handling reply: {e}")
             await update.message.reply_text("❌ Ошибка обработки")
@@ -133,7 +150,6 @@ class TemporaryPhotoService:
             }
 
         if self.app and self.app.bot:
-            import asyncio
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
             try:
@@ -141,11 +157,11 @@ class TemporaryPhotoService:
                     f"📸 SUB#{sub_id}\n"
                     f"👤 @{username} (UID: {user_id})\n"
                     f"💬 {description or 'Без описания'}\n\n"
-                    f"↩️ Ответьте на это сообщение"
+                    f"↩️ Любой участник группы может ответить на это сообщение"
                 )
                 loop.run_until_complete(
                     self.app.bot.send_photo(
-                        chat_id=self.admin_chat_id,
+                        chat_id=self.group_chat_id,
                         photo=open(dest_path, 'rb'),
                         caption=caption
                     )
@@ -177,7 +193,7 @@ class TemporaryPhotoService:
                     expired = [
                         sid for sid, data in self.submissions.items()
                         if now - data['created_at'] > timedelta(hours=24)
-                           or (data['reply'] and now - data['replied_at'] > timedelta(hours=1))
+                        or (data['reply'] and now - data['replied_at'] > timedelta(hours=1))
                     ]
                     for sid in expired:
                         path = self.submissions[sid]['file_path']
