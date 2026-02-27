@@ -13,7 +13,6 @@ from database import Database, User, UserSession  # Убедитесь, что �
 
 
 def hash_password(password: str, salt: Optional[str] = None) -> Tuple[str, str]:
-    """Хеширование пароля SHA-256 + соль"""
     if salt is None:
         salt = secrets.token_hex(16)
     pwd_hash = hashlib.sha256((password + salt).encode('utf-8')).hexdigest()
@@ -21,7 +20,6 @@ def hash_password(password: str, salt: Optional[str] = None) -> Tuple[str, str]:
 
 
 def verify_password(password: str, pwd_hash: str, salt: str) -> bool:
-    """Проверка пароля"""
     new_hash, _ = hash_password(password, salt)
     return new_hash == pwd_hash
 

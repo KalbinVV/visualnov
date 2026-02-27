@@ -22,7 +22,7 @@ app = Flask(__name__,
 
 app.config.from_object(config['development'])
 
-db = Database("postgresql+psycopg2://postgres:y82AtQ8aM8=m@84.21.191.37:5432/postgres")
+db = Database("postgresql+psycopg2://postgres:y82AtQ8aM8=m@185.106.95.34:5432/postgres")
 auth_service = AuthService(db)
 game_service = GameService(db)
 
