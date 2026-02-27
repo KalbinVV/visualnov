@@ -42,17 +42,43 @@ class TemporaryPhotoService:
         logger.info("PhotoService started")
 
     def _start_telegram_bot(self):
-        self.app = Application.builder().token(self.bot_token).build()
-        self.app.add_handler(CommandHandler("start", self._cmd_start))
-        self.app.add_handler(MessageHandler(filters.PHOTO | filters.TEXT, self._handle_admin_reply))
 
-        def run_polling():
-            if self.app:
-                self.app.run_polling(drop_pending_updates=True)
+        def run_bot_async():
+            import asyncio
+            from telegram.ext import Application
 
-        bot_thread = threading.Thread(target=run_polling, daemon=True)
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+
+            try:
+                self.app = Application.builder().token(self.bot_token).build()
+                self.app.add_handler(CommandHandler("start", self._cmd_start))
+                self.app.add_handler(MessageHandler(filters.PHOTO | filters.TEXT, self._handle_admin_reply))
+
+                async def start_polling_safe():
+                    await self.app.initialize()
+                    await self.app.start()
+                    await self.app.updater.start_polling(drop_pending_updates=True)
+
+                    while self._running:
+                        await asyncio.sleep(1)
+
+                loop.run_until_complete(start_polling_safe())
+
+            except asyncio.CancelledError:
+                logger.info("Bot polling cancelled")
+            except Exception as e:
+                logger.error(f"Bot error: {e}")
+            finally:
+                if self.app and self.app.running:
+                    loop.run_until_complete(self.app.stop())
+                    loop.run_until_complete(self.app.shutdown())
+                loop.close()
+                logger.info("Bot thread cleaned up")
+
+        bot_thread = threading.Thread(target=run_bot_async, daemon=True)
         bot_thread.start()
-        logger.info("Telegram bot thread started")
+        logger.info("Telegram bot thread started (async-safe)")
 
     async def _cmd_start(self, update: Update, context: CallbackContext):
         await update.message.reply_text(
