@@ -16,16 +16,13 @@ logger = logging.getLogger(__name__)
 
 
 class SupportService:
-    """Сервис полноценной техподдержки с чатом"""
-
     CLEANUP_INTERVAL = 60
-    MAX_MESSAGES_PER_TICKET = 50
 
     def __init__(self, bot_token: str, group_chat_id: int, temp_folder: str = 'static/temp_support'):
         self.bot_token = bot_token
         self.group_chat_id = group_chat_id
         self.temp_folder = temp_folder
-        self.tickets: Dict[str, Dict[str, Any]] = {}
+        self.conversations: Dict[int, Dict[str, Any]] = {}
         self.app: Optional[Application] = None
         self._lock = threading.Lock()
         self._cleanup_thread: Optional[threading.Thread] = None
@@ -104,8 +101,8 @@ class SupportService:
 
     async def _cmd_start(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(
-            "🤖 USSC Romance — Техподдержка.\n"
-            "Отвечайте на сообщения из тикетов для ответа пользователю."
+            "🤖 USSC Romance — Поддержка.\n"
+            "Отвечайте на сообщения пользователей для ответа."
         )
 
     async def _handle_admin_reply(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -121,11 +118,10 @@ class SupportService:
             if not forwarded or not forwarded.caption:
                 return
 
-            if not forwarded.caption.startswith("🎫 TICKET#"):
+            if not forwarded.caption.startswith("💬 USER#"):
                 return
 
-            ticket_id = forwarded.caption.split('#')[1].split('\n')[0].strip()
-
+            user_id = int(forwarded.caption.split('#')[1].split()[0])
             reply_text = update.message.text or update.message.caption
             has_photo = update.message.photo is not None
             photo_file_id = None
@@ -133,30 +129,29 @@ class SupportService:
             if has_photo:
                 photo = update.message.photo[-1]
                 photo_file = await self.app.bot.get_file(photo.file_id)
-                photo_path = os.path.join(self.temp_folder, f"reply_{ticket_id}_{uuid.uuid4().hex[:8]}.jpg")
+                photo_path = os.path.join(self.temp_folder, f"reply_{user_id}_{uuid.uuid4().hex[:8]}.jpg")
                 await photo_file.download_to_drive(photo_path)
                 photo_file_id = photo_path
 
-            logger.info(f"Processing reply for TICKET#{ticket_id}")
+            logger.info(f"Processing reply for user {user_id}")
 
             with self._lock:
-                if ticket_id in self.tickets:
+                if user_id in self.conversations:
                     message = {
                         'id': str(uuid.uuid4())[:8],
                         'from': 'admin',
                         'text': reply_text if reply_text else '',
-                        'photo': photo_file_id,
+                        'photo': f'/static/temp_support/{os.path.basename(photo_path)}' if photo_path else None,
                         'timestamp': datetime.utcnow().isoformat()
                     }
-                    self.tickets[ticket_id]['messages'].append(message)
-                    self.tickets[ticket_id]['last_activity'] = datetime.utcnow()
-                    self.tickets[ticket_id]['status'] = 'open'
+                    self.conversations[user_id]['messages'].append(message)
+                    self.conversations[user_id]['last_activity'] = datetime.utcnow()
+                    self.conversations[user_id]['has_reply'] = True
 
-                    logger.info(
-                        f"✅ Reply added to ticket {ticket_id} from @{update.effective_user.username or update.effective_user.id}")
+                    logger.info(f"✅ Reply added for user {user_id}")
                     await update.message.reply_text("✅ Ответ отправлен пользователю")
                 else:
-                    await update.message.reply_text(f"⚠️ Тикет #{ticket_id} не найден или закрыт")
+                    await update.message.reply_text(f"⚠️ Пользователь {user_id} не найден")
 
         except Exception as e:
             logger.error(f"Error handling reply: {e}")
@@ -165,10 +160,18 @@ class SupportService:
             except:
                 pass
 
-    def create_ticket(self, user_id: int, username: str, message_text: str = '', photo_path: str = None) -> str:
-        ticket_id = str(uuid.uuid4())[:8]
-
+    def start_conversation(self, user_id: int, username: str, message_text: str = '', photo_path: str = None) -> bool:
         with self._lock:
+            if user_id not in self.conversations:
+                self.conversations[user_id] = {
+                    'user_id': user_id,
+                    'username': username,
+                    'created_at': datetime.utcnow(),
+                    'last_activity': datetime.utcnow(),
+                    'has_reply': False,
+                    'messages': []
+                }
+
             message = {
                 'id': str(uuid.uuid4())[:8],
                 'from': 'user',
@@ -177,25 +180,19 @@ class SupportService:
                 'timestamp': datetime.utcnow().isoformat()
             }
 
-            self.tickets[ticket_id] = {
-                'user_id': user_id,
-                'username': username,
-                'created_at': datetime.utcnow(),
-                'last_activity': datetime.utcnow(),
-                'status': 'open',
-                'messages': [message],
-                'telegram_msg_id': None
-            }
-            logger.info(f"Created ticket {ticket_id} for user {username}")
+            self.conversations[user_id]['messages'].append(message)
+            self.conversations[user_id]['last_activity'] = datetime.utcnow()
+            logger.info(f"Message from user {user_id}")
 
         if photo_path:
             temp_photo = os.path.join(self.temp_folder, os.path.basename(photo_path))
-            shutil.copy2(photo_path, temp_photo)
+            if os.path.exists(photo_path):
+                shutil.copy2(photo_path, temp_photo)
 
         if self.app and self.app.bot and self._bot_loop:
             caption = (
-                f"🎫 TICKET#{ticket_id}\n"
-                f"👤 @{username} (UID: {user_id})\n"
+                f"💬 USER#{user_id}\n"
+                f"👤 @{username}\n"
                 f"💬 {message_text or 'Без текста'}\n\n"
                 f"↩️ Ответьте на это сообщение"
             )
@@ -203,18 +200,17 @@ class SupportService:
             async def send_to_telegram():
                 try:
                     if photo_path and os.path.exists(temp_photo):
-                        message = await self.app.bot.send_photo(
+                        await self.app.bot.send_photo(
                             chat_id=self.group_chat_id,
                             photo=open(temp_photo, 'rb'),
                             caption=caption
                         )
                     else:
-                        message = await self.app.bot.send_message(
+                        await self.app.bot.send_message(
                             chat_id=self.group_chat_id,
                             text=caption
                         )
-                    self.tickets[ticket_id]['telegram_msg_id'] = message.message_id
-                    logger.info(f"Sent ticket {ticket_id} to Telegram, message_id: {message.message_id}")
+                    logger.info(f"Sent message to Telegram for user {user_id}")
                 except Exception as e:
                     logger.error(f"Failed to send to Telegram: {e}")
 
@@ -226,18 +222,11 @@ class SupportService:
             except Exception as e:
                 logger.error(f"Error sending to Telegram: {e}")
 
-        return ticket_id
+        return True
 
-    def add_message(self, ticket_id: str, user_id: int, message_text: str = '', photo_path: str = None) -> bool:
+    def add_message(self, user_id: int, message_text: str = '', photo_path: str = None) -> bool:
         with self._lock:
-            if ticket_id not in self.tickets:
-                return False
-
-            ticket = self.tickets[ticket_id]
-            if ticket['user_id'] != user_id:
-                return False
-
-            if ticket['status'] == 'closed':
+            if user_id not in self.conversations:
                 return False
 
             message = {
@@ -248,14 +237,9 @@ class SupportService:
                 'timestamp': datetime.utcnow().isoformat()
             }
 
-            ticket['messages'].append(message)
-            ticket['last_activity'] = datetime.utcnow()
-            ticket['status'] = 'open'
-
-            if len(ticket['messages']) > self.MAX_MESSAGES_PER_TICKET:
-                ticket['messages'] = ticket['messages'][-self.MAX_MESSAGES_PER_TICKET:]
-
-            logger.info(f"Message added to ticket {ticket_id}")
+            self.conversations[user_id]['messages'].append(message)
+            self.conversations[user_id]['last_activity'] = datetime.utcnow()
+            self.conversations[user_id]['has_reply'] = False
 
         if photo_path:
             temp_photo = os.path.join(self.temp_folder, os.path.basename(photo_path))
@@ -263,9 +247,10 @@ class SupportService:
                 shutil.copy2(photo_path, temp_photo)
 
         if self.app and self.app.bot and self._bot_loop:
+            user_data = self.conversations[user_id]
             caption = (
-                f"🎫 TICKET#{ticket_id}\n"
-                f"👤 @{ticket['username']} (UID: {user_id})\n"
+                f"💬 USER#{user_id}\n"
+                f"👤 @{user_data['username']}\n"
                 f"💬 {message_text or 'Без текста'}\n\n"
                 f"↩️ Ответьте на это сообщение"
             )
@@ -276,16 +261,13 @@ class SupportService:
                         await self.app.bot.send_photo(
                             chat_id=self.group_chat_id,
                             photo=open(temp_photo, 'rb'),
-                            caption=caption,
-                            reply_to_message_id=ticket.get('telegram_msg_id')
+                            caption=caption
                         )
                     else:
                         await self.app.bot.send_message(
                             chat_id=self.group_chat_id,
-                            text=caption,
-                            reply_to_message_id=ticket.get('telegram_msg_id')
+                            text=caption
                         )
-                    logger.info(f"Forwarded message to Telegram for ticket {ticket_id}")
                 except Exception as e:
                     logger.error(f"Failed to forward to Telegram: {e}")
 
@@ -299,52 +281,19 @@ class SupportService:
 
         return True
 
-    def get_ticket(self, ticket_id: str, user_id: int = None) -> Optional[Dict[str, Any]]:
+    def get_conversation(self, user_id: int) -> Optional[Dict[str, Any]]:
         with self._lock:
-            ticket = self.tickets.get(ticket_id)
-            if not ticket:
+            conv = self.conversations.get(user_id)
+            if not conv:
                 return None
-
-            if user_id and ticket['user_id'] != user_id:
-                return None
-
             return {
-                'ticket_id': ticket_id,
-                'user_id': ticket['user_id'],
-                'username': ticket['username'],
-                'status': ticket['status'],
-                'created_at': ticket['created_at'].isoformat(),
-                'last_activity': ticket['last_activity'].isoformat(),
-                'messages': ticket['messages'].copy()
+                'user_id': conv['user_id'],
+                'username': conv['username'],
+                'has_reply': conv['has_reply'],
+                'created_at': conv['created_at'].isoformat(),
+                'last_activity': conv['last_activity'].isoformat(),
+                'messages': conv['messages'].copy()
             }
-
-    def get_user_tickets(self, user_id: int) -> List[Dict[str, Any]]:
-        with self._lock:
-            tickets = []
-            for ticket_id, ticket in self.tickets.items():
-                if ticket['user_id'] == user_id:
-                    tickets.append({
-                        'ticket_id': ticket_id,
-                        'status': ticket['status'],
-                        'created_at': ticket['created_at'].isoformat(),
-                        'last_activity': ticket['last_activity'].isoformat(),
-                        'messages_count': len(ticket['messages'])
-                    })
-            return sorted(tickets, key=lambda x: x['last_activity'], reverse=True)
-
-    def close_ticket(self, ticket_id: str, user_id: int) -> bool:
-        with self._lock:
-            if ticket_id not in self.tickets:
-                return False
-
-            ticket = self.tickets[ticket_id]
-            if ticket['user_id'] != user_id:
-                return False
-
-            ticket['status'] = 'closed'
-            ticket['last_activity'] = datetime.utcnow()
-            logger.info(f"Ticket {ticket_id} closed")
-            return True
 
     def _cleanup_loop(self):
         while True:
@@ -352,20 +301,18 @@ class SupportService:
                 now = datetime.utcnow()
                 with self._lock:
                     expired = []
-                    for sid, data in self.tickets.items():
-                        if data['status'] == 'closed' and now - data['last_activity'] > timedelta(hours=1):
-                            expired.append(sid)
-                        elif now - data['created_at'] > timedelta(hours=24):
-                            expired.append(sid)
+                    for uid, data in self.conversations.items():
+                        if now - data['last_activity'] > timedelta(hours=24):
+                            expired.append(uid)
 
-                    for sid in expired:
-                        for msg in self.tickets[sid]['messages']:
+                    for uid in expired:
+                        for msg in self.conversations[uid]['messages']:
                             if msg.get('photo'):
                                 photo_path = os.path.join(self.temp_folder, os.path.basename(msg['photo']))
                                 if os.path.exists(photo_path):
                                     os.remove(photo_path)
-                        del self.tickets[sid]
-                        logger.info(f"Cleaned up ticket {sid}")
+                        del self.conversations[uid]
+                        logger.info(f"Cleaned up conversation for user {uid}")
             except Exception as e:
                 logger.error(f"Cleanup error: {e}")
             threading.Event().wait(self.CLEANUP_INTERVAL)

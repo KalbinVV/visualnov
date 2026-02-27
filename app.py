@@ -37,7 +37,7 @@ MAX_FILE_SIZE = 10 * 1024 * 1024
 support_service = SupportService(
     bot_token='8645029016:AAE8pzbN9rIDeS_gc8cBg6gea7IeSVRXrk8',
     group_chat_id=-5001787109,
-    temp_folder=os.path.join(app.static_folder, 'temp_photos')
+    temp_folder=os.path.join(app.static_folder, 'support_tmp')
 )
 
 
@@ -1585,32 +1585,29 @@ def support_page():
     if not user:
         session.clear()
         return redirect(url_for('login_page'))
-
-    tickets = support_service.get_user_tickets(user.id)
-    return render_template('support.html', user=user, tickets=tickets)
+    return render_template('support.html', user=user)
 
 
-@app.route('/support/ticket/<ticket_id>')
-@login_required
-def support_ticket_page(ticket_id: str):
-    user = db.get_user_by_id(session['user_id'])
-    if not user:
-        session.clear()
-        return redirect(url_for('login_page'))
-
-    ticket = support_service.get_ticket(ticket_id, user.id)
-    if not ticket:
-        return redirect(url_for('support_page'))
-
-    return render_template('support_ticket.html', user=user, ticket=ticket)
-
-
-@app.route('/api/support/ticket', methods=['POST'])
+@app.route('/api/support/conversation', methods=['GET'])
 @api_login_required
-def api_create_ticket():
+def api_get_conversation():
     try:
-        data = request.form
-        message_text = data.get('message', '').strip()
+        user = db.get_user_by_id(session['user_id'])
+        conversation = support_service.get_conversation(user.id)
+
+        if not conversation:
+            return jsonify({'success': True, 'conversation': {'messages': []}}), 200
+
+        return jsonify({'success': True, 'conversation': conversation}), 200
+    except Exception as e:
+        return jsonify({'error': f'Ошибка: {str(e)}'}), 500
+
+
+@app.route('/api/support/message', methods=['POST'])
+@api_login_required
+def api_send_message():
+    try:
+        message_text = request.form.get('message', '').strip()
         user = db.get_user_by_id(session['user_id'])
 
         photo_path = None
@@ -1625,94 +1622,26 @@ def api_create_ticket():
         if not message_text and not photo_path:
             return jsonify({'error': 'Введите сообщение или прикрепите файл'}), 400
 
-        ticket_id = support_service.create_ticket(
-            user_id=user.id,
-            username=user.username,
-            message_text=message_text,
-            photo_path=photo_path
-        )
-
-        if photo_path and os.path.exists(photo_path):
-            os.remove(photo_path)
-
-        return jsonify({'success': True, 'ticket_id': ticket_id}), 201
-    except Exception as e:
-        app.logger.error(f"Create ticket error: {e}")
-        return jsonify({'error': f'Ошибка: {str(e)}'}), 500
-
-
-@app.route('/api/support/ticket/<ticket_id>/message', methods=['POST'])
-@api_login_required
-def api_add_message(ticket_id: str):
-    try:
-        data = request.form
-        message_text = data.get('message', '').strip()
-        user = db.get_user_by_id(session['user_id'])
-
-        photo_path = None
-        if 'photo' in request.files:
-            file = request.files['photo']
-            if file.filename != '':
-                os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-                photo_path = os.path.join(app.config['UPLOAD_FOLDER'],
-                                          f"support_{session['user_id']}_{uuid.uuid4().hex[:8]}.jpg")
-                file.save(photo_path)
-
-        if not message_text and not photo_path:
-            return jsonify({'error': 'Введите сообщение или прикрепите файл'}), 400
-
-        success = support_service.add_message(ticket_id, user.id, message_text, photo_path)
-
-        if not success:
-            return jsonify({'error': 'Тикет не найден или закрыт'}), 404
+        if user.id not in support_service.conversations:
+            support_service.start_conversation(
+                user_id=user.id,
+                username=user.username,
+                message_text=message_text,
+                photo_path=photo_path
+            )
+        else:
+            support_service.add_message(
+                user_id=user.id,
+                message_text=message_text,
+                photo_path=photo_path
+            )
 
         if photo_path and os.path.exists(photo_path):
             os.remove(photo_path)
 
         return jsonify({'success': True}), 200
     except Exception as e:
-        app.logger.error(f"Add message error: {e}")
-        return jsonify({'error': f'Ошибка: {str(e)}'}), 500
-
-
-@app.route('/api/support/ticket/<ticket_id>', methods=['GET'])
-@api_login_required
-def api_get_ticket(ticket_id: str):
-    try:
-        user = db.get_user_by_id(session['user_id'])
-        ticket = support_service.get_ticket(ticket_id, user.id)
-
-        if not ticket:
-            return jsonify({'error': 'Тикет не найден'}), 404
-
-        return jsonify({'success': True, 'ticket': ticket}), 200
-    except Exception as e:
-        return jsonify({'error': f'Ошибка: {str(e)}'}), 500
-
-
-@app.route('/api/support/tickets', methods=['GET'])
-@api_login_required
-def api_get_tickets():
-    try:
-        user = db.get_user_by_id(session['user_id'])
-        tickets = support_service.get_user_tickets(user.id)
-        return jsonify({'success': True, 'tickets': tickets}), 200
-    except Exception as e:
-        return jsonify({'error': f'Ошибка: {str(e)}'}), 500
-
-
-@app.route('/api/support/ticket/<ticket_id>/close', methods=['POST'])
-@api_login_required
-def api_close_ticket(ticket_id: str):
-    try:
-        user = db.get_user_by_id(session['user_id'])
-        success = support_service.close_ticket(ticket_id, user.id)
-
-        if not success:
-            return jsonify({'error': 'Не удалось закрыть тикет'}), 400
-
-        return jsonify({'success': True}), 200
-    except Exception as e:
+        app.logger.error(f"Send message error: {e}")
         return jsonify({'error': f'Ошибка: {str(e)}'}), 500
 
 
