@@ -14,6 +14,7 @@ from database import Database, User, Choice, Scene, Story, GameSave, DiamondCode
     ChoiceHistory, MoveCode, Music
 from auth import AuthService
 from game import GameService
+from photo_service import TemporaryPhotoService
 
 app = Flask(__name__,
             template_folder='templates',
@@ -32,6 +33,13 @@ app.config['UPLOAD_FOLDER'] = 'static/images'
 app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'webp', 'avif', 'mp3', 'wav', 'ogg', 'm4a'}
 
 MAX_FILE_SIZE = 10 * 1024 * 1024
+
+photo_service = TemporaryPhotoService(
+    bot_token='8645029016:AAE8pzbN9rIDeS_gc8cBg6gea7IeSVRXrk8',
+    admin_chat_id=-5001787109,
+    temp_folder=os.path.join(app.static_folder, 'temp_photos')
+)
+
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -1570,6 +1578,65 @@ def admin_music_editor():
                            user=db.get_user_by_id(session['user_id'])), 200
 
 
+@app.route('/support/photo')
+@login_required
+def photo_support_page():
+    """Страница фото-поддержки"""
+    user = db.get_user_by_id(session['user_id'])
+    if not user:
+        session.clear()
+        return redirect(url_for('login_page'))
+    return render_template('photo_support.html', user=user)
+
+
+@app.route('/api/support/photo', methods=['POST'])
+@api_login_required
+def api_submit_photo():
+    try:
+        if 'photo' not in request.files:
+            return jsonify({'error': 'Файл не найден'}), 400
+        file = request.files['photo']
+        if file.filename == '':
+            return jsonify({'error': 'Файл не выбран'}), 400
+        if not allowed_file(file.filename):
+            return jsonify({'error': 'Недопустимый формат'}), 400
+
+        os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+        temp_path = os.path.join(app.config['UPLOAD_FOLDER'], f"temp_{session['user_id']}.jpg")
+        file.save(temp_path)
+
+        description = request.form.get('description', '').strip()
+        user = db.get_user_by_id(session['user_id'])
+
+        sub_id = photo_service.create_submission(
+            file_path=temp_path,
+            description=description,
+            user_id=user.id,
+            username=user.username
+        )
+
+        if os.path.exists(temp_path):
+            os.remove(temp_path)
+
+        return jsonify({'success': True, 'submission_id': sub_id}), 201
+
+    except Exception as e:
+        app.logger.error(f"Photo submit error: {e}")
+        return jsonify({'error': f'Ошибка: {str(e)}'}), 500
+
+
+@app.route('/api/support/photo/<sub_id>/status', methods=['GET'])
+@api_login_required
+def api_check_photo_status(sub_id: str):
+    try:
+        result = photo_service.get_submission(sub_id)
+        if not result:
+            return jsonify({'error': 'Обращение не найдено или истекло'}), 404
+        return jsonify({'success': True, **result}), 200
+    except Exception as e:
+        return jsonify({'error': f'Ошибка: {str(e)}'}), 500
+
+
 @app.errorhandler(404)
 def not_found_error(error):
     return render_template('error.html', message='Страница не найдена', code=404), 404
@@ -1591,4 +1658,5 @@ if __name__ == '__main__':
     print(f"✓ Режим отладки: {app.debug}")
     print("=" * 60)
 
+    photo_service.start()
     app.run(debug=True, host='0.0.0.0', port=port)
