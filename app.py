@@ -1738,10 +1738,10 @@ if __name__ == '__main__':
     print("=" * 60)
 
     try:
-        photo_service.start()
-        print("✓ PhotoService запущен (Telegram-бот в фоне)")
+        support_service.start()
+        print("✓ SupportService запущен (Telegram-бот в фоне)")
     except Exception as e:
-        print(f"⚠ PhotoService не запущен: {e}")
+        print(f"⚠ SupportService не запущен: {e}")
 
     print("=" * 60)
 
