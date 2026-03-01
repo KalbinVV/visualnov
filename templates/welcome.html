@@ -1,0 +1,771 @@
+{% extends "base.html" %}
+
+{% block title %}Скоро — USSC Romance{% endblock %}
+
+{% block content %}
+<!-- Подключение шрифтов -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
+
+<div class="waiting-wrapper">
+
+  <!-- Навигация -->
+  <nav class="glass-nav">
+    <div class="nav-content">
+      <div class="brand">
+        <span class="brand-icon">💖</span>
+        <span class="brand-text">USSC <span class="highlight">Romance</span></span>
+      </div>
+      <div class="nav-actions">
+        <div class="currency-pill">
+          <div class="currency-icon">💎</div>
+          <span class="currency-value" id="diamondAmount">{{ user.diamonds }}</span>
+          <div class="currency-glow"></div>
+        </div>
+        <div class="profile-trigger">
+          <div class="avatar-ring">
+            {% if user.avatar_url %}
+              <img src="{{ user.avatar_url }}" alt="User">
+            {% else %}
+              <span class="avatar-placeholder">{{ user.display_name[0] }}</span>
+            {% endif %}
+          </div>
+          <div class="profile-dropdown">
+            <a href="{{ url_for('profile_page') }}" class="dropdown-item">
+              <span>👤</span> Профиль
+            </a>
+            {% if user.is_admin %}
+            <a href="{{ url_for('admin_page') }}" class="dropdown-item">
+              <span>⚙️</span> Админка
+            </a>
+            {% endif %}
+            <div class="dropdown-divider"></div>
+            <a href="#" onclick="logout()" class="dropdown-item danger">
+              <span>🚪</span> Выйти
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Основной контент: Песочные часы -->
+  <main class="waiting-stage">
+    
+    <!-- Центральная секция с часами -->
+    <section class="hourglass-section fade-in">
+      
+      <!-- Контейнер часов -->
+      <div class="hourglass-container">
+        <div class="hourglass-frame">
+          <!-- Верхняя колба -->
+          <div class="bulb top-bulb">
+            <div class="sand-fill" id="topSand"></div>
+          </div>
+          
+          <!-- Горлышко -->
+          <div class="neck">
+            <div class="sand-stream" id="sandStream"></div>
+          </div>
+          
+          <!-- Нижняя колба -->
+          <div class="bulb bottom-bulb">
+            <div class="sand-pile" id="bottomSand"></div>
+          </div>
+        </div>
+        
+        <!-- Свечение вокруг -->
+        <div class="hourglass-glow"></div>
+      </div>
+
+      <!-- Таймер -->
+      <div class="timer-display">
+        <div class="timer-unit">
+          <span class="timer-value" id="days">00</span>
+          <span class="timer-label">дней</span>
+        </div>
+        <span class="timer-separator">:</span>
+        <div class="timer-unit">
+          <span class="timer-value" id="hours">00</span>
+          <span class="timer-label">часов</span>
+        </div>
+        <span class="timer-separator">:</span>
+        <div class="timer-unit">
+          <span class="timer-value" id="minutes">00</span>
+          <span class="timer-label">минут</span>
+        </div>
+        <span class="timer-separator">:</span>
+        <div class="timer-unit">
+          <span class="timer-value" id="seconds">00</span>
+          <span class="timer-label">секунд</span>
+        </div>
+      </div>
+
+      <!-- Прогресс-бар -->
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+
+      <!-- Ссылка на историю -->
+      <div class="story-link-container">
+        <a href="/game/romance-premium" class="story-card glass-panel">
+          <div class="story-badge">✨ Премьера</div>
+          <div class="story-content">
+            <h3 class="story-title">Тени Сердца</h3>
+            <p class="story-desc">Романтическая история, которая откроется совсем скоро. Будьте первыми.</p>
+          </div>
+          <div class="story-arrow">→</div>
+        </a>
+      </div>
+
+    </section>
+
+    <!-- Нижний текст -->
+    <footer class="waiting-footer fade-in-up">
+      <p class="footer-text">пока можете поиграть в другие наши игры</p>
+      <div class="footer-actions">
+        <a href="/library" class="btn-secondary">Перейти в библиотеку</a>
+      </div>
+    </footer>
+
+  </main>
+
+</div>
+
+<style>
+  :root {
+    --bg-deep: #050508;
+    --bg-surface: #0f0f16;
+    --primary: #8b5cf6;
+    --primary-glow: rgba(139, 92, 246, 0.5);
+    --accent: #d8b4fe;
+    --sand-color: #f5d7a1;
+    --sand-glow: rgba(245, 215, 161, 0.4);
+    --text-main: #ffffff;
+    --text-muted: #94a3b8;
+    --glass-bg: rgba(20, 20, 30, 0.6);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --card-hover: rgba(255, 255, 255, 0.03);
+
+    --font-display: 'Playfair Display', serif;
+    --font-ui: 'Inter', sans-serif;
+
+    --radius-lg: 24px;
+    --radius-md: 16px;
+    --radius-sm: 8px;
+  }
+
+  [data-theme="orange"] {
+    --primary: #f97316;
+    --primary-glow: rgba(249, 115, 22, 0.5);
+    --accent: #fdba74;
+    --sand-color: #fcd34d;
+    --bg-deep: #080402;
+    --bg-surface: #150a05;
+  }
+
+  [data-theme="dark-green"] {
+    --primary: #10b981;
+    --primary-glow: rgba(16, 185, 129, 0.5);
+    --accent: #6ee7b7;
+    --sand-color: #a7f3d0;
+    --bg-deep: #020403;
+    --bg-surface: #05150f;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--font-ui);
+    background-color: var(--bg-deep);
+    background-image:
+      radial-gradient(circle at 10% 20%, rgba(139, 92, 246, 0.08) 0%, transparent 40%),
+      radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.05) 0%, transparent 40%),
+      radial-gradient(circle at 50% 50%, rgba(245, 215, 161, 0.03) 0%, transparent 60%);
+    color: var(--text-main);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* --- Навигация (из референса) --- */
+  .glass-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 80px;
+    background: rgba(5, 5, 8, 0.7);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--glass-border);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .nav-content {
+    width: 100%;
+    max-width: 1400px;
+    padding: 0 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .brand {
+    font-family: var(--font-display);
+    font-size: 24px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    letter-spacing: -0.5px;
+  }
+
+  .brand-icon { font-size: 28px; filter: drop-shadow(0 0 10px var(--primary-glow)); }
+  .highlight { color: var(--primary); font-style: italic; }
+
+  .nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+
+  .currency-pill {
+    position: relative;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    padding: 8px 16px;
+    border-radius: 50px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    overflow: hidden;
+  }
+
+  .currency-pill:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--primary);
+    transform: translateY(-2px);
+  }
+
+  .currency-icon { font-size: 18px; animation: float 3s ease-in-out infinite; }
+  .currency-value { font-weight: 600; font-size: 15px; color: var(--accent); }
+
+  .currency-glow {
+    position: absolute;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+    opacity: 0;
+    transform: scale(0.5);
+    transition: opacity 0.3s;
+    pointer-events: none;
+  }
+  .currency-pill:hover .currency-glow { opacity: 1; transform: scale(1); }
+
+  .profile-trigger { position: relative; cursor: pointer; }
+
+  .avatar-ring {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    padding: 2px;
+    background: linear-gradient(135deg, var(--primary), transparent);
+    transition: transform 0.3s;
+  }
+
+  .profile-trigger:hover .avatar-ring { transform: scale(1.05); }
+
+  .avatar-ring img, .avatar-placeholder {
+    width: 100%; height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    background: var(--bg-surface);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: var(--text-main);
+    border: 2px solid var(--bg-deep);
+  }
+
+  .profile-dropdown {
+    position: absolute;
+    top: 60px; right: 0;
+    width: 220px;
+    background: rgba(15, 15, 22, 0.95);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    padding: 8px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+  }
+
+  .profile-trigger:hover .profile-dropdown {
+    opacity: 1; visibility: visible; transform: translateY(0);
+  }
+
+  .dropdown-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 16px;
+    color: var(--text-muted);
+    text-decoration: none;
+    border-radius: var(--radius-sm);
+    transition: all 0.2s;
+    font-size: 14px;
+  }
+
+  .dropdown-item:hover { background: rgba(255,255,255,0.05); color: var(--text-main); }
+  .dropdown-item.danger:hover { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+  .dropdown-divider { height: 1px; background: var(--glass-border); margin: 6px 0; }
+
+  /* --- Waiting Stage --- */
+  .waiting-stage {
+    padding-top: 120px;
+    padding-bottom: 40px;
+    min-height: calc(100vh - 80px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
+
+  .hourglass-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 32px;
+    padding: 20px;
+    max-width: 600px;
+    width: 100%;
+  }
+
+  /* --- Hourglass Animation --- */
+  .hourglass-container {
+    position: relative;
+    width: 180px;
+    height: 280px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .hourglass-frame {
+    position: relative;
+    width: 120px;
+    height: 240px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .bulb {
+    width: 100px;
+    height: 100px;
+    border: 3px solid var(--glass-border);
+    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+    background: rgba(255, 255, 255, 0.02);
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(4px);
+  }
+
+  .top-bulb {
+    border-radius: 50% 50% 30% 30% / 60% 60% 40% 40%;
+    border-bottom: none;
+    margin-bottom: -2px;
+  }
+
+  .bottom-bulb {
+    border-radius: 30% 30% 50% 50% / 40% 40% 60% 60%;
+    border-top: none;
+    margin-top: -2px;
+  }
+
+  .neck {
+    width: 20px;
+    height: 24px;
+    background: rgba(255, 255, 255, 0.05);
+    border-left: 3px solid var(--glass-border);
+    border-right: 3px solid var(--glass-border);
+    position: relative;
+    z-index: 2;
+  }
+
+  /* Песок в верхней колбе */
+  .sand-fill {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(180deg, var(--sand-color) 0%, #e8c385 100%);
+    border-radius: inherit;
+    transform-origin: bottom;
+    transition: height 0.3s linear;
+    box-shadow: inset 0 -10px 30px rgba(0,0,0,0.2);
+  }
+
+  /* Поток песка */
+  .sand-stream {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(180deg, var(--sand-color), var(--sand-glow), transparent);
+    border-radius: 2px;
+    opacity: 0;
+    animation: streamFlow 0.15s infinite alternate;
+  }
+
+  .sand-stream.active { opacity: 1; }
+
+  @keyframes streamFlow {
+    from { width: 3px; opacity: 0.8; }
+    to { width: 5px; opacity: 1; box-shadow: 0 0 10px var(--sand-glow); }
+  }
+
+  /* Кучка песка внизу */
+  .sand-pile {
+    position: absolute;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 20px;
+    height: 4px;
+    background: var(--sand-color);
+    border-radius: 50% 50% 20% 20%;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 20px var(--sand-glow);
+  }
+
+  /* Свечение часов */
+  .hourglass-glow {
+    position: absolute;
+    width: 200px;
+    height: 320px;
+    background: radial-gradient(ellipse, var(--primary-glow) 0%, transparent 70%);
+    opacity: 0.3;
+    filter: blur(40px);
+    z-index: -1;
+    animation: pulseGlow 4s ease-in-out infinite;
+  }
+
+  @keyframes pulseGlow {
+    0%, 100% { opacity: 0.2; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(1.05); }
+  }
+
+  /* --- Timer Display --- */
+  .timer-display {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 16px 24px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    backdrop-filter: blur(12px);
+  }
+
+  .timer-unit {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 50px;
+  }
+
+  .timer-value {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--primary);
+    text-shadow: 0 0 20px var(--primary-glow);
+  }
+
+  .timer-label {
+    font-size: 10px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 2px;
+  }
+
+  .timer-separator {
+    font-size: 24px;
+    color: var(--text-muted);
+    font-weight: 300;
+    animation: blink 1s step-end infinite;
+  }
+
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* --- Progress Track --- */
+  .progress-track {
+    width: 100%;
+    max-width: 400px;
+    height: 4px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary), var(--accent));
+    border-radius: 2px;
+    transition: width 0.5s ease;
+    box-shadow: 0 0 10px var(--primary-glow);
+  }
+
+  /* --- Story Link Card --- */
+  .story-link-container {
+    width: 100%;
+    max-width: 400px;
+    margin-top: 8px;
+  }
+
+  .story-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    color: var(--text-main);
+    transition: all 0.3s ease;
+    backdrop-filter: blur(12px);
+    text-align: left;
+  }
+
+  .story-card:hover {
+    border-color: var(--primary);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3), 0 0 20px var(--primary-glow);
+  }
+
+  .story-badge {
+    padding: 4px 10px;
+    background: rgba(249, 115, 22, 0.2);
+    color: #fdba74;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+  }
+
+  .story-content { flex: 1; min-width: 0; }
+
+  .story-title {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .story-desc {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .story-arrow {
+    font-size: 20px;
+    color: var(--primary);
+    transition: transform 0.3s;
+  }
+
+  .story-card:hover .story-arrow { transform: translateX(4px); }
+
+  /* --- Footer --- */
+  .waiting-footer {
+    margin-top: auto;
+    padding: 24px;
+    text-align: center;
+  }
+
+  .footer-text {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+    opacity: 0.8;
+  }
+
+  .footer-actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .btn-secondary {
+    padding: 10px 24px;
+    background: transparent;
+    border: 1px solid var(--glass-border);
+    color: var(--text-muted);
+    border-radius: 50px;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+
+  .btn-secondary:hover {
+    border-color: var(--text-main);
+    color: var(--text-main);
+    background: rgba(255,255,255,0.05);
+  }
+
+  /* --- Animations --- */
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .fade-in { animation: fadeIn 0.8s ease-out forwards; }
+  .fade-in-up { animation: fadeInUp 0.8s ease-out forwards; }
+
+  /* --- Mobile Responsive --- */
+  @media (max-width: 768px) {
+    .nav-content { padding: 0 20px; }
+    .hourglass-container { width: 140px; height: 220px; }
+    .hourglass-frame { width: 90px; height: 180px; }
+    .bulb { width: 75px; height: 75px; }
+    .neck { width: 16px; height: 18px; }
+    .timer-display { gap: 4px; padding: 12px 16px; }
+    .timer-value { font-size: 20px; }
+    .timer-label { font-size: 9px; }
+    .timer-separator { font-size: 18px; }
+    .story-card { padding: 14px 16px; }
+    .story-title { font-size: 16px; }
+    .story-desc { font-size: 12px; }
+  }
+
+  @media (max-width: 480px) {
+    .timer-display { flex-wrap: wrap; justify-content: center; }
+    .timer-unit { min-width: 40px; }
+    .timer-value { font-size: 18px; }
+  }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Целевая дата: 3 марта текущего года (или следующего, если уже прошло)
+  const now = new Date();
+  let targetYear = now.getFullYear();
+  let targetDate = new Date(targetYear, 2, 3, 23, 59, 59); // 3 марта, 23:59:59
+  
+  if (now > targetDate) {
+    targetYear++;
+    targetDate = new Date(targetYear, 2, 3, 23, 59, 59);
+  }
+
+  const totalDuration = targetDate - now;
+  
+  const topSand = document.getElementById('topSand');
+  const bottomSand = document.getElementById('bottomSand');
+  const sandStream = document.getElementById('sandStream');
+  const progressFill = document.getElementById('progressFill');
+  
+  const daysEl = document.getElementById('days');
+  const hoursEl = document.getElementById('hours');
+  const minutesEl = document.getElementById('minutes');
+  const secondsEl = document.getElementById('seconds');
+
+  function updateHourglass() {
+    const now = new Date();
+    const remaining = targetDate - now;
+
+    if (remaining <= 0) {
+      // Таймер истёк
+      topSand.style.height = '0%';
+      bottomSand.style.width = '80px';
+      bottomSand.style.height = '40px';
+      sandStream.classList.remove('active');
+      progressFill.style.width = '100%';
+      daysEl.textContent = '00';
+      hoursEl.textContent = '00';
+      minutesEl.textContent = '00';
+      secondsEl.textContent = '00';
+      return;
+    }
+
+    // Процент оставшегося времени
+    const percentRemaining = (remaining / totalDuration) * 100;
+    const percentElapsed = 100 - percentRemaining;
+
+    // Обновляем таймер
+    const days = Math.floor(remaining / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((remaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
+
+    daysEl.textContent = String(days).padStart(2, '0');
+    hoursEl.textContent = String(hours).padStart(2, '0');
+    minutesEl.textContent = String(minutes).padStart(2, '0');
+    secondsEl.textContent = String(seconds).padStart(2, '0');
+
+    // Анимация песка
+    topSand.style.height = `${Math.max(0, percentRemaining)}%`;
+    
+    // Нижняя кучка растёт нелинейно (визуальный эффект)
+    const pileWidth = Math.min(80, 20 + (percentElapsed * 0.75));
+    const pileHeight = Math.min(40, 4 + (percentElapsed * 0.45));
+    bottomSand.style.width = `${pileWidth}px`;
+    bottomSand.style.height = `${pileHeight}px`;
+
+    // Поток песка активен, пока есть песок сверху
+    if (percentRemaining > 1) {
+      sandStream.classList.add('active');
+    } else {
+      sandStream.classList.remove('active');
+    }
+
+    // Прогресс-бар
+    progressFill.style.width = `${Math.min(100, percentElapsed)}%`;
+
+    requestAnimationFrame(updateHourglass);
+  }
+
+  // Запускаем анимацию
+  updateHourglass();
+
+  // Logout функция (из референса)
+  async function logout() {
+    if (!confirm('Выйти из аккаунта?')) return;
+    await fetch('/api/logout', { method: 'POST' });
+    window.location.href = '/login';
+  }
+  window.logout = logout;
+});
+</script>
+{% endblock %}

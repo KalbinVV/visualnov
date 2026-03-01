@@ -1645,6 +1645,13 @@ def api_send_message():
         return jsonify({'error': f'Ошибка: {str(e)}'}), 500
 
 
+@app.route('/welcome')
+@admin_required
+def admin_music_editor():
+    return render_template('welcome.html',
+                           user=db.get_user_by_id(session['user_id'])), 200
+
+
 @app.errorhandler(404)
 def not_found_error(error):
     return render_template('error.html', message='Страница не найдена', code=404), 404
