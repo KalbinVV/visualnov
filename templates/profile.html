@@ -67,9 +67,6 @@
           </div>
         </div>
 
-        <button class="btn-edit" onclick="editProfile()">
-          <span>✎</span> Редактировать
-        </button>
       </div>
 
       <!-- Статистика -->
@@ -78,11 +75,6 @@
           <div class="stat-icon">🎮</div>
           <div class="stat-value">{{ stats|length if stats else 0 }}</div>
           <div class="stat-label">Игр пройдено</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon">🏆</div>
-          <div class="stat-value">{{ achievements|length }}</div>
-          <div class="stat-label">Достижений</div>
         </div>
         <div class="stat-card highlight">
           <div class="stat-icon">💎</div>
@@ -122,73 +114,6 @@
       {% endif %}
     </section>
 
-    <!-- Достижения -->
-    <section class="profile-section glass-panel fade-in" style="animation-delay: 0.2s">
-      <div class="section-header">
-        <h3>🏆 Достижения</h3>
-        <span class="section-count">{{ achievements|length }}</span>
-      </div>
-
-      {% if achievements %}
-      <div class="achievements-grid">
-        {% for achievement in achievements %}
-        <div class="achievement-card">
-          <div class="achievement-header">
-            <div class="achievement-icon">✨</div>
-            <div class="achievement-rarity common">Обычное</div>
-          </div>
-          <h4 class="achievement-title">{{ achievement.achievement_name }}</h4>
-          <p class="achievement-desc">{{ achievement.description }}</p>
-          <div class="achievement-footer">
-            <span class="unlock-date">🗓 {{ achievement.unlocked_at[:10] if achievement.unlocked_at else '—' }}</span>
-          </div>
-        </div>
-        {% endfor %}
-      </div>
-      {% else %}
-      <div class="empty-state">
-        <div class="empty-icon">🎁</div>
-        <p>Пока нет достижений</p>
-        <p class="empty-subtext">Играйте, чтобы открывать новые награды</p>
-      </div>
-      {% endif %}
-    </section>
-
-    <!-- Статистика игр -->
-    <section class="profile-section glass-panel fade-in" style="animation-delay: 0.3s">
-      <div class="section-header">
-        <h3>📊 История игр</h3>
-      </div>
-
-      {% if stats %}
-      <div class="games-history">
-        {% for stat in stats %}
-        <div class="game-history-item">
-          <div class="game-info">
-            <div class="game-title">{{ stat.game_title }}</div>
-            <div class="game-meta">
-              <span>📖 Глава {{ stat.current_chapter }}</span>
-              <span>⏱ {{ stat.play_time }} мин</span>
-            </div>
-          </div>
-          <div class="game-progress">
-            <div class="progress-bar">
-              <div class="progress-fill" style="width: {{ stat.progress }}%"></div>
-            </div>
-            <span class="progress-text">{{ stat.progress }}%</span>
-          </div>
-        </div>
-        {% endfor %}
-      </div>
-      {% else %}
-      <div class="empty-state">
-        <div class="empty-icon">📚</div>
-        <p>История пуста</p>
-        <p class="empty-subtext">Начните новую историю, чтобы увидеть прогресс здесь</p>
-        <button class="btn-browse" onclick="window.location.href='/dashboard'">Выбрать историю</button>
-      </div>
-      {% endif %}
-    </section>
 
   </main>
 </div>
