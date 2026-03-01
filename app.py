@@ -16,6 +16,7 @@ from auth import AuthService
 from game import GameService
 from support_service import SupportService
 
+
 app = Flask(__name__,
             template_folder='templates',
             static_folder='static')
@@ -470,6 +471,9 @@ def dashboard():
     if not user:
         session.clear()
         return redirect(url_for('login_page'))
+
+    if app.config.get('IS_DEMO'):
+        return redirect('/welcome')
 
     games = game_service.get_available_games(session['user_id'])
 
