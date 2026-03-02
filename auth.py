@@ -63,7 +63,7 @@ class AuthService:
             password_hash=pwd_hash,
             password_salt=salt,
             display_name=display_name or username,
-            diamonds=100,
+            diamonds=30,
             is_leader=False
         )
 
