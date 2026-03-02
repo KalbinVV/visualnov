@@ -153,7 +153,8 @@
     <footer class="waiting-footer fade-in-up">
       <p class="footer-text">пока можете поиграть в другие наши игры</p>
       <div class="footer-actions">
-        <a href="https://play.google.com/store/apps/details?id=com.yourstoryinteractive.sails.pirate.adventure&hl=ru" class="btn-secondary">Перейти в библиотеку</a>
+        <!-- Кнопке добавлен id для JS-управления ссылкой -->
+        <a href="#" id="libraryBtn" class="btn-secondary">Перейти в библиотеку</a>
       </div>
     </footer>
 
@@ -968,7 +969,39 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  // Целевая дата: 3 марта текущего года (или следующего, если уже прошло)
+  const libraryBtn = document.getElementById('libraryBtn');
+
+  const IOS_STORE_URL = 'https://rutube.ru/video/ac4ac2f35c35fe2dc78e9a66c48097cb/';
+  const ANDROID_STORE_URL = 'https://play.google.com/store/apps/details?id=com.yourstoryinteractive.sails.pirate.adventure&hl=ru';
+
+  function detectPlatform() {
+    const ua = navigator.userAgent || navigator.vendor || window.opera;
+
+    // Проверка на iOS устройства
+    if (/iPad|iPhone|iPod/.test(ua) && !window.MSStream) {
+      return 'ios';
+    }
+    // Проверка на Android
+    if (/android/i.test(ua)) {
+      return 'android';
+    }
+    return 'unknown';
+  }
+
+  // Установка правильной ссылки при загрузке
+  const platform = detectPlatform();
+  if (libraryBtn) {
+    if (platform === 'ios') {
+      libraryBtn.href = IOS_STORE_URL;
+    } else if (platform === 'android') {
+      libraryBtn.href = ANDROID_STORE_URL;
+    } else {
+      // Fallback для десктопов или неизвестных устройств (по умолчанию Android)
+      libraryBtn.href = ANDROID_STORE_URL;
+    }
+  }
+
+  // === 2. Логика песочных часов ===
   const now = new Date();
   let targetYear = now.getFullYear();
   let targetDate = new Date(targetYear, 2, 3, 23, 59, 59); // 3 марта, 23:59:59
@@ -978,7 +1011,6 @@ document.addEventListener('DOMContentLoaded', function() {
     targetDate = new Date(targetYear, 2, 3, 23, 59, 59);
   }
 
-  // Фиксированная точка старта для расчёта прогресса (момент загрузки страницы)
   const pageLoadTime = Date.now();
   const totalDuration = targetDate - pageLoadTime;
 
@@ -992,8 +1024,6 @@ document.addEventListener('DOMContentLoaded', function() {
   const minutesEl = document.getElementById('minutes');
   const secondsEl = document.getElementById('seconds');
 
-  // Константы для анимации песка
-  const CHAMBER_HEIGHT = 120;
   const MAX_PILE_HEIGHT = 50;
   const MAX_PILE_WIDTH = 60;
 
@@ -1018,7 +1048,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const percentElapsed = Math.min(100, (elapsed / totalDuration) * 100);
     const percentRemaining = 100 - percentElapsed;
 
-    // Обновляем таймер
     const days = Math.floor(remaining / (1000 * 60 * 60 * 24));
     const hours = Math.floor((remaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
@@ -1029,7 +1058,6 @@ document.addEventListener('DOMContentLoaded', function() {
     minutesEl.textContent = String(minutes).padStart(2, '0');
     secondsEl.textContent = String(seconds).padStart(2, '0');
 
-    // Анимация песка
     sandTop.style.height = percentRemaining + '%';
 
     const pileHeight = (percentElapsed / 100) * MAX_PILE_HEIGHT;
@@ -1050,24 +1078,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
   updateHourglass();
 
-  // === MODAL FUNCTIONS ===
+  // === 3. Модальное окно Алмазов ===
   function showDiamondModal() {
     const modal = document.getElementById('diamondModal');
-    // Синхронизируем баланс в модалке с хедером
     const currentBalance = document.getElementById('diamondAmount').textContent;
     document.getElementById('modalDiamondBalance').textContent = currentBalance;
 
     modal.classList.add('show');
-    document.body.style.overflow = 'hidden'; // Блокируем скролл фона
+    document.body.style.overflow = 'hidden';
   }
 
   function hideDiamondModal() {
     const modal = document.getElementById('diamondModal');
     modal.classList.remove('show');
-    document.body.style.overflow = ''; // Возвращаем скролл
+    document.body.style.overflow = '';
   }
 
-  // Закрытие модального окна по клавише Escape
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       hideDiamondModal();
@@ -1080,6 +1106,8 @@ document.addEventListener('DOMContentLoaded', function() {
     await fetch('/api/logout', { method: 'POST' });
     window.location.href = '/login';
   }
+
+  // Глобальная регистрация функций
   window.logout = logout;
   window.showDiamondModal = showDiamondModal;
   window.hideDiamondModal = hideDiamondModal;
