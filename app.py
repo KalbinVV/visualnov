@@ -473,7 +473,8 @@ def dashboard():
         return redirect(url_for('login_page'))
 
     if app.config.get('IS_DEMO'):
-        return redirect('/welcome')
+        if not user.is_admin:
+            return redirect('/welcome')
 
     games = game_service.get_available_games(session['user_id'])
 
