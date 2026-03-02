@@ -56,6 +56,12 @@
     <!-- Центральная секция с часами -->
     <section class="hourglass-section fade-in">
       
+      <!-- Заголовок с текстом ожидания -->
+      <div class="waiting-header">
+        <h1 class="waiting-title">Ожидайте релиза первой истории любви</h1>
+        <p class="waiting-subtitle">«Язык цветов» — история о беззвучных комплиментах, внимании к деталям и силе индивидуальности. Она будет доступна через:</p>
+      </div>
+
       <!-- Контейнер часов -->
       <div class="hourglass-container">
 
@@ -369,10 +375,32 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 32px;
+    gap: 24px;
     padding: 20px;
     max-width: 600px;
     width: 100%;
+  }
+
+  /* --- Waiting Header Text --- */
+  .waiting-header {
+    margin-bottom: 8px;
+  }
+
+  .waiting-title {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 12px;
+    line-height: 1.3;
+  }
+
+  .waiting-subtitle {
+    font-size: 15px;
+    color: var(--text-muted);
+    line-height: 1.5;
+    max-width: 480px;
+    margin: 0 auto;
   }
 
   /* --- Hourglass - Classic Design --- */
@@ -460,9 +488,10 @@
     bottom: 0;
     left: 0;
     width: 100%;
+    height: 100%;
     background: linear-gradient(180deg, var(--sand-color) 0%, #d4a853 100%);
     border-radius: 50% 50% 50% 50% / 100% 100% 20% 20%;
-    transition: height 0.3s linear;
+    transition: height 0.1s linear;
     box-shadow: inset 0 -10px 20px rgba(0,0,0,0.3);
   }
 
@@ -523,9 +552,11 @@
     left: 50%;
     transform: translateX(-50%);
     background: linear-gradient(180deg, var(--sand-color) 0%, #d4a853 100%);
-    border-radius: 50% 50% 50% 50% / 100% 100% 20% 20%;
-    transition: all 0.3s ease;
+    border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+    transition: all 0.1s ease;
     box-shadow: 0 0 15px var(--sand-glow);
+    width: 10px;
+    height: 0;
   }
 
   /* Декоративные колпачки */
@@ -623,7 +654,7 @@
     height: 100%;
     background: linear-gradient(90deg, var(--primary), var(--accent));
     border-radius: 2px;
-    transition: width 0.5s ease;
+    transition: width 0.1s linear;
     box-shadow: 0 0 10px var(--primary-glow);
   }
 
@@ -755,6 +786,8 @@
   /* --- Mobile Responsive --- */
   @media (max-width: 768px) {
     .nav-content { padding: 0 20px; }
+    .waiting-title { font-size: 24px; }
+    .waiting-subtitle { font-size: 14px; }
     .hourglass-container { width: 160px; height: 280px; }
     .hourglass-plate { width: 140px; height: 12px; }
     .hourglass-pillar { width: 10px; height: 220px; }
@@ -777,6 +810,8 @@
     .timer-display { flex-wrap: wrap; justify-content: center; }
     .timer-unit { min-width: 40px; }
     .timer-value { font-size: 18px; }
+    .waiting-title { font-size: 20px; }
+    .waiting-subtitle { font-size: 13px; }
   }
 </style>
 
@@ -785,14 +820,16 @@ document.addEventListener('DOMContentLoaded', function() {
   // Целевая дата: 3 марта текущего года (или следующего, если уже прошло)
   const now = new Date();
   let targetYear = now.getFullYear();
-  let targetDate = new Date(targetYear, 2, 3, 12, 59, 59); // 3 марта, 23:59:59
+  let targetDate = new Date(targetYear, 2, 3, 23, 59, 59); // 3 марта, 23:59:59
 
   if (now > targetDate) {
     targetYear++;
     targetDate = new Date(targetYear, 2, 3, 23, 59, 59);
   }
 
-  const totalDuration = targetDate - now;
+  // Фиксированная точка старта для расчёта прогресса (момент загрузки страницы)
+  const pageLoadTime = Date.now();
+  const totalDuration = targetDate - pageLoadTime;
 
   const sandTop = document.getElementById('sandTop');
   const sandBottom = document.getElementById('sandBottom');
@@ -804,15 +841,20 @@ document.addEventListener('DOMContentLoaded', function() {
   const minutesEl = document.getElementById('minutes');
   const secondsEl = document.getElementById('seconds');
 
-  function updateHourglass() {
-    const now = new Date();
-    const remaining = targetDate - now;
+  // Константы для анимации песка
+  const CHAMBER_HEIGHT = 120; // высота колбы в px
+  const MAX_PILE_HEIGHT = 50; // максимальная высота кучки внизу
+  const MAX_PILE_WIDTH = 60;  // максимальная ширина кучки внизу
 
+  function updateHourglass() {
+    const currentTime = Date.now();
+    const remaining = Math.max(0, targetDate - currentTime);
+
+    // Если время вышло
     if (remaining <= 0) {
-      // Таймер истёк
       sandTop.style.height = '0%';
-      sandBottom.style.width = '60px';
-      sandBottom.style.height = '50px';
+      sandBottom.style.width = MAX_PILE_WIDTH + 'px';
+      sandBottom.style.height = MAX_PILE_HEIGHT + 'px';
       sandStream.classList.remove('active');
       progressFill.style.width = '100%';
       daysEl.textContent = '00';
@@ -822,9 +864,10 @@ document.addEventListener('DOMContentLoaded', function() {
       return;
     }
 
-    // Процент оставшегося времени
-    const percentRemaining = (remaining / totalDuration) * 100;
-    const percentElapsed = 100 - percentRemaining;
+    // Точный расчёт процента прошедшего времени от момента загрузки
+    const elapsed = currentTime - pageLoadTime;
+    const percentElapsed = Math.min(100, (elapsed / totalDuration) * 100);
+    const percentRemaining = 100 - percentElapsed;
 
     // Обновляем таймер
     const days = Math.floor(remaining / (1000 * 60 * 60 * 24));
@@ -837,16 +880,16 @@ document.addEventListener('DOMContentLoaded', function() {
     minutesEl.textContent = String(minutes).padStart(2, '0');
     secondsEl.textContent = String(seconds).padStart(2, '0');
 
-    // Анимация песка в верхней колбе
-    sandTop.style.height = `${Math.max(0, percentRemaining)}%`;
+    // Анимация песка: высота верхнего песка пропорциональна оставшемуся времени
+    sandTop.style.height = percentRemaining + '%';
 
-    // Кучка песка внизу растёт
-    const pileWidth = Math.min(60, 10 + (percentElapsed * 0.6));
-    const pileHeight = Math.min(50, 5 + (percentElapsed * 0.5));
-    sandBottom.style.width = `${pileWidth}px`;
-    sandBottom.style.height = `${pileHeight}px`;
+    // Кучка песка внизу: растёт пропорционально прошедшему времени
+    const pileHeight = (percentElapsed / 100) * MAX_PILE_HEIGHT;
+    const pileWidth = 10 + (percentElapsed / 100) * (MAX_PILE_WIDTH - 10);
+    sandBottom.style.height = pileHeight + 'px';
+    sandBottom.style.width = pileWidth + 'px';
 
-    // Поток песка активен, пока есть песок сверху
+    // Поток песка активен, пока есть песок сверху (>1%)
     if (percentRemaining > 1) {
       sandStream.classList.add('active');
     } else {
@@ -854,8 +897,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Прогресс-бар
-    progressFill.style.width = `${Math.min(100, percentElapsed)}%`;
+    progressFill.style.width = percentElapsed + '%';
 
+    // Плавная рекурсия через requestAnimationFrame
     requestAnimationFrame(updateHourglass);
   }
 
