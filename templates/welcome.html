@@ -18,7 +18,8 @@
         <span class="brand-text">USSC <span class="highlight">Romance</span></span>
       </div>
       <div class="nav-actions">
-        <div class="currency-pill">
+        <!-- Счетчик алмазов с обработчиком клика -->
+        <div class="currency-pill" onclick="showDiamondModal()">
           <div class="currency-icon">💎</div>
           <span class="currency-value" id="diamondAmount">{{ user.diamonds }}</span>
           <div class="currency-glow"></div>
@@ -52,10 +53,10 @@
 
   <!-- Основной контент: Песочные часы -->
   <main class="waiting-stage">
-    
+
     <!-- Центральная секция с часами -->
     <section class="hourglass-section fade-in">
-      
+
       <!-- Заголовок с текстом ожидания -->
       <div class="waiting-header">
         <h1 class="waiting-title">Ожидайте релиза первой истории любви</h1>
@@ -158,6 +159,39 @@
 
   </main>
 
+</div>
+
+<!-- Модальное окно Алмазов -->
+<div class="diamond-modal" id="diamondModal">
+  <div class="modal-backdrop" onclick="hideDiamondModal()"></div>
+  <div class="modal-content glass-panel">
+    <button class="modal-close" onclick="hideDiamondModal()">✕</button>
+
+    <div class="modal-header">
+      <div class="gem-icon-large">💎</div>
+      <h3>Ваши Алмазы</h3>
+    </div>
+
+    <div class="balance-display">
+      <span class="balance-amount" id="modalDiamondBalance">{{ user.diamonds }}</span>
+      <span class="balance-label">доступно</span>
+    </div>
+
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="info-icon">🔓</div>
+        <h4>Эксклюзив</h4>
+        <p>Открывайте платные сцены и альтернативные концовки.</p>
+      </div>
+      <div class="info-card">
+        <div class="info-icon">❤️</div>
+        <h4>Отношения</h4>
+        <p>Улучшайте связь с персонажами и получайте особые подарки.</p>
+      </div>
+    </div>
+
+    <p class="modal-footer-note">Алмазы можно использовать в любой истории</p>
+  </div>
 </div>
 
 <style>
@@ -414,7 +448,6 @@
     justify-content: center;
   }
 
-  /* Верхняя и нижняя пластины */
   .hourglass-plate {
     width: 180px;
     height: 16px;
@@ -427,15 +460,9 @@
     z-index: 10;
   }
 
-  .top-plate {
-    margin-bottom: -4px;
-  }
+  .top-plate { margin-bottom: -4px; }
+  .bottom-plate { margin-top: -4px; }
 
-  .bottom-plate {
-    margin-top: -4px;
-  }
-
-  /* Основной корпус */
   .hourglass-body {
     display: flex;
     align-items: center;
@@ -445,7 +472,6 @@
     z-index: 5;
   }
 
-  /* Стойки по бокам */
   .hourglass-pillar {
     width: 12px;
     height: 280px;
@@ -456,7 +482,6 @@
       inset 0 2px 4px rgba(255,255,255,0.1);
   }
 
-  /* Стеклянная камера с песком */
   .glass-chamber {
     position: relative;
     width: 80px;
@@ -466,7 +491,6 @@
     align-items: center;
   }
 
-  /* Верхняя колба */
   .chamber-top {
     width: 70px;
     height: 120px;
@@ -482,7 +506,6 @@
       0 0 10px rgba(200, 220, 255, 0.1);
   }
 
-  /* Песок в верхней колбе */
   .sand-top {
     position: absolute;
     bottom: 0;
@@ -495,7 +518,6 @@
     box-shadow: inset 0 -10px 20px rgba(0,0,0,0.3);
   }
 
-  /* Горлышко */
   .chamber-neck {
     width: 20px;
     height: 40px;
@@ -506,7 +528,6 @@
     z-index: 3;
   }
 
-  /* Поток песка */
   .sand-stream {
     position: absolute;
     top: 0;
@@ -529,7 +550,6 @@
     to { width: 4px; box-shadow: 0 0 8px var(--sand-glow); }
   }
 
-  /* Нижняя колба */
   .chamber-bottom {
     width: 70px;
     height: 120px;
@@ -545,7 +565,6 @@
       0 0 10px rgba(200, 220, 255, 0.1);
   }
 
-  /* Песок в нижней колбе - кучка */
   .sand-bottom {
     position: absolute;
     bottom: 0;
@@ -559,7 +578,6 @@
     height: 0;
   }
 
-  /* Декоративные колпачки */
   .hourglass-cap {
     position: absolute;
     width: 60px;
@@ -570,15 +588,9 @@
     box-shadow: 0 2px 4px rgba(0,0,0,0.3);
   }
 
-  .top-cap {
-    top: 38px;
-  }
+  .top-cap { top: 38px; }
+  .bottom-cap { bottom: 38px; }
 
-  .bottom-cap {
-    bottom: 38px;
-  }
-
-  /* Свечение вокруг часов */
   .hourglass-glow {
     position: absolute;
     width: 250px;
@@ -764,6 +776,142 @@
     background: rgba(255,255,255,0.05);
   }
 
+  /* === MODAL STYLES === */
+  .diamond-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+
+  .diamond-modal.show {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+  }
+
+  .modal-content {
+    position: relative;
+    width: 100%;
+    max-width: 400px;
+    padding: 40px 32px;
+    border-radius: 32px;
+    background: rgba(20, 20, 30, 0.8);
+    border: 1px solid var(--glass-border-ui);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    transform: scale(0.9) translateY(20px);
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    text-align: center;
+  }
+
+  .diamond-modal.show .modal-content {
+    transform: scale(1) translateY(0);
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 20px;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+    transition: all 0.2s;
+  }
+
+  .modal-close:hover {
+    background: rgba(255,255,255,0.1);
+    color: var(--text-main);
+  }
+
+  .modal-header {
+    margin-bottom: 24px;
+  }
+
+  .gem-icon-large {
+    font-size: 48px;
+    margin-bottom: 12px;
+    display: inline-block;
+    filter: drop-shadow(0 0 15px var(--primary-glow));
+    animation: float 4s ease-in-out infinite;
+  }
+
+  .modal-header h3 {
+    font-family: var(--font-display);
+    font-size: 24px;
+    color: var(--text-main);
+  }
+
+  .balance-display {
+    margin-bottom: 32px;
+    padding: 20px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 16px;
+    border: 1px solid var(--glass-border-ui);
+  }
+
+  .balance-amount {
+    display: block;
+    font-size: 36px;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 4px;
+  }
+
+  .balance-label {
+    font-size: 12px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .info-card {
+    background: rgba(255,255,255,0.02);
+    padding: 16px;
+    border-radius: 12px;
+    text-align: left;
+    border: 1px solid transparent;
+    transition: border-color 0.2s;
+  }
+
+  .info-card:hover {
+    border-color: var(--glass-border-ui);
+  }
+
+  .info-icon { font-size: 20px; margin-bottom: 8px; }
+  .info-card h4 { font-size: 14px; margin-bottom: 4px; color: var(--text-main); }
+  .info-card p { font-size: 12px; color: var(--text-muted); line-height: 1.4; }
+
+  .modal-footer-note {
+    font-size: 12px;
+    color: var(--text-muted);
+    opacity: 0.6;
+    font-style: italic;
+  }
+
   /* --- Animations --- */
   @keyframes float {
     0%, 100% { transform: translateY(0); }
@@ -804,6 +952,9 @@
     .story-card { padding: 14px 16px; }
     .story-title { font-size: 16px; }
     .story-desc { font-size: 12px; }
+    .modal-content { max-width: 90%; padding: 32px 24px; }
+    .balance-amount { font-size: 32px; }
+    .info-grid { grid-template-columns: 1fr; }
   }
 
   @media (max-width: 480px) {
@@ -842,15 +993,14 @@ document.addEventListener('DOMContentLoaded', function() {
   const secondsEl = document.getElementById('seconds');
 
   // Константы для анимации песка
-  const CHAMBER_HEIGHT = 120; // высота колбы в px
-  const MAX_PILE_HEIGHT = 50; // максимальная высота кучки внизу
-  const MAX_PILE_WIDTH = 60;  // максимальная ширина кучки внизу
+  const CHAMBER_HEIGHT = 120;
+  const MAX_PILE_HEIGHT = 50;
+  const MAX_PILE_WIDTH = 60;
 
   function updateHourglass() {
     const currentTime = Date.now();
     const remaining = Math.max(0, targetDate - currentTime);
 
-    // Если время вышло
     if (remaining <= 0) {
       sandTop.style.height = '0%';
       sandBottom.style.width = MAX_PILE_WIDTH + 'px';
@@ -864,7 +1014,6 @@ document.addEventListener('DOMContentLoaded', function() {
       return;
     }
 
-    // Точный расчёт процента прошедшего времени от момента загрузки
     const elapsed = currentTime - pageLoadTime;
     const percentElapsed = Math.min(100, (elapsed / totalDuration) * 100);
     const percentRemaining = 100 - percentElapsed;
@@ -880,31 +1029,50 @@ document.addEventListener('DOMContentLoaded', function() {
     minutesEl.textContent = String(minutes).padStart(2, '0');
     secondsEl.textContent = String(seconds).padStart(2, '0');
 
-    // Анимация песка: высота верхнего песка пропорциональна оставшемуся времени
+    // Анимация песка
     sandTop.style.height = percentRemaining + '%';
 
-    // Кучка песка внизу: растёт пропорционально прошедшему времени
     const pileHeight = (percentElapsed / 100) * MAX_PILE_HEIGHT;
     const pileWidth = 10 + (percentElapsed / 100) * (MAX_PILE_WIDTH - 10);
     sandBottom.style.height = pileHeight + 'px';
     sandBottom.style.width = pileWidth + 'px';
 
-    // Поток песка активен, пока есть песок сверху (>1%)
     if (percentRemaining > 1) {
       sandStream.classList.add('active');
     } else {
       sandStream.classList.remove('active');
     }
 
-    // Прогресс-бар
     progressFill.style.width = percentElapsed + '%';
 
-    // Плавная рекурсия через requestAnimationFrame
     requestAnimationFrame(updateHourglass);
   }
 
-  // Запускаем анимацию
   updateHourglass();
+
+  // === MODAL FUNCTIONS ===
+  function showDiamondModal() {
+    const modal = document.getElementById('diamondModal');
+    // Синхронизируем баланс в модалке с хедером
+    const currentBalance = document.getElementById('diamondAmount').textContent;
+    document.getElementById('modalDiamondBalance').textContent = currentBalance;
+
+    modal.classList.add('show');
+    document.body.style.overflow = 'hidden'; // Блокируем скролл фона
+  }
+
+  function hideDiamondModal() {
+    const modal = document.getElementById('diamondModal');
+    modal.classList.remove('show');
+    document.body.style.overflow = ''; // Возвращаем скролл
+  }
+
+  // Закрытие модального окна по клавише Escape
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      hideDiamondModal();
+    }
+  });
 
   // Logout функция
   async function logout() {
@@ -913,6 +1081,8 @@ document.addEventListener('DOMContentLoaded', function() {
     window.location.href = '/login';
   }
   window.logout = logout;
+  window.showDiamondModal = showDiamondModal;
+  window.hideDiamondModal = hideDiamondModal;
 });
 </script>
 {% endblock %}
