@@ -152,10 +152,10 @@ class GameService:
             if user_save.friendship_level < choice.required_friendship_level:
                 return False, 'Данный вариант недоступен, в связи с вашими предыдущими выборами'
 
-            if user_save.passion_level < choice.passion_change:
+            if user_save.passion_level < choice.required_passion_level:
                 return False, 'Данный вариант недоступен, в связи с вашими предыдущими выборами!'
 
-            if user_save.teasing_level < choice.teasing_change:
+            if user_save.teasing_level < choice.required_teasing_level:
                 return False, 'Данный вариант недоступен, в связи с вашими предыдущими выборами'
 
             if choice.is_locked:
