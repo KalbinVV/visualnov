@@ -67,7 +67,7 @@ class GameService:
             return False, 'История еще не опубликована'
 
         if not story.is_unlocked:
-            return False, 'История заблокирована!'
+            return False, 'Пожалуйста, дождитесь релиза истории :)'
 
         return True, ''
 
