@@ -1120,7 +1120,7 @@
       sprite.classList.remove('show', 'hide', 'blackout');
     }
 
-    els.speaker.innerHTML = sceneData.character_name + ' 🔊' || '';
+    els.speaker.innerHTML = sceneData.character_name || '';
 
     els.text.innerHTML = sceneData.dialogue || '';
     els.text.style.animation = 'none';
