@@ -785,7 +785,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // Целевая дата: 3 марта текущего года (или следующего, если уже прошло)
   const now = new Date();
   let targetYear = now.getFullYear();
-  let targetDate = new Date(targetYear, 2, 3, 12, 00, 00); // 3 марта, 12:00:00
+  let targetDate = new Date(targetYear, 2, 2, 12, 00, 00); // 3 марта, 12:00:00
 
   if (now > targetDate) {
     targetYear++;
