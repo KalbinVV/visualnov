@@ -268,6 +268,6 @@ class GameService:
                                           'quantity_of_player': quantity_of_players,
                                           'percent': percent})
 
-                players_legends_choices['players'].append({'user': user, 'choices_stats': choices_stats})
+                players_legends_choices['players'].append({'user': {'name': user.display_name, 'id': user.id}, 'choices_stats': choices_stats})
 
             return players_legends_choices
