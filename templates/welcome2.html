@@ -18,7 +18,6 @@
         <span class="brand-text">USSC <span class="highlight">Romance</span></span>
       </div>
       <div class="nav-actions">
-        <!-- Счетчик алмазов с обработчиком клика -->
         <div class="currency-pill" onclick="showDiamondModal()">
           <div class="currency-icon">💎</div>
           <span class="currency-value" id="diamondAmount">{{ user.diamonds }}</span>
@@ -59,8 +58,8 @@
 
       <!-- Заголовок с текстом ожидания -->
       <div class="waiting-header">
-        <h1 class="waiting-title">Ожидайте релиза первой истории любви</h1>
-        <p class="waiting-subtitle">«Язык цветов» — история о беззвучных комплиментах, внимании к деталям и силе индивидуальности. Она будет доступна через:</p>
+        <h1 class="waiting-title">Ожидайте релиза философии риса</h1>
+        <p class="waiting-subtitle">«Философия риса» — История о поиске идеала в тривиальных вещах. Она будет доступна через:</p>
       </div>
 
       <!-- Контейнер часов -->
@@ -138,10 +137,21 @@
       <!-- Ссылка на историю -->
       <div class="story-link-container">
         <a href="/game/3" class="story-card glass-panel">
-          <div class="story-badge">✨ Премьера</div>
+          <div class="story-badge-available">🚀 Доступно</div>
           <div class="story-content">
             <h3 class="story-title">Язык цветов</h3>
             <p class="story-desc">История о беззвучных комплиментах, вниманию к деталям и важности индивидуализма</p>
+          </div>
+          <div class="story-arrow">→</div>
+        </a>
+      </div>
+
+      <div class="story-link-container">
+        <a href="/game/4" class="story-card glass-panel">
+          <div class="story-badge">✨ Премьера</div>
+          <div class="story-content">
+            <h3 class="story-title">Философия риса</h3>
+            <p class="story-desc">История о поиске идеала в тривиальных вещах</p>
           </div>
           <div class="story-arrow">→</div>
         </a>
@@ -711,6 +721,20 @@
     white-space: nowrap;
   }
 
+  .story-badge-available {
+    padding: 4px 10px;
+    background: rgba(115, 175, 122, 0.2);
+    color: #fdba74;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+  }
+
+
+
   .story-content { flex: 1; min-width: 0; }
 
   .story-title {
@@ -1003,7 +1027,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   const now = new Date();
   let targetYear = now.getFullYear();
-  let targetDate = new Date(targetYear, 2, 3, 12, 00, 00); // 3 марта, 12:00:00
+  let targetDate = new Date(targetYear, 2, 5, 12, 00, 00); // 5 марта, 12:00:00
 
   if (now > targetDate) {
     targetYear++;
