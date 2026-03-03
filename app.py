@@ -23,7 +23,7 @@ app = Flask(__name__,
 
 app.config.from_object(config['development'])
 
-db = Database("postgresql+psycopg2://postgres:y82AtQ8aM8=m@localhost:5432/postgres")
+db = Database("postgresql+psycopg2://postgres:y82AtQ8aM8=m@185.172.131.57:5432/postgres")
 auth_service = AuthService(db)
 game_service = GameService(db)
 
@@ -1653,7 +1653,7 @@ def api_send_message():
 @app.route('/welcome')
 @login_required
 def welcome_page():
-    return render_template('welcome.html',
+    return render_template('welcome2.html',
                            user=db.get_user_by_id(session['user_id'])), 200
 
 
