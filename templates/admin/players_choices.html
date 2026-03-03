@@ -551,7 +551,7 @@
       const pagePlayers = filteredPlayers.slice(start, end);
 
       container.innerHTML = pagePlayers.map((player, index) => {
-        const name = player.username;
+        const name = player.name;
         const initials = name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
         const choices = player.choices_stats || [];
         const topChoices = choices.slice(0, 3);
