@@ -1599,7 +1599,7 @@ def welcome_page():
 
 
 
-@app.route('/api/get_players_legends_choices/<story_id:int>')
+@app.route('/api/get_players_legends_choices/<story_id>')
 @admin_required
 def get_players_legends_choices(story_id: int):
     return game_service.get_players_legends_choices(story_id)
