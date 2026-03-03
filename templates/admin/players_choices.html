@@ -447,6 +447,7 @@
         updateStats();
         applyFilters();
         updateLastUpdate();
+        filterPlayers();
       } catch (error) {
         console.error('Ошибка загрузки:', error);
         showError('Не удалось загрузить данные. Проверьте подключение или обратитесь к администратору.');
@@ -489,7 +490,6 @@
         now.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
     }
 
-    // === Фильтрация и сортировка ===
     function filterPlayers() {
       const query = document.getElementById('searchInput').value.toLowerCase().trim();
 
