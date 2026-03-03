@@ -1605,6 +1605,12 @@ def get_players_legends_choices(story_id: int):
     return game_service.get_players_legends_choices(story_id)
 
 
+@app.route('/stats/<story_id>')
+@admin_required
+def get_story_stats(story_id: int):
+    return render_template('admin/players_choices.html', story_id=story_id)
+
+
 @app.errorhandler(404)
 def not_found_error(error):
     return render_template('error.html', message='Страница не найдена', code=404), 404
