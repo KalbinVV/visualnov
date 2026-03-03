@@ -1653,7 +1653,7 @@ def api_send_message():
 @app.route('/welcome')
 @login_required
 def welcome_page():
-    return render_template('welcome.html',
+    return render_template('welcome2.html',
                            user=db.get_user_by_id(session['user_id'])), 200
 
 
