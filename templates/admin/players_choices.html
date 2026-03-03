@@ -439,7 +439,7 @@
         // Адаптация под ваш формат: data.players -> [{user, choices_stats}]
         allPlayers = (data.players || []).map(player => ({
           user_id: player.user?.id,
-          username: player.user?.username || player.user?.email || `Игрок #${player.user?.id}`,
+          username: player.user?.name || player.user?.email || `Игрок #${player.user?.id}`,
           email: player.user?.email,
           choices_stats: player.choices_stats || []
         }));
@@ -551,7 +551,7 @@
       const pagePlayers = filteredPlayers.slice(start, end);
 
       container.innerHTML = pagePlayers.map((player, index) => {
-        const name = player.name;
+        const name = player.username;
         const initials = name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
         const choices = player.choices_stats || [];
         const topChoices = choices.slice(0, 3);
