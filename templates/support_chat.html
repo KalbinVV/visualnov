@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Админ-чат | Любовный симулятор</title>
+    <style>
+        :root {
+            --bg-primary: #0f0f1a;
+            --bg-secondary: #1a1a2e;
+            --bg-tertiary: #252542;
+            --accent: #8b5cf6;
+            --accent-light: #a78bfa;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0b0;
+            --success: #10b981;
+            --danger: #ef4444;
+            --border: #333355;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+        }
+
+        .login-box {
+            background: var(--bg-secondary);
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(139, 92, 246, 0.2);
+            width: 100%;
+            max-width: 400px;
+            border: 1px solid var(--border);
+        }
+
+        .login-box h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--accent);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px 24px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .btn:hover {
+            background: var(--accent-light);
+        }
+
+        .error {
+            background: var(--danger);
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        /* Chat Layout */
+        .chat-layout {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            height: 100vh;
+        }
+
+        .sidebar {
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sidebar-header h2 {
+            font-size: 18px;
+            color: var(--accent);
+        }
+
+        .unread-badge {
+            background: var(--danger);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+
+        .user-list {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .user-item {
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            transition: background 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-item:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .user-item.active {
+            background: var(--bg-tertiary);
+            border-left: 3px solid var(--accent);
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .user-info {
+            flex: 1;
+        }
+
+        .user-name {
+            font-weight: 500;
+        }
+
+        .user-last-login {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .chat-area {
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-primary);
+        }
+
+        .chat-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .chat-header .user-avatar {
+            width: 45px;
+            height: 45px;
+        }
+
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            position: relative;
+        }
+
+        .message.mine {
+            background: var(--accent);
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.theirs {
+            background: var(--bg-tertiary);
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+
+        .message-text {
+            word-wrap: break-word;
+        }
+
+        .message-image {
+            max-width: 100%;
+            border-radius: 8px;
+            margin-top: 8px;
+            cursor: pointer;
+        }
+
+        .message-time {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-top: 5px;
+            text-align: right;
+        }
+
+        .message-input-area {
+            padding: 20px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+        }
+
+        .message-input {
+            flex: 1;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px 16px;
+            color: var(--text-primary);
+            resize: none;
+            max-height: 100px;
+            font-family: inherit;
+        }
+
+        .message-input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .input-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .btn-icon:hover {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .btn-send {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .btn-send:hover {
+            background: var(--accent-light);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: var(--text-secondary);
+        }
+
+        .empty-state svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        #image-preview {
+            max-width: 150px;
+            max-height: 150px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .preview-container {
+            padding: 10px 20px 0;
+        }
+
+        .remove-image {
+            background: var(--danger);
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        /* Modal for image */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal img {
+            max-width: 90%;
+            max-height: 90%;
+            border-radius: 8px;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            color: white;
+            font-size: 30px;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .chat-layout {
+                grid-template-columns: 1fr;
+            }
+            .sidebar {
+                display: none;
+            }
+            .sidebar.show {
+                display: flex;
+                position: absolute;
+                z-index: 100;
+                width: 100%;
+                height: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    {% if page == 'login' %}
+    <div class="login-container">
+        <div class="login-box">
+            <h1>🔐 Админ-чат</h1>
+            {% if error %}
+            <div class="error">{{ error }}</div>
+            {% endif %}
+            <form method="POST">
+                <div class="form-group">
+                    <label>Логин</label>
+                    <input type="text" name="username" required placeholder="Введите логин">
+                </div>
+                <div class="form-group">
+                    <label>Пароль</label>
+                    <input type="password" name="password" required placeholder="Введите пароль">
+                </div>
+                <button type="submit" class="btn">Войти</button>
+            </form>
+        </div>
+    </div>
+    {% else %}
+    <div class="chat-layout">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2>💬 Чат</h2>
+                <span class="unread-badge" id="total-unread">0</span>
+            </div>
+            <div class="user-list" id="user-list">
+                <!-- Пользователи загружаются JS -->
+            </div>
+            <div style="padding: 15px; border-top: 1px solid var(--border);">
+                <a href="/logout" class="btn" style="text-decoration: none; display: block; text-align: center;">Выйти</a>
+            </div>
+        </aside>
+
+        <main class="chat-area">
+            <div class="chat-header hidden" id="chat-header">
+                <div class="user-avatar" id="current-user-avatar">?</div>
+                <div>
+                    <h3 id="current-user-name">Выберите пользователя</h3>
+                    <small id="current-user-status" style="color: var(--text-secondary);"></small>
+                </div>
+            </div>
+
+            <div class="messages-container" id="messages-container">
+                <div class="empty-state" id="empty-state">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/>
+                    </svg>
+                    <p>Выберите пользователя для начала переписки</p>
+                </div>
+            </div>
+
+            <div class="preview-container hidden" id="preview-container">
+                <img id="image-preview" src="" alt="Preview">
+                <br>
+                <button class="remove-image" onclick="removeImage()">✕ Удалить</button>
+            </div>
+
+            <div class="message-input-area hidden" id="input-area">
+                <textarea class="message-input" id="message-input" placeholder="Введите сообщение..." rows="1"></textarea>
+                <div class="input-actions">
+                    <input type="file" id="image-input" accept="image/*" style="display: none;" onchange="handleImageSelect(this)">
+                    <button class="btn-icon" onclick="document.getElementById('image-input').click()" title="Прикрепить фото">
+                        📷
+                    </button>
+                    <button class="btn-icon btn-send" onclick="sendMessage()" title="Отправить">
+                        ➤
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Image Modal -->
+    <div class="modal hidden" id="image-modal" onclick="this.classList.add('hidden')">
+        <span class="modal-close">&times;</span>
+        <img id="modal-image" src="" alt="Full size">
+    </div>
+
+    <script>
+        let currentUserId = null;
+        let selectedImage = null;
+        const adminId = {{ session.get('user_id', 0) }};
+
+        // Загрузка списка пользователей
+        async function loadUsers() {
+            const response = await fetch('/api/users');
+            const users = await response.json();
+
+            const userList = document.getElementById('user-list');
+            userList.innerHTML = users.map(user => `
+                <div class="user-item" onclick="selectUser(${user.id}, '${user.display_name}', '${user.avatar_url || ''}')" data-user-id="${user.id}">
+                    <div class="user-avatar">${user.display_name.charAt(0).toUpperCase()}</div>
+                    <div class="user-info">
+                        <div class="user-name">${user.display_name}</div>
+                        <div class="user-last-login">${user.last_login ? 'Был: ' + new Date(user.last_login).toLocaleString('ru-RU') : 'Не заходил'}</div>
+                    </div>
+                    ${user.unread_count > 0 ? `<span class="unread-badge">${user.unread_count}</span>` : ''}
+                </div>
+            `).join('');
+        }
+
+        // Выбор пользователя
+        function selectUser(userId, name, avatar) {
+            currentUserId = userId;
+
+            document.querySelectorAll('.user-item').forEach(item => {
+                item.classList.toggle('active', item.dataset.userId == userId);
+            });
+
+            document.getElementById('empty-state').classList.add('hidden');
+            document.getElementById('chat-header').classList.remove('hidden');
+            document.getElementById('input-area').classList.remove('hidden');
+            document.getElementById('current-user-name').textContent = name;
+            document.getElementById('current-user-avatar').textContent = name.charAt(0).toUpperCase();
+
+            loadMessages();
+            updateUnreadBadge();
+        }
+
+        // Загрузка сообщений
+        async function loadMessages() {
+            if (!currentUserId) return;
+
+            const response = await fetch(`/api/messages/${currentUserId}`);
+            const messages = await response.json();
+
+            const container = document.getElementById('messages-container');
+            container.innerHTML = messages.map(msg => `
+                <div class="message ${msg.is_mine ? 'mine' : 'theirs'}">
+                    ${msg.message_text ? `<div class="message-text">${escapeHtml(msg.message_text)}</div>` : ''}
+                    ${msg.image_path ? `<img class="message-image" src="${msg.image_path}" onclick="showImage('${msg.image_path}')" alt="Image">` : ''}
+                    <div class="message-time">${new Date(msg.created_at).toLocaleString('ru-RU')}</div>
+                </div>
+            `).join('');
+
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // Отправка сообщения
+        async function sendMessage() {
+            const input = document.getElementById('message-input');
+            const text = input.value.trim();
+
+            if (!text && !selectedImage) return;
+
+            const formData = new FormData();
+            formData.append('receiver_id', currentUserId);
+            formData.append('message', text);
+            if (selectedImage) {
+                formData.append('image', selectedImage);
+            }
+
+            const response = await fetch('/api/send', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.ok) {
+                input.value = '';
+                removeImage();
+                loadMessages();
+                loadUsers();
+            }
+        }
+
+        // Обработка изображения
+        function handleImageSelect(input) {
+            if (input.files && input.files[0]) {
+                selectedImage = input.files[0];
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('image-preview').src = e.target.result;
+                    document.getElementById('preview-container').classList.remove('hidden');
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function removeImage() {
+            selectedImage = null;
+            document.getElementById('image-input').value = '';
+            document.getElementById('preview-container').classList.add('hidden');
+        }
+
+        // Показать изображение
+        function showImage(src) {
+            document.getElementById('modal-image').src = src;
+            document.getElementById('image-modal').classList.remove('hidden');
+        }
+
+        // Обновление бейджа непрочитанных
+        async function updateUnreadBadge() {
+            const response = await fetch('/api/unread');
+            const data = await response.json();
+            document.getElementById('total-unread').textContent = data.total;
+        }
+
+        // Экранирование HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Enter для отправки
+        document.getElementById('message-input')?.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // Автообновление
+        setInterval(() => {
+            if (currentUserId) loadMessages();
+            loadUsers();
+        }, 5000);
+
+        // Инициализация
+        loadUsers();
+        updateUnreadBadge();
+    </script>
+    {% endif %}
+</body>
+</html>
