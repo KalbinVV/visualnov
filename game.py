@@ -241,3 +241,33 @@ class GameService:
                                       'percent': percent})
 
             return choices_stats
+
+
+    def get_players_legends_choices(self, story_id: int):
+        with Session(self.db.engine) as s:
+            players_legends_choices = {'players': []}
+
+            for user in s.query(User).all():
+                choices_ids = list(map(lambda ch: ch.choice_id, s.query(ChoiceHistory)
+                                       .filter_by(user_id=user.id,
+                                                  story_id=story_id,
+                                                  is_active=True).all()))
+
+                choices = s.query(Choice).filter(Choice.id.in_(choices_ids),
+                                              Choice.is_legend_choice == True).all()
+                total_players_count = s.query(User).count()
+
+                choices_stats = []
+
+                for choice in choices:
+                    quantity_of_players = s.query(ChoiceHistory).filter_by(choice_id=choice.id).count() - 1
+
+                    percent = floor(quantity_of_players / total_players_count * 100) if quantity_of_players > 0 else 0
+
+                    choices_stats.append({'data': Choice.as_dict(choice),
+                                          'quantity_of_player': quantity_of_players,
+                                          'percent': percent})
+
+                players_legends_choices['players'].append({'user': user, 'choices_stats': choices_stats})
+
+            return players_legends_choices
