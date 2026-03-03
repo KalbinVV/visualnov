@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Админ-чат | Любовный симулятор</title>
+    <title>Поддержка | Любовный симулятор</title>
     <style>
         :root {
             --bg-primary: #0f0f1a;
@@ -15,14 +15,11 @@
             --text-secondary: #a0a0b0;
             --success: #10b981;
             --danger: #ef4444;
+            --warning: #f59e0b;
             --border: #333355;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -31,6 +28,7 @@
             min-height: 100vh;
         }
 
+        /* Login */
         .login-container {
             display: flex;
             justify-content: center;
@@ -51,13 +49,18 @@
 
         .login-box h1 {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 10px;
             color: var(--accent);
         }
 
-        .form-group {
-            margin-bottom: 20px;
+        .login-box p {
+            text-align: center;
+            color: var(--text-secondary);
+            margin-bottom: 30px;
+            font-size: 14px;
         }
+
+        .form-group { margin-bottom: 20px; }
 
         .form-group label {
             display: block;
@@ -92,9 +95,7 @@
             transition: background 0.3s;
         }
 
-        .btn:hover {
-            background: var(--accent-light);
-        }
+        .btn:hover { background: var(--accent-light); }
 
         .error {
             background: var(--danger);
@@ -105,139 +106,74 @@
             text-align: center;
         }
 
-        /* Chat Layout */
-        .chat-layout {
-            display: grid;
-            grid-template-columns: 280px 1fr;
-            height: 100vh;
+        .success {
+            background: var(--success);
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
         }
 
-        .sidebar {
-            background: var(--bg-secondary);
-            border-right: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
-        }
-
-        .sidebar-header {
+        /* User Support Layout */
+        .user-layout {
+            max-width: 800px;
+            margin: 0 auto;
             padding: 20px;
-            border-bottom: 1px solid var(--border);
+        }
+
+        .user-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-bottom: 20px;
+            padding: 20px;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            border: 1px solid var(--border);
         }
 
-        .sidebar-header h2 {
-            font-size: 18px;
-            color: var(--accent);
-        }
+        .user-header h1 { color: var(--accent); }
 
         .unread-badge {
             background: var(--danger);
             color: white;
-            padding: 2px 8px;
+            padding: 4px 12px;
             border-radius: 12px;
-            font-size: 12px;
-        }
-
-        .user-list {
-            flex: 1;
-            overflow-y: auto;
-        }
-
-        .user-item {
-            padding: 15px 20px;
-            border-bottom: 1px solid var(--border);
-            cursor: pointer;
-            transition: background 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .user-item:hover {
-            background: var(--bg-tertiary);
-        }
-
-        .user-item.active {
-            background: var(--bg-tertiary);
-            border-left: 3px solid var(--accent);
-        }
-
-        .user-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: var(--accent);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-        }
-
-        .user-info {
-            flex: 1;
-        }
-
-        .user-name {
-            font-weight: 500;
-        }
-
-        .user-last-login {
-            font-size: 12px;
-            color: var(--text-secondary);
-        }
-
-        .chat-area {
-            display: flex;
-            flex-direction: column;
-            background: var(--bg-primary);
-        }
-
-        .chat-header {
-            padding: 20px;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .chat-header .user-avatar {
-            width: 45px;
-            height: 45px;
+            font-size: 14px;
         }
 
         .messages-container {
-            flex: 1;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            max-height: 60vh;
             overflow-y: auto;
             padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
+            margin-bottom: 20px;
         }
 
         .message {
-            max-width: 70%;
+            max-width: 80%;
             padding: 12px 16px;
             border-radius: 12px;
+            margin-bottom: 15px;
             position: relative;
         }
 
-        .message.mine {
+        .message.user {
             background: var(--accent);
-            align-self: flex-end;
+            margin-left: auto;
             border-bottom-right-radius: 4px;
         }
 
-        .message.theirs {
+        .message.admin {
             background: var(--bg-tertiary);
-            align-self: flex-start;
+            border: 1px solid var(--border);
             border-bottom-left-radius: 4px;
         }
 
-        .message-text {
-            word-wrap: break-word;
-        }
+        .message-text { word-wrap: break-word; }
 
         .message-image {
             max-width: 100%;
@@ -253,9 +189,17 @@
             text-align: right;
         }
 
+        .message-status {
+            font-size: 10px;
+            color: var(--text-secondary);
+            margin-top: 3px;
+        }
+
         .message-input-area {
-            padding: 20px;
-            border-top: 1px solid var(--border);
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            padding: 15px;
             display: flex;
             gap: 12px;
             align-items: flex-end;
@@ -263,14 +207,15 @@
 
         .message-input {
             flex: 1;
-            background: var(--bg-secondary);
+            background: var(--bg-tertiary);
             border: 1px solid var(--border);
-            border-radius: 12px;
+            border-radius: 8px;
             padding: 12px 16px;
             color: var(--text-primary);
             resize: none;
             max-height: 100px;
             font-family: inherit;
+            min-height: 50px;
         }
 
         .message-input:focus {
@@ -278,17 +223,14 @@
             border-color: var(--accent);
         }
 
-        .input-actions {
-            display: flex;
-            gap: 8px;
-        }
+        .input-actions { display: flex; gap: 8px; }
 
         .btn-icon {
             width: 44px;
             height: 44px;
             border-radius: 8px;
             border: 1px solid var(--border);
-            background: var(--bg-secondary);
+            background: var(--bg-tertiary);
             color: var(--text-primary);
             cursor: pointer;
             display: flex;
@@ -307,12 +249,109 @@
             border-color: var(--accent);
         }
 
-        .btn-send:hover {
-            background: var(--accent-light);
+        .btn-send:hover { background: var(--accent-light); }
+
+        /* Admin Dashboard */
+        .admin-layout {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            height: 100vh;
         }
 
-        .hidden {
-            display: none !important;
+        .sidebar {
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sidebar-header h2 { color: var(--accent); font-size: 18px; }
+
+        .ticket-list {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .ticket-item {
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .ticket-item:hover { background: var(--bg-tertiary); }
+
+        .ticket-item.active {
+            background: var(--bg-tertiary);
+            border-left: 3px solid var(--accent);
+        }
+
+        .ticket-item.has-unread {
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .ticket-user {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .ticket-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .ticket-info { flex: 1; }
+
+        .ticket-name { font-weight: 500; }
+
+        .ticket-preview {
+            font-size: 12px;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 200px;
+        }
+
+        .ticket-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 5px;
+        }
+
+        .ticket-time {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        .chat-area {
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-primary);
+        }
+
+        .chat-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 15px;
         }
 
         .empty-state {
@@ -331,15 +370,16 @@
             opacity: 0.5;
         }
 
+        /* Preview & Modal */
+        .preview-container {
+            padding: 10px 20px 0;
+        }
+
         #image-preview {
             max-width: 150px;
             max-height: 150px;
             border-radius: 8px;
             margin-bottom: 10px;
-        }
-
-        .preview-container {
-            padding: 10px 20px 0;
         }
 
         .remove-image {
@@ -350,10 +390,8 @@
             border-radius: 4px;
             cursor: pointer;
             font-size: 12px;
-            margin-top: 5px;
         }
 
-        /* Modal for image */
         .modal {
             position: fixed;
             top: 0;
@@ -382,20 +420,19 @@
             cursor: pointer;
         }
 
+        .hidden { display: none !important; }
+
+        .logout-btn {
+            background: var(--danger);
+            margin-top: 10px;
+        }
+
+        .logout-btn:hover { background: #dc2626; }
+
         @media (max-width: 768px) {
-            .chat-layout {
-                grid-template-columns: 1fr;
-            }
-            .sidebar {
-                display: none;
-            }
-            .sidebar.show {
-                display: flex;
-                position: absolute;
-                z-index: 100;
-                width: 100%;
-                height: 100%;
-            }
+            .admin-layout { grid-template-columns: 1fr; }
+            .sidebar { display: none; height: 100%; position: absolute; z-index: 100; }
+            .sidebar.show { display: flex; }
         }
     </style>
 </head>
@@ -403,14 +440,15 @@
     {% if page == 'login' %}
     <div class="login-container">
         <div class="login-box">
-            <h1>🔐 Админ-чат</h1>
+            <h1>💬 Поддержка</h1>
+            <p>Любовный симулятор</p>
             {% if error %}
             <div class="error">{{ error }}</div>
             {% endif %}
             <form method="POST">
                 <div class="form-group">
-                    <label>Логин</label>
-                    <input type="text" name="username" required placeholder="Введите логин">
+                    <label>Логин или Email</label>
+                    <input type="text" name="identifier" required placeholder="Введите логин или email">
                 </div>
                 <div class="form-group">
                     <label>Пароль</label>
@@ -420,36 +458,115 @@
             </form>
         </div>
     </div>
-    {% else %}
-    <div class="chat-layout">
+
+    {% elif page == 'user' %}
+    <div class="user-layout">
+        <div class="user-header">
+            <div>
+                <h1>💬 Поддержка</h1>
+                <small style="color: var(--text-secondary);">{{ session.get('display_name') }}</small>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                {% if unread > 0 %}
+                <span class="unread-badge">{{ unread }} новых</span>
+                {% endif %}
+                <a href="/logout" class="btn" style="width: auto; padding: 8px 16px; font-size: 14px;">Выйти</a>
+            </div>
+        </div>
+
+        <div class="messages-container" id="messages-container">
+            {% if messages %}
+                {% for msg in messages %}
+                <div class="message {{ 'admin' if msg.is_from_admin else 'user' }}">
+                    {% if msg.message_text %}
+                    <div class="message-text">{{ msg.message_text }}</div>
+                    {% endif %}
+                    {% if msg.image_path %}
+                    <img class="message-image" src="{{ msg.image_path }}" onclick="showImage('{{ msg.image_path }}')" alt="Image">
+                    {% endif %}
+                    <div class="message-time">{{ msg.created_at[:16].replace('T', ' ') }}</div>
+                    {% if not msg.is_from_admin and not msg.is_read %}
+                    <div class="message-status">📤 Ожидает ответа</div>
+                    {% elif msg.is_from_admin and not msg.is_read %}
+                    <div class="message-status">📬 Новое</div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            {% else %}
+            <div class="empty-state">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/>
+                </svg>
+                <p>Напишите нам, если у вас есть вопросы</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="preview-container hidden" id="preview-container">
+            <img id="image-preview" src="" alt="Preview">
+            <br>
+            <button class="remove-image" onclick="removeImage()">✕ Удалить</button>
+        </div>
+
+        <div class="message-input-area">
+            <textarea class="message-input" id="message-input" placeholder="Опишите вашу проблему..." rows="1"></textarea>
+            <div class="input-actions">
+                <input type="file" id="image-input" accept="image/*" style="display: none;" onchange="handleImageSelect(this)">
+                <button class="btn-icon" onclick="document.getElementById('image-input').click()" title="Прикрепить фото">📷</button>
+                <button class="btn-icon btn-send" onclick="sendMessage()" title="Отправить">➤</button>
+            </div>
+        </div>
+    </div>
+
+    {% elif page == 'admin' %}
+    <div class="admin-layout">
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
-                <h2>💬 Чат</h2>
+                <h2>🎧 Поддержка</h2>
                 <span class="unread-badge" id="total-unread">0</span>
             </div>
-            <div class="user-list" id="user-list">
-                <!-- Пользователи загружаются JS -->
+            <div class="ticket-list" id="ticket-list">
+                {% for ticket in tickets %}
+                <div class="ticket-item {{ 'has-unread' if ticket.unread_count > 0 else '' }}"
+                     onclick="selectTicket({{ ticket.user_id }}, '{{ ticket.display_name }}')"
+                     data-user-id="{{ ticket.user_id }}">
+                    <div class="ticket-user">
+                        <div class="ticket-avatar">{{ ticket.display_name[0].upper() }}</div>
+                        <div class="ticket-info">
+                            <div class="ticket-name">{{ ticket.display_name }}</div>
+                            <div class="ticket-preview">{{ ticket.last_message_text or 'Нет сообщений' }}</div>
+                            <div class="ticket-meta">
+                                <span class="ticket-time">{{ ticket.last_message_at[:16].replace('T', ' ') if ticket.last_message_at else '-' }}</span>
+                                {% if ticket.unread_count > 0 %}
+                                <span class="unread-badge">{{ ticket.unread_count }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
             </div>
             <div style="padding: 15px; border-top: 1px solid var(--border);">
-                <a href="/logout" class="btn" style="text-decoration: none; display: block; text-align: center;">Выйти</a>
+                <small style="color: var(--text-secondary);">{{ session.get('display_name') }}</small>
+                <a href="/logout" class="btn logout-btn">Выйти</a>
             </div>
         </aside>
 
         <main class="chat-area">
             <div class="chat-header hidden" id="chat-header">
-                <div class="user-avatar" id="current-user-avatar">?</div>
+                <div class="ticket-avatar" id="current-user-avatar">?</div>
                 <div>
-                    <h3 id="current-user-name">Выберите пользователя</h3>
+                    <h3 id="current-user-name">Выберите тикет</h3>
                     <small id="current-user-status" style="color: var(--text-secondary);"></small>
                 </div>
             </div>
 
-            <div class="messages-container" id="messages-container">
+            <div class="messages-container" id="messages-container" style="flex: 1; max-height: none;">
                 <div class="empty-state" id="empty-state">
                     <svg viewBox="0 0 24 24" fill="currentColor">
                         <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/>
                     </svg>
-                    <p>Выберите пользователя для начала переписки</p>
+                    <p>Выберите тикет для просмотра</p>
                 </div>
             </div>
 
@@ -460,83 +577,93 @@
             </div>
 
             <div class="message-input-area hidden" id="input-area">
-                <textarea class="message-input" id="message-input" placeholder="Введите сообщение..." rows="1"></textarea>
+                <textarea class="message-input" id="message-input" placeholder="Ответ пользователю..." rows="1"></textarea>
                 <div class="input-actions">
                     <input type="file" id="image-input" accept="image/*" style="display: none;" onchange="handleImageSelect(this)">
-                    <button class="btn-icon" onclick="document.getElementById('image-input').click()" title="Прикрепить фото">
-                        📷
-                    </button>
-                    <button class="btn-icon btn-send" onclick="sendMessage()" title="Отправить">
-                        ➤
-                    </button>
+                    <button class="btn-icon" onclick="document.getElementById('image-input').click()" title="Прикрепить фото">📷</button>
+                    <button class="btn-icon btn-send" onclick="sendMessage()" title="Отправить">➤</button>
                 </div>
             </div>
         </main>
     </div>
+    {% endif %}
 
-    <!-- Image Modal -->
     <div class="modal hidden" id="image-modal" onclick="this.classList.add('hidden')">
         <span class="modal-close">&times;</span>
         <img id="modal-image" src="" alt="Full size">
     </div>
 
+    {% if page != 'login' %}
     <script>
         let currentUserId = null;
         let selectedImage = null;
-        const adminId = {{ session.get('user_id', 0) }};
+        const isAdmin = {{ 'true' if page == 'admin' else 'false' }};
 
-        // Загрузка списка пользователей
-        async function loadUsers() {
-            const response = await fetch('/api/users');
-            const users = await response.json();
+        // Загрузка тикетов (админ)
+        async function loadTickets() {
+            if (!isAdmin) return;
+            const response = await fetch('/api/admin/tickets');
+            const tickets = await response.json();
 
-            const userList = document.getElementById('user-list');
-            userList.innerHTML = users.map(user => `
-                <div class="user-item" onclick="selectUser(${user.id}, '${user.display_name}', '${user.avatar_url || ''}')" data-user-id="${user.id}">
-                    <div class="user-avatar">${user.display_name.charAt(0).toUpperCase()}</div>
-                    <div class="user-info">
-                        <div class="user-name">${user.display_name}</div>
-                        <div class="user-last-login">${user.last_login ? 'Был: ' + new Date(user.last_login).toLocaleString('ru-RU') : 'Не заходил'}</div>
+            const list = document.getElementById('ticket-list');
+            if (list) {
+                list.innerHTML = tickets.map(ticket => `
+                    <div class="ticket-item ${ticket.unread_count > 0 ? 'has-unread' : ''}"
+                         onclick="selectTicket(${ticket.user_id}, '${ticket.display_name}')"
+                         data-user-id="${ticket.user_id}">
+                        <div class="ticket-user">
+                            <div class="ticket-avatar">${ticket.display_name.charAt(0).toUpperCase()}</div>
+                            <div class="ticket-info">
+                                <div class="ticket-name">${ticket.display_name}</div>
+                                <div class="ticket-preview">${ticket.last_message_text || 'Нет сообщений'}</div>
+                                <div class="ticket-meta">
+                                    <span class="ticket-time">${ticket.last_message_at ? ticket.last_message_at.slice(0, 16).replace('T', ' ') : '-'}</span>
+                                    ${ticket.unread_count > 0 ? `<span class="unread-badge">${ticket.unread_count}</span>` : ''}
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    ${user.unread_count > 0 ? `<span class="unread-badge">${user.unread_count}</span>` : ''}
-                </div>
-            `).join('');
+                `).join('');
+            }
+
+            // Обновляем счётчик
+            const unreadResp = await fetch('/api/admin/unread-total');
+            const unreadData = await unreadResp.json();
+            document.getElementById('total-unread').textContent = unreadData.total;
         }
 
-        // Выбор пользователя
-        function selectUser(userId, name, avatar) {
+        // Выбор тикета (админ)
+        function selectTicket(userId, name) {
             currentUserId = userId;
-
-            document.querySelectorAll('.user-item').forEach(item => {
+            document.querySelectorAll('.ticket-item').forEach(item => {
                 item.classList.toggle('active', item.dataset.userId == userId);
             });
-
             document.getElementById('empty-state').classList.add('hidden');
             document.getElementById('chat-header').classList.remove('hidden');
             document.getElementById('input-area').classList.remove('hidden');
             document.getElementById('current-user-name').textContent = name;
             document.getElementById('current-user-avatar').textContent = name.charAt(0).toUpperCase();
-
             loadMessages();
-            updateUnreadBadge();
         }
 
         // Загрузка сообщений
         async function loadMessages() {
             if (!currentUserId) return;
 
-            const response = await fetch(`/api/messages/${currentUserId}`);
+            const url = isAdmin ? `/api/admin/messages/${currentUserId}` : '/api/user/messages';
+            const response = await fetch(url);
             const messages = await response.json();
 
             const container = document.getElementById('messages-container');
             container.innerHTML = messages.map(msg => `
-                <div class="message ${msg.is_mine ? 'mine' : 'theirs'}">
+                <div class="message ${msg.is_from_admin ? 'admin' : 'user'}">
                     ${msg.message_text ? `<div class="message-text">${escapeHtml(msg.message_text)}</div>` : ''}
                     ${msg.image_path ? `<img class="message-image" src="${msg.image_path}" onclick="showImage('${msg.image_path}')" alt="Image">` : ''}
-                    <div class="message-time">${new Date(msg.created_at).toLocaleString('ru-RU')}</div>
+                    <div class="message-time">${msg.created_at.slice(0, 16).replace('T', ' ')}</div>
+                    ${!msg.is_from_admin && !msg.is_read ? '<div class="message-status">📤 Ожидает ответа</div>' : ''}
+                    ${msg.is_from_admin && !msg.is_read ? '<div class="message-status">📬 Новое</div>' : ''}
                 </div>
             `).join('');
-
             container.scrollTop = container.scrollHeight;
         }
 
@@ -544,26 +671,23 @@
         async function sendMessage() {
             const input = document.getElementById('message-input');
             const text = input.value.trim();
-
             if (!text && !selectedImage) return;
 
             const formData = new FormData();
-            formData.append('receiver_id', currentUserId);
-            formData.append('message', text);
-            if (selectedImage) {
-                formData.append('image', selectedImage);
+            if (isAdmin) {
+                formData.append('user_id', currentUserId);
             }
+            formData.append('message', text);
+            if (selectedImage) formData.append('image', selectedImage);
 
-            const response = await fetch('/api/send', {
-                method: 'POST',
-                body: formData
-            });
+            const url = isAdmin ? '/api/admin/send' : '/api/user/send';
+            const response = await fetch(url, { method: 'POST', body: formData });
 
             if (response.ok) {
                 input.value = '';
                 removeImage();
                 loadMessages();
-                loadUsers();
+                if (isAdmin) loadTickets();
             }
         }
 
@@ -586,20 +710,11 @@
             document.getElementById('preview-container').classList.add('hidden');
         }
 
-        // Показать изображение
         function showImage(src) {
             document.getElementById('modal-image').src = src;
             document.getElementById('image-modal').classList.remove('hidden');
         }
 
-        // Обновление бейджа непрочитанных
-        async function updateUnreadBadge() {
-            const response = await fetch('/api/unread');
-            const data = await response.json();
-            document.getElementById('total-unread').textContent = data.total;
-        }
-
-        // Экранирование HTML
         function escapeHtml(text) {
             const div = document.createElement('div');
             div.textContent = text;
@@ -617,12 +732,13 @@
         // Автообновление
         setInterval(() => {
             if (currentUserId) loadMessages();
-            loadUsers();
+            if (isAdmin) loadTickets();
         }, 5000);
 
         // Инициализация
-        loadUsers();
-        updateUnreadBadge();
+        if (isAdmin) {
+            loadTickets();
+        }
     </script>
     {% endif %}
 </body>
