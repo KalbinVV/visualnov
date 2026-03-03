@@ -1286,7 +1286,15 @@ def code_move_to(uuid: str):
                                    message='Сначала инициализируйтесь в игре перед тем как использовать коды!',
                                    code=403), 403
 
-        current_save.scene_id = code.scene_id
+        scene = s.get(Scene, code.scene_id)
+
+        if not scene:
+            return render_template('error.html',
+                                   message='Неправильный код!',
+                                   code=403), 403
+
+        current_save.scene_id = scene.id
+        current_save.chapter_id = scene.chapter_id
 
         s.commit()
 
