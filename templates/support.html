@@ -1,379 +1,1543 @@
-{% extends "base.html" %}
-{% block title %}Поддержка — USSC Romance{% endblock %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Сообщения — USSC Romance</title>
 
-{% block content %}
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <!-- Подключение шрифтов -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
 
-<style>
-  :root {
-    --bg-deep: #050508; --bg-surface: #0f0f16; --primary: #8b5cf6;
-    --accent: #d8b4fe; --text-main: #fff; --text-muted: #94a3b8;
-    --glass-bg: rgba(20,20,30,0.6); --glass-border: rgba(255,255,255,0.08);
-    --radius-lg: 24px; --radius-md: 16px;
-  }
-  [data-theme="orange"] { --primary: #f97316; --accent: #fdba74; }
-  [data-theme="dark-green"] { --primary: #10b981; --accent: #6ee7b7; }
+    <style>
+        :root {
+            /* USSC Romance Design System */
+            --bg-deep: #050508;
+            --bg-surface: #0f0f16;
+            --primary: #8b5cf6;
+            --primary-dark: #7c3aed;
+            --primary-glow: rgba(139, 92, 246, 0.5);
+            --accent: #d8b4fe;
+            --text-main: #ffffff;
+            --text-muted: #94a3b8;
+            --glass-bg: rgba(20, 20, 30, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --card-hover: rgba(255, 255, 255, 0.03);
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    font-family: 'Inter', sans-serif; background: var(--bg-deep);
-    color: var(--text-main); min-height: 100vh; padding-top: 80px;
-    padding-bottom: 100px;
-  }
+            --font-display: 'Playfair Display', serif;
+            --font-ui: 'Inter', sans-serif;
 
-  .support-container {
-    max-width: 800px; margin: 0 auto; padding: 24px;
-  }
+            --radius-lg: 24px;
+            --radius-md: 16px;
+            --radius-sm: 8px;
 
-  .support-header {
-    margin-bottom: 24px;
-    padding: 20px;
-    background: var(--glass-bg);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius-md);
-  }
+            /* Mobile-first spacing */
+            --nav-height: 70px;
+            --touch-target: 48px;
+        }
 
-  .support-header h1 {
-    font-family: 'Playfair Display', serif;
-    font-size: 28px;
-    margin-bottom: 8px;
-  }
+        /* Темы */
+        [data-theme="orange"] {
+            --primary: #f97316;
+            --primary-glow: rgba(249, 115, 22, 0.5);
+            --accent: #fdba74;
+            --bg-deep: #080402;
+            --bg-surface: #150a05;
+        }
 
-  .support-header p {
-    font-size: 14px;
-    color: var(--text-muted);
-  }
+        [data-theme="dark-green"] {
+            --primary: #10b981;
+            --primary-glow: rgba(16, 185, 129, 0.5);
+            --accent: #6ee7b7;
+            --bg-deep: #020403;
+            --bg-surface: #05150f;
+        }
 
-  .chat-container {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    min-height: 400px;
-    max-height: 60vh;
-    overflow-y: auto;
-    padding: 20px;
-    background: var(--glass-bg);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius-md);
-    margin-bottom: 20px;
-  }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
-  .message {
-    padding: 14px 18px;
-    border-radius: 18px;
-    max-width: 85%;
-    line-height: 1.5;
-    animation: fadeIn 0.3s ease;
-  }
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: none; }
-  }
+        body {
+            font-family: var(--font-ui);
+            background-color: var(--bg-deep);
+            background-image:
+                radial-gradient(circle at 10% 20%, rgba(139, 92, 246, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.05) 0%, transparent 40%);
+            color: var(--text-main);
+            min-height: 100vh;
+            overflow-x: hidden;
+            padding-top: var(--nav-height);
+        }
 
-  .message.admin {
-    align-self: flex-start;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid var(--glass-border);
-    border-bottom-left-radius: 4px;
-  }
+        /* --- Навигация --- */
+        .glass-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: var(--nav-height);
+            background: rgba(5, 5, 8, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+            z-index: 1000;
+            display: none;
+        }
 
-  .message.user {
-    align-self: flex-end;
-    background: var(--primary);
-    color: white;
-    border-bottom-right-radius: 4px;
-  }
+        .nav-content {
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 100%;
+        }
 
-  .message img {
-    max-width: 100%;
-    border-radius: 12px;
-    margin-top: 8px;
-    border: 1px solid var(--glass-border);
-  }
+        .brand {
+            font-family: var(--font-display);
+            font-size: 20px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            letter-spacing: -0.5px;
+            text-decoration: none;
+            color: var(--text-main);
+        }
 
-  .message-time {
-    font-size: 11px;
-    opacity: 0.6;
-    margin-top: 6px;
-  }
+        .brand-icon { font-size: 24px; filter: drop-shadow(0 0 10px var(--primary-glow)); }
+        .highlight { color: var(--primary); font-style: italic; }
 
-  .empty-chat {
-    text-align: center;
-    padding: 40px;
-    color: var(--text-muted);
-  }
+        /* Hamburger Menu */
+        .menu-toggle {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 10px;
+            margin-right: 12px;
+        }
 
-  .input-area {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: var(--bg-surface);
-    padding: 16px;
-    border-top: 1px solid var(--glass-border);
-    display: flex;
-    gap: 12px;
-    align-items: flex-end;
-    justify-content: center;
-  }
+        .menu-toggle span {
+            width: 24px;
+            height: 2px;
+            background: var(--text-main);
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
 
-  .input-wrapper {
-    max-width: 800px;
-    width: 100%;
-    display: flex;
-    gap: 12px;
-    align-items: flex-end;
-  }
+        .menu-toggle.active span:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
 
-  .btn-send, .btn-attach {
-    background: var(--primary);
-    border: none;
-    color: white;
-    padding: 14px 20px;
-    border-radius: 50px;
-    cursor: pointer;
-    font-weight: 500;
-    transition: all 0.2s;
-    flex-shrink: 0;
-  }
-  .btn-send:hover, .btn-attach:hover {
-    filter: brightness(1.1);
-  }
-  .btn-send:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
+        .menu-toggle.active span:nth-child(2) {
+            opacity: 0;
+        }
 
-  #fileInput {
-    display: none;
-  }
+        .menu-toggle.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(7px, -6px);
+        }
 
-  #messageInput {
-    flex: 1;
-    padding: 14px 18px;
-    border-radius: 24px;
-    border: 1px solid var(--glass-border);
-    background: var(--glass-bg);
-    color: var(--text-main);
-    font-size: 14px;
-    resize: none;
-    max-height: 120px;
-    font-family: 'Inter', sans-serif;
-  }
-  #messageInput:focus {
-    outline: none;
-    border-color: var(--primary);
-  }
-  #messageInput::placeholder {
-    color: var(--text-muted);
-  }
+        /* Mobile Navigation Drawer */
+        .nav-drawer {
+            position: fixed;
+            top: var(--nav-height);
+            right: -100%;
+            width: 280px;
+            max-width: 85vw;
+            height: calc(100vh - var(--nav-height));
+            background: rgba(15, 15, 22, 0.98);
+            backdrop-filter: blur(20px);
+            border-left: 1px solid var(--glass-border);
+            z-index: 999;
+            transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 24px;
+            overflow-y: auto;
+        }
 
-  .preview-container {
-    position: fixed;
-    bottom: 80px;
-    left: 50%;
-    transform: translateX(-50%);
-    max-width: 800px;
-    width: 90%;
-    z-index: 100;
-  }
+        .nav-drawer.open {
+            right: 0;
+        }
 
-  .preview-container img {
-    width: 100%;
-    border-radius: 16px;
-    border: 1px solid var(--glass-border);
-  }
+        .nav-drawer-overlay {
+            position: fixed;
+            inset: 0;
+            top: var(--nav-height);
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 998;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
 
-  .preview-close {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    background: rgba(0,0,0,0.6);
-    border: none;
-    color: white;
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    cursor: pointer;
-    font-size: 18px;
-  }
+        .nav-drawer-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
 
-  .hidden {
-    display: none !important;
-  }
+        .nav-drawer-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            margin-bottom: 8px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-height: var(--touch-target);
+        }
 
-  .status-indicator {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 12px;
-    margin-top: 8px;
-  }
-  .status-waiting {
-    background: rgba(249,115,22,0.2);
-    color: #fdba74;
-  }
-  .status-replied {
-    background: rgba(16,185,129,0.2);
-    color: #6ee7b7;
-  }
+        .nav-drawer-item:hover, .nav-drawer-item.active {
+            background: rgba(139, 92, 246, 0.15);
+            border-color: var(--primary);
+            color: var(--text-main);
+        }
 
-  @media (max-width: 768px) {
-    .support-container { padding: 16px; }
-    .message { max-width: 90%; }
-    .input-wrapper { padding: 0 8px; }
-  }
-</style>
+        .nav-drawer-item.danger:hover {
+            background: rgba(239, 68, 68, 0.15);
+            border-color: var(--danger);
+            color: var(--danger);
+        }
 
-<div class="support-container">
-  <div class="support-header">
-    <h1>💬 Поддержка</h1>
-    <p>Напишите нам — ответим в ближайшее время</p>
-    <div id="statusIndicator" class="status-indicator status-waiting hidden">
-      <span>⏳</span> Ожидание ответа
+        .nav-drawer-divider {
+            height: 1px;
+            background: var(--glass-border);
+            margin: 16px 0;
+        }
+
+        /* Desktop Navigation */
+        .nav-links {
+            display: none;
+            gap: 8px;
+        }
+
+        .nav-links button {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            color: var(--text-muted);
+            padding: 10px 20px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-family: var(--font-ui);
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            min-height: var(--touch-target);
+        }
+
+        .nav-links button:hover, .nav-links button.active {
+            background: rgba(139, 92, 246, 0.2);
+            border-color: var(--primary);
+            color: var(--text-main);
+        }
+
+        /* Профиль */
+        .profile-trigger {
+            position: relative;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .avatar-ring {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            padding: 2px;
+            background: linear-gradient(135deg, var(--primary), transparent);
+            transition: transform 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .profile-trigger:active .avatar-ring { transform: scale(0.95); }
+
+        .avatar-placeholder {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: var(--bg-surface);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: var(--text-main);
+            border: 2px solid var(--bg-deep);
+            font-size: 16px;
+        }
+
+        .profile-dropdown {
+            position: absolute;
+            top: 55px;
+            right: 0;
+            width: 200px;
+            background: rgba(15, 15, 22, 0.98);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: 8px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
+
+        .profile-dropdown.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            color: var(--text-muted);
+            text-decoration: none;
+            border-radius: var(--radius-sm);
+            transition: all 0.2s;
+            font-size: 14px;
+            cursor: pointer;
+            min-height: var(--touch-target);
+        }
+
+        .dropdown-item:hover {
+            background: rgba(255,255,255,0.05);
+            color: var(--text-main);
+        }
+
+        .dropdown-item.danger:hover {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background: var(--glass-border);
+            margin: 6px 0;
+        }
+
+        /* --- Main Content --- */
+        .main-stage {
+            padding: 24px 20px 60px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .section { display: none; }
+        .section.active { display: block; animation: fadeInUp 0.4s ease-out forwards; }
+
+        /* Карточки */
+        .glass-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(20px);
+            transition: all 0.3s ease;
+        }
+
+        .card-header {
+            font-family: var(--font-display);
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--glass-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        /* Кнопки */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 14px 28px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: var(--font-ui);
+            transition: all 0.3s ease;
+            min-height: var(--touch-target);
+            width: auto;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 15px var(--primary-glow);
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+            filter: brightness(0.9);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            color: var(--text-muted);
+        }
+
+        .btn-secondary:active {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-danger {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid var(--danger);
+            color: var(--danger);
+        }
+
+        .btn-sm {
+            padding: 10px 18px;
+            font-size: 13px;
+            min-height: 40px;
+        }
+
+        .btn-block {
+            width: 100%;
+        }
+
+        .btn-icon {
+            padding: 12px;
+            min-width: var(--touch-target);
+            min-height: var(--touch-target);
+            border-radius: 50%;
+        }
+
+        /* Формы */
+        .form-group { margin-bottom: 20px; }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-muted);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 14px 18px;
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--text-main);
+            font-size: 16px;
+            font-family: var(--font-ui);
+            transition: all 0.3s ease;
+            min-height: var(--touch-target);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.05);
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+        }
+
+        textarea.form-control {
+            min-height: 140px;
+            resize: vertical;
+            line-height: 1.6;
+        }
+
+        input[type="file"].form-control {
+            padding: 12px;
+            cursor: pointer;
+        }
+
+        /* Mobile Card List (alternative to table) */
+        .message-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .message-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .message-card:active {
+            background: rgba(255, 255, 255, 0.06);
+            transform: scale(0.99);
+        }
+
+        .message-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .message-card-title {
+            font-weight: 600;
+            font-size: 15px;
+            color: var(--text-main);
+            flex: 1;
+        }
+
+        .message-card-meta {
+            display: flex;
+            gap: 12px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .message-card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 12px;
+            border-top: 1px solid var(--glass-border);
+            margin-top: 8px;
+        }
+
+        /* Таблицы (desktop) */
+        .table-container {
+            overflow-x: auto;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--glass-border);
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 600px;
+        }
+
+        .table th, .table td {
+            padding: 16px 20px;
+            text-align: left;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .table th {
+            background: rgba(255, 255, 255, 0.02);
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+
+        .table td {
+            font-size: 14px;
+            color: var(--text-main);
+        }
+
+        .table tr {
+            transition: background 0.2s ease;
+            cursor: pointer;
+        }
+
+        .table tr:active {
+            background: var(--card-hover);
+        }
+
+        .table tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Бейджи */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 14px;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+
+        .badge-pending {
+            background: rgba(245, 158, 11, 0.2);
+            color: #fdba74;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .badge-answered {
+            background: rgba(16, 185, 129, 0.2);
+            color: #6ee7b7;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .badge-new {
+            background: rgba(139, 92, 246, 0.2);
+            color: var(--accent);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            animation: pulse 2s infinite;
+        }
+
+        /* Уведомления */
+        .alert {
+            padding: 16px 20px;
+            border-radius: var(--radius-md);
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .alert-error {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid var(--danger);
+            color: #fca5a5;
+        }
+
+        .alert-success {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid var(--success);
+            color: #6ee7b7;
+        }
+
+        .hidden { display: none !important; }
+
+        /* Login Section */
+        .login-wrapper {
+            max-width: 440px;
+            margin: 40px auto;
+        }
+
+        .login-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: 32px 24px;
+            backdrop-filter: blur(20px);
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        .login-header h2 {
+            font-family: var(--font-display);
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .login-header p {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        /* View Message */
+        .message-meta {
+            color: var(--text-muted);
+            font-size: 13px;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--glass-border);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .message-content {
+            white-space: pre-wrap;
+            line-height: 1.7;
+            color: var(--text-main);
+            margin-bottom: 24px;
+            font-size: 15px;
+        }
+
+        .message-image {
+            max-width: 100%;
+            max-height: 400px;
+            border-radius: var(--radius-md);
+            margin-top: 16px;
+            border: 1px solid var(--glass-border);
+        }
+
+        .response-item {
+            background: rgba(139, 92, 246, 0.1);
+            border-left: 3px solid var(--primary);
+            padding: 16px;
+            margin-top: 16px;
+            border-radius: 0 var(--radius-md) var(--radius-md) 0;
+        }
+
+        .response-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .response-author {
+            font-weight: 600;
+            color: var(--accent);
+            font-size: 14px;
+        }
+
+        .response-date {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .response-content {
+            white-space: pre-wrap;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        /* Bottom Sheet for Mobile */
+        .bottom-sheet {
+            position: fixed;
+            bottom: -100%;
+            left: 0;
+            right: 0;
+            background: rgba(15, 15, 22, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+            border-top: 1px solid var(--glass-border);
+            z-index: 1001;
+            padding: 24px;
+            max-height: 80vh;
+            overflow-y: auto;
+            transition: bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .bottom-sheet.open {
+            bottom: 0;
+        }
+
+        .bottom-sheet-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .bottom-sheet-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .bottom-sheet-handle {
+            width: 40px;
+            height: 4px;
+            background: var(--glass-border);
+            border-radius: 2px;
+            margin: 0 auto 20px;
+        }
+
+        .bottom-sheet-title {
+            font-family: var(--font-display);
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        /* FAB - Floating Action Button */
+        .fab {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 4px 20px var(--primary-glow);
+            cursor: pointer;
+            z-index: 900;
+            transition: all 0.3s ease;
+        }
+
+        .fab:active {
+            transform: scale(0.9);
+        }
+
+        .fab.hidden {
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(0);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 48px 24px;
+            color: var(--text-muted);
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .empty-state-title {
+            font-family: var(--font-display);
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-main);
+        }
+
+        .empty-state-desc {
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        /* Desktop Styles */
+        @media (min-width: 769px) {
+            .menu-toggle { display: none; }
+            .nav-drawer { display: none; }
+            .nav-drawer-overlay { display: none; }
+            .nav-links { display: flex; }
+            .message-list { display: none; }
+            .table-container { display: block; }
+            .main-stage { padding: 32px; }
+            .glass-card { padding: 32px; }
+            .card-header { font-size: 24px; }
+            .login-card { padding: 40px; }
+            .fab { display: none; }
+        }
+
+        /* Mobile Styles */
+        @media (max-width: 768px) {
+            .table-container { display: none; }
+            .message-list { display: flex; }
+            .brand-text { display: none; }
+            .brand-icon { font-size: 28px; }
+            .login-wrapper { margin: 20px auto; }
+            .glass-card { padding: 20px; border-radius: var(--radius-md); }
+            .card-header { font-size: 18px; flex-direction: column; align-items: flex-start; }
+            .btn { width: 100%; justify-content: center; }
+            .btn-sm { width: auto; }
+            .response-header { flex-direction: column; align-items: flex-start; }
+
+            /* Improve touch targets */
+            .message-card { min-height: 80px; }
+            .dropdown-item { min-height: 52px; }
+            .nav-drawer-item { min-height: 56px; }
+        }
+
+        /* Small Mobile */
+        @media (max-width: 400px) {
+            :root { --nav-height: 60px; }
+            .glass-card { padding: 16px; }
+            .card-header { font-size: 16px; }
+            .message-card-title { font-size: 14px; }
+            .badge { padding: 4px 10px; font-size: 11px; }
+        }
+
+        /* Safe Area for iOS */
+        @supports (padding: max(0px)) {
+            body { padding-top: max(var(--nav-height), env(safe-area-inset-top)); }
+            .glass-nav { padding-top: env(safe-area-inset-top); }
+            .nav-drawer { padding-top: env(safe-area-inset-top); }
+            .fab { bottom: max(24px, env(safe-area-inset-bottom)); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Навигация -->
+    <nav class="glass-nav" id="navbar">
+        <div class="nav-content">
+            <div style="display:flex;align-items:center;">
+                <button class="menu-toggle" id="menuToggle" onclick="toggleMenu()" aria-label="Меню">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+                <a href="#" class="brand">
+                    <span class="brand-icon">💬</span>
+                    <span class="brand-text">USSC <span class="highlight">Messages</span></span>
+                </a>
+            </div>
+
+            <div class="nav-actions" style="display:flex;align-items:center;">
+                <ul class="nav-links">
+                    <li><button onclick="showSection('dashboard')" id="nav-dashboard" class="active">Сообщения</button></li>
+                    <li><button onclick="showSection('create')" id="nav-create">Новое</button></li>
+                    <li id="admin-link" style="display:none;"><button onclick="showSection('admin')" id="nav-admin">Админ</button></li>
+                    <li>
+                        <button class="nav-drawer-item" onclick="window.location.href='http://usscromance.marchd.ru/';">
+                            <span>❤️️</span> Вернуться в игру
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="profile-trigger" onclick="toggleProfile()">
+                    <div class="avatar-ring">
+                        <span class="avatar-placeholder" id="user-avatar">U</span>
+                    </div>
+                    <div class="profile-dropdown" id="profileDropdown">
+                        <div class="dropdown-item" style="cursor: default;">
+                            <span>👤</span> <span id="user-display">User</span>
+                        </div>
+                        <div class="dropdown-divider"></div>
+                        <button onclick="logout()" class="dropdown-item danger" style="width:100%;text-align:left;">
+                            <span>🚪</span> Выйти
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Navigation Drawer -->
+    <div class="nav-drawer-overlay" id="navOverlay" onclick="toggleMenu()"></div>
+    <div class="nav-drawer" id="navDrawer">
+        <nav style="display:flex;flex-direction:column;">
+            <button class="nav-drawer-item" onclick="showSection('dashboard');toggleMenu();" id="drawer-dashboard">
+                <span>📬</span> Мои сообщения
+            </button>
+            <button class="nav-drawer-item" onclick="showSection('create');toggleMenu();" id="drawer-create">
+                <span>✏️</span> Новое сообщение
+            </button>
+            <button class="nav-drawer-item" onclick="showSection('admin');toggleMenu();" id="drawer-admin" style="display:none;">
+                <span>⚙️</span> Админ-панель
+            </button>
+
+            <button class="nav-drawer-item" onclick="window.location.href='http://usscromance.marchd.ru/';">
+                <span>❤️️</span> Вернуться в игру
+            </button>
+            <div class="nav-drawer-divider"></div>
+            <div class="nav-drawer-item" style="cursor:default;opacity:0.7;">
+                <span>👤</span> <span id="drawer-user-display">User</span>
+            </div>
+            <button class="nav-drawer-item danger" onclick="logout();toggleMenu();">
+                <span>🚪</span> Выйти
+            </button>
+        </nav>
     </div>
-  </div>
 
-  <div class="chat-container" id="chatContainer">
-    <div class="empty-chat" id="emptyChat">
-      <p>Здесь появится история переписки</p>
-      <p style="margin-top: 10px; font-size: 13px;">Отправьте первое сообщение</p>
+    <!-- FAB for Create Message -->
+    <button class="fab hidden" id="fabCreate" onclick="showSection('create')" aria-label="Новое сообщение">
+        <span>+</span>
+    </button>
+
+    <div class="main-stage">
+        <!-- Login Section -->
+        <div id="login-section" class="section active">
+            <div class="login-wrapper">
+                <div class="login-card">
+                    <div class="login-header">
+                        <div style="font-size:48px;margin-bottom:12px;">💬</div>
+                        <h2>Вход в систему</h2>
+                        <p>Введите данные для доступа</p>
+                    </div>
+                    <div id="login-error" class="alert alert-error hidden"></div>
+                    <form onsubmit="return login(event)">
+                        <div class="form-group">
+                            <label>Имя пользователя или Email</label>
+                            <input type="text" class="form-control" id="login-identifier" required placeholder="username или email" autocomplete="username">
+                        </div>
+                        <div class="form-group">
+                            <label>Пароль</label>
+                            <input type="password" class="form-control" id="login-password" required placeholder="••••••••" autocomplete="current-password">
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">Войти</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Section -->
+        <div id="dashboard-section" class="section">
+            <div class="glass-card">
+                <div class="card-header">
+                    <span>Мои сообщения</span>
+                    <span id="unread-badge" class="badge badge-new hidden">0</span>
+                </div>
+
+                <!-- Mobile Card View -->
+                <div class="message-list" id="messages-list"></div>
+
+                <!-- Desktop Table View -->
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Тема</th>
+                                <th>От</th>
+                                <th>Дата</th>
+                                <th>Статус</th>
+                            </tr>
+                        </thead>
+                        <tbody id="messages-table"></tbody>
+                    </table>
+                </div>
+
+                <div id="messages-empty" class="empty-state hidden">
+                    <div class="empty-state-icon">📭</div>
+                    <div class="empty-state-title">Нет сообщений</div>
+                    <div class="empty-state-desc">Создайте первое сообщение или проверьте позже</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- View Message Section -->
+        <div id="view-section" class="section">
+            <button class="btn btn-secondary btn-sm" onclick="showSection('dashboard')" style="margin-bottom:16px;">
+                <span style="margin-right:8px;">←</span> Назад
+            </button>
+            <div class="glass-card">
+                <div class="card-header" id="view-subject"></div>
+                <div class="message-meta" id="view-meta"></div>
+                <div class="message-content" id="view-content"></div>
+                <img id="view-image" class="message-image hidden">
+                <div id="view-responses"></div>
+                <div id="respond-form" class="hidden" style="margin-top:24px;padding-top:24px;border-top:1px solid var(--glass-border);">
+                    <div class="card-header" style="font-size:18px;margin-bottom:16px;">Ответить</div>
+                    <form onsubmit="return respond(event)">
+                        <input type="hidden" id="respond-message-id">
+                        <div class="form-group">
+                            <label>Ваш ответ</label>
+                            <textarea class="form-control" id="respond-content" name="content" required placeholder="Введите текст ответа..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Изображение (необязательно)</label>
+                            <input type="file" class="form-control" id="respond-image" accept="image/*">
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">Отправить ответ</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Create Message Section -->
+        <div id="create-section" class="section">
+            <button class="btn btn-secondary btn-sm" onclick="showSection('dashboard')" style="margin-bottom:16px;">
+                <span style="margin-right:8px;">←</span> Назад
+            </button>
+            <div class="glass-card">
+                <div class="card-header">Новое сообщение</div>
+                <div id="create-error" class="alert alert-error hidden"></div>
+                <div id="create-success" class="alert alert-success hidden"></div>
+                <form onsubmit="return createMessage(event)">
+                    <div class="form-group">
+                        <label>Тема</label>
+                        <input type="text" class="form-control" id="subject" name="subject" required maxlength="200" placeholder="Краткая тема">
+                    </div>
+                    <div class="form-group">
+                        <label>Сообщение</label>
+                        <textarea class="form-control" id="content" name="content" required placeholder="Опишите ваш вопрос..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Изображение (необязательно)</label>
+                        <input type="file" class="form-control" id="image" name="image" accept="image/*">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Отправить</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Admin Section -->
+        <div id="admin-section" class="section">
+            <div class="glass-card">
+                <div class="card-header">
+                    <span>⏳ Ожидают ответа</span>
+                    <span class="badge badge-pending" id="pending-count">0</span>
+                </div>
+
+                <div class="message-list" id="admin-pending-list"></div>
+
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Тема</th>
+                                <th>От</th>
+                                <th>Дата</th>
+                                <th>Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-pending-table"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="glass-card">
+                <div class="card-header">Все сообщения</div>
+
+                <div class="message-list" id="admin-all-list"></div>
+
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Тема</th>
+                                <th>От</th>
+                                <th>Дата</th>
+                                <th>Статус</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-all-table"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
-</div>
 
-<div class="input-area">
-  <div class="input-wrapper">
-    <button class="btn-attach" onclick="document.getElementById('fileInput').click()">📎</button>
-    <input type="file" id="fileInput" accept="image/*" onchange="handleFileSelect(event)">
+    <script>
+        let currentUser = {{ user | tojson if user else 'null' }};
+        let profileOpen = false;
 
-    <textarea id="messageInput" placeholder="Введите сообщение..." rows="1"></textarea>
+        async function api(url, options = {}) {
+            const res = await fetch(url, options);
+            return await res.json();
+        }
 
-    <button class="btn-send" id="sendBtn" onclick="sendMessage()">➤</button>
-  </div>
-</div>
+        // Menu Toggle
+        function toggleMenu() {
+            const drawer = document.getElementById('navDrawer');
+            const overlay = document.getElementById('navOverlay');
+            const toggle = document.getElementById('menuToggle');
+            drawer.classList.toggle('open');
+            overlay.classList.toggle('active');
+            toggle.classList.toggle('active');
+            document.body.style.overflow = drawer.classList.contains('open') ? 'hidden' : '';
+        }
 
-<div class="preview-container hidden" id="previewContainer">
-  <button class="preview-close" onclick="clearPreview()">✕</button>
-  <img id="previewImage" src="" alt="Preview">
-</div>
+        // Profile Toggle
+        function toggleProfile() {
+            const dropdown = document.getElementById('profileDropdown');
+            profileOpen = !profileOpen;
+            dropdown.classList.toggle('show');
+        }
 
-<script>
-let pollInterval = null;
-let hasConversation = false;
+        // Close profile when clicking outside
+        document.addEventListener('click', function(e) {
+            const profile = document.querySelector('.profile-trigger');
+            if (profile && !profile.contains(e.target)) {
+                document.getElementById('profileDropdown').classList.remove('show');
+                profileOpen = false;
+            }
+        });
 
-async function loadConversation() {
-  try {
-    const res = await fetch('/api/support/conversation');
-    const data = await res.json();
+        function showSection(id) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById(id + '-section').classList.add('active');
 
-    if (data.success && data.conversation.messages.length > 0) {
-      hasConversation = true;
-      renderMessages(data.conversation.messages);
-      updateStatus(data.conversation.has_reply);
-      document.getElementById('emptyChat').classList.add('hidden');
-    }
-  } catch (e) {
-    console.error('Load error:', e);
-  }
-}
+            // Update nav buttons (desktop)
+            document.querySelectorAll('.nav-links button').forEach(b => b.classList.remove('active'));
+            const navBtn = document.getElementById('nav-' + id);
+            if (navBtn) navBtn.classList.add('active');
 
-function renderMessages(messages) {
-  const chat = document.getElementById('chatContainer');
-  chat.innerHTML = '';
+            // Update drawer buttons (mobile)
+            document.querySelectorAll('.nav-drawer-item').forEach(b => b.classList.remove('active'));
+            const drawerBtn = document.getElementById('drawer-' + id);
+            if (drawerBtn) drawerBtn.classList.add('active');
 
-  messages.forEach(msg => {
-    const div = document.createElement('div');
-    div.className = `message ${msg.from}`;
-    let html = '';
-    if (msg.text) html += `<div>${msg.text}</div>`;
-    if (msg.photo) html += `<img src="${msg.photo}" alt="Photo">`;
-    html += `<div class="message-time">${msg.timestamp.slice(0, 16)}</div>`;
-    div.innerHTML = html;
-    chat.appendChild(div);
-  });
+            // Show/hide FAB
+            const fab = document.getElementById('fabCreate');
+            if (id === 'dashboard' && currentUser) {
+                fab.classList.remove('hidden');
+            } else {
+                fab.classList.add('hidden');
+            }
 
-  chat.scrollTop = chat.scrollHeight;
-}
+            if (id === 'dashboard') loadMessages();
+            if (id === 'admin') loadAdmin();
+        }
 
-function updateStatus(hasReply) {
-  const indicator = document.getElementById('statusIndicator');
-  if (hasReply) {
-    indicator.className = 'status-indicator status-replied';
-    indicator.innerHTML = '<span>✓</span> Есть ответ';
-  } else {
-    indicator.className = 'status-indicator status-waiting';
-    indicator.innerHTML = '<span>⏳</span> Ожидание ответа';
-  }
-  indicator.classList.remove('hidden');
-}
+        function showError(el, msg) {
+            el.textContent = msg;
+            el.classList.remove('hidden');
+        }
 
-function handleFileSelect(e) {
-  const file = e.target.files[0];
-  if (!file) return;
+        async function login(e) {
+            e.preventDefault();
+            const identifier = document.getElementById('login-identifier').value;
+            const password = document.getElementById('login-password').value;
+            const err = document.getElementById('login-error');
+            err.classList.add('hidden');
 
-  const reader = new FileReader();
-  reader.onload = (ev) => {
-    document.getElementById('previewImage').src = ev.target.result;
-    document.getElementById('previewContainer').classList.remove('hidden');
-  };
-  reader.readAsDataURL(file);
-}
+            const btn = e.target.querySelector('button[type="submit"]');
+            btn.disabled = true;
+            btn.textContent = 'Вход...';
 
-function clearPreview() {
-  document.getElementById('previewContainer').classList.add('hidden');
-  document.getElementById('fileInput').value = '';
-  document.getElementById('previewImage').src = '';
-}
+            const data = await api('/api/login', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({identifier, password})
+            });
 
-async function sendMessage() {
-  const messageText = document.getElementById('messageInput').value.trim();
-  const file = document.getElementById('fileInput').files[0];
+            btn.disabled = false;
+            btn.textContent = 'Войти';
 
-  if (!messageText && !file) return;
+            if (data.success) {
+                currentUser = data.user;
+                initAuth();
+                showSection('dashboard');
+                loadUnreadCount();
+            } else {
+                showError(err, data.error);
+            }
+        }
 
-  const formData = new FormData();
-  formData.append('message', messageText);
-  if (file) formData.append('photo', file);
+        function initAuth() {
+            document.getElementById('navbar').style.display = 'block';
+            document.getElementById('user-display').textContent = currentUser.display_name;
+            document.getElementById('drawer-user-display').textContent = currentUser.display_name;
+            document.getElementById('user-avatar').textContent = currentUser.display_name[0].toUpperCase();
+            if (currentUser.is_admin) {
+                document.getElementById('admin-link').style.display = 'block';
+                document.getElementById('drawer-admin').style.display = 'flex';
+            }
+        }
 
-  const sendBtn = document.getElementById('sendBtn');
-  sendBtn.disabled = true;
+        async function logout() {
+            if (!confirm('Выйти из аккаунта?')) return;
+            await api('/api/logout', {method: 'POST'});
+            currentUser = null;
+            document.getElementById('navbar').style.display = 'none';
+            showSection('login');
+        }
 
-  try {
-    const res = await fetch('/api/support/message', {
-      method: 'POST',
-      body: formData
-    });
-    const data = await res.json();
+        function renderMessageCard(m) {
+            return `
+                <div class="message-card" onclick="viewMessage(${m.id})">
+                    <div class="message-card-header">
+                        <div class="message-card-title">${escapeHtml(m.subject)}</div>
+                        <span class="badge ${m.is_responded ? 'badge-answered' : 'badge-pending'}">
+                            ${m.is_responded ? '✓' : '⏳'}
+                        </span>
+                    </div>
+                    <div class="message-card-meta">
+                        <span>👤 ${escapeHtml(m.username)}</span>
+                        <span>📅 ${formatDate(m.created_at)}</span>
+                    </div>
+                </div>
+            `;
+        }
 
-    if (data.success) {
-      document.getElementById('messageInput').value = '';
-      clearPreview();
-      loadConversation();
-    } else {
-      alert('Ошибка: ' + (data.error || 'Неизвестная ошибка'));
-    }
-  } catch (err) {
-    console.error(err);
-    alert('Ошибка сети');
-  } finally {
-    sendBtn.disabled = false;
-  }
-}
+        function renderAdminPendingCard(m) {
+            return `
+                <div class="message-card" onclick="viewMessage(${m.id})">
+                    <div class="message-card-header">
+                        <div class="message-card-title">${escapeHtml(m.subject)}</div>
+                        <span class="badge badge-pending">Ответить</span>
+                    </div>
+                    <div class="message-card-meta">
+                        <span>👤 ${escapeHtml(m.username)}</span>
+                        <span>📅 ${formatDate(m.created_at)}</span>
+                    </div>
+                    <div class="message-card-footer">
+                        <button class="btn btn-primary btn-sm" onclick="event.stopPropagation();viewMessage(${m.id})">
+                            Ответить
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
 
-pollInterval = setInterval(loadConversation, 5000);
-loadConversation();
+        async function loadMessages() {
+            const data = await api('/api/messages');
+            const tbody = document.getElementById('messages-table');
+            const list = document.getElementById('messages-list');
+            const empty = document.getElementById('messages-empty');
 
-document.getElementById('messageInput').addEventListener('input', function() {
-  this.style.height = 'auto';
-  this.style.height = Math.min(this.scrollHeight, 100) + 'px';
-});
+            tbody.innerHTML = '';
+            list.innerHTML = '';
 
-window.addEventListener('beforeunload', () => {
-  if (pollInterval) clearInterval(pollInterval);
-});
-</script>
-{% endblock %}
+            if (!data.success || !data.messages.length) {
+                empty.classList.remove('hidden');
+                return;
+            }
+
+            empty.classList.add('hidden');
+
+            data.messages.forEach(m => {
+                // Desktop table
+                const tr = document.createElement('tr');
+                tr.onclick = () => viewMessage(m.id);
+                tr.innerHTML = `
+                    <td style="font-weight:500;">${escapeHtml(m.subject)}</td>
+                    <td>${escapeHtml(m.username)}</td>
+                    <td>${formatDate(m.created_at)}</td>
+                    <td><span class="badge ${m.is_responded ? 'badge-answered' : 'badge-pending'}">${m.is_responded ? 'Отвечено' : 'Ожидает'}</span></td>
+                `;
+                tbody.appendChild(tr);
+
+                // Mobile cards
+                list.innerHTML += renderMessageCard(m);
+            });
+
+            loadUnreadCount();
+        }
+
+        async function loadUnreadCount() {
+            const data = await api('/api/messages/count');
+            const badge = document.getElementById('unread-badge');
+            if (data.count > 0) {
+                badge.textContent = data.count;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+
+        async function viewMessage(id) {
+            const data = await api('/api/messages/' + id);
+            if (!data.success) return alert(data.error);
+
+            const m = data.message;
+            document.getElementById('view-subject').textContent = m.subject;
+            document.getElementById('view-meta').innerHTML = `
+                <span>👤 ${escapeHtml(m.username)}</span>
+                <span>•</span>
+                <span>${formatDate(m.created_at)}</span>
+            `;
+            document.getElementById('view-content').textContent = m.content;
+
+            const img = document.getElementById('view-image');
+            if (m.image_path) {
+                img.src = m.image_path;
+                img.classList.remove('hidden');
+            } else {
+                img.classList.add('hidden');
+            }
+
+            const respDiv = document.getElementById('view-responses');
+            respDiv.innerHTML = '';
+            if (data.responses && data.responses.length) {
+                data.responses.forEach(r => {
+                    respDiv.innerHTML += `
+                        <div class="response-item">
+                            <div class="response-header">
+                                <span class="response-author">👤 ${escapeHtml(r.admin_username)}</span>
+                                <span class="response-date">${formatDate(r.created_at)}</span>
+                            </div>
+                            <div class="response-content">${escapeHtml(r.content)}</div>
+                            ${r.image_path ? `<img src="${r.image_path}" class="message-image">` : ''}
+                        </div>
+                    `;
+                });
+            }
+
+            const respondForm = document.getElementById('respond-form');
+            if (currentUser.is_admin && !m.is_responded) {
+                document.getElementById('respond-message-id').value = id;
+                respondForm.classList.remove('hidden');
+            } else {
+                respondForm.classList.add('hidden');
+            }
+
+            showSection('view');
+            window.scrollTo(0, 0);
+        }
+
+        async function createMessage(e) {
+            e.preventDefault();
+            const form = e.target;
+            const fd = new FormData(form);
+            const err = document.getElementById('create-error');
+            const suc = document.getElementById('create-success');
+            err.classList.add('hidden');
+            suc.classList.add('hidden');
+
+            const btn = form.querySelector('button[type="submit"]');
+            btn.disabled = true;
+            btn.textContent = 'Отправка...';
+
+            const data = await api('/api/messages', {method: 'POST', body: fd});
+
+            btn.disabled = false;
+            btn.textContent = 'Отправить';
+
+            if (data.success) {
+                suc.textContent = 'Сообщение отправлено!';
+                suc.classList.remove('hidden');
+                form.reset();
+                setTimeout(() => showSection('dashboard'), 1500);
+            } else {
+                showError(err, data.error);
+            }
+        }
+
+        async function respond(e) {
+            e.preventDefault();
+            const id = document.getElementById('respond-message-id').value;
+            const form = e.target;
+            const fd = new FormData(form);
+
+            const btn = form.querySelector('button[type="submit"]');
+            btn.disabled = true;
+            btn.textContent = 'Отправка...';
+
+            const data = await api('/api/messages/' + id + '/respond', {method: 'POST', body: fd});
+
+            btn.disabled = false;
+            btn.textContent = 'Отправить ответ';
+
+            if (data.success) {
+                alert('Ответ отправлен!');
+                viewMessage(id);
+            } else {
+                alert(data.error || 'Ошибка');
+            }
+        }
+
+        async function loadAdmin() {
+            const pending = await api('/api/messages/pending');
+            const all = await api('/api/messages');
+
+            const pendingTbody = document.getElementById('admin-pending-table');
+            const pendingList = document.getElementById('admin-pending-list');
+            const allTbody = document.getElementById('admin-all-table');
+            const allList = document.getElementById('admin-all-list');
+
+            pendingTbody.innerHTML = '';
+            pendingList.innerHTML = '';
+            allTbody.innerHTML = '';
+            allList.innerHTML = '';
+
+            if (pending.success && pending.messages.length) {
+                document.getElementById('pending-count').textContent = pending.messages.length;
+                pending.messages.forEach(m => {
+                    // Desktop
+                    pendingTbody.innerHTML += `
+                        <tr onclick="viewMessage(${m.id})" style="cursor:pointer">
+                            <td style="font-weight:500;">${escapeHtml(m.subject)}</td>
+                            <td>${escapeHtml(m.username)}</td>
+                            <td>${formatDate(m.created_at)}</td>
+                            <td>
+                                <button class="btn btn-primary btn-sm" onclick="event.stopPropagation();viewMessage(${m.id})">Ответить</button>
+                            </td>
+                        </tr>
+                    `;
+                    // Mobile
+                    pendingList.innerHTML += renderAdminPendingCard(m);
+                });
+            } else {
+                document.getElementById('pending-count').textContent = '0';
+                pendingTbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:40px;">Нет ожидающих</td></tr>';
+                pendingList.innerHTML = '<div class="empty-state"><div class="empty-state-icon">✓</div><div class="empty-state-title">Все отвечено</div><div class="empty-state-desc">Нет сообщений, требующих ответа</div></div>';
+            }
+
+            if (all.success && all.messages.length) {
+                all.messages.forEach(m => {
+                    // Desktop
+                    allTbody.innerHTML += `
+                        <tr onclick="viewMessage(${m.id})" style="cursor:pointer">
+                            <td style="font-weight:500;">${escapeHtml(m.subject)}</td>
+                            <td>${escapeHtml(m.username)}</td>
+                            <td>${formatDate(m.created_at)}</td>
+                            <td><span class="badge ${m.is_responded ? 'badge-answered' : 'badge-pending'}">${m.is_responded ? 'Отвечено' : 'Ожидает'}</span></td>
+                        </tr>
+                    `;
+                    // Mobile
+                    allList.innerHTML += renderMessageCard(m);
+                });
+            }
+        }
+
+        // Utility functions
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diff = now - date;
+
+            // Less than 1 minute
+            if (diff < 60000) return 'Только что';
+            // Less than 1 hour
+            if (diff < 3600000) return Math.floor(diff / 60000) + ' мин назад';
+            // Less than 24 hours
+            if (diff < 86400000) return Math.floor(diff / 3600000) + ' ч назад';
+            // Less than 7 days
+            if (diff < 604800000) return Math.floor(diff / 86400000) + ' дн назад';
+
+            return date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
+        }
+
+        // Init
+        if (currentUser) {
+            initAuth();
+            showSection('dashboard');
+            loadUnreadCount();
+        } else {
+            showSection('login');
+        }
+
+        // Handle back button on mobile
+        window.addEventListener('popstate', function() {
+            if (document.getElementById('view-section').classList.contains('active')) {
+                showSection('dashboard');
+            }
+        });
+    </script>
+</body>
+</html>
