@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Сообщения — USSC Romance</title>
 
     <!-- Подключение шрифтов -->
@@ -34,6 +34,10 @@
             --radius-lg: 24px;
             --radius-md: 16px;
             --radius-sm: 8px;
+
+            /* Mobile-first spacing */
+            --nav-height: 70px;
+            --touch-target: 48px;
         }
 
         /* Темы */
@@ -53,7 +57,7 @@
             --bg-surface: #05150f;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
         body {
             font-family: var(--font-ui);
@@ -64,6 +68,7 @@
             color: var(--text-main);
             min-height: 100vh;
             overflow-x: hidden;
+            padding-top: var(--nav-height);
         }
 
         /* --- Навигация --- */
@@ -72,51 +77,151 @@
             top: 0;
             left: 0;
             width: 100%;
-            height: 80px;
-            background: rgba(5, 5, 8, 0.7);
+            height: var(--nav-height);
+            background: rgba(5, 5, 8, 0.85);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border-bottom: 1px solid var(--glass-border);
             z-index: 1000;
             display: none;
-            align-items: center;
-            justify-content: center;
         }
 
         .nav-content {
             width: 100%;
             max-width: 1400px;
-            padding: 0 32px;
+            margin: 0 auto;
+            padding: 0 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            height: 100%;
         }
 
         .brand {
             font-family: var(--font-display);
-            font-size: 24px;
+            font-size: 20px;
             font-weight: 700;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             letter-spacing: -0.5px;
             text-decoration: none;
             color: var(--text-main);
         }
 
-        .brand-icon { font-size: 28px; filter: drop-shadow(0 0 10px var(--primary-glow)); }
+        .brand-icon { font-size: 24px; filter: drop-shadow(0 0 10px var(--primary-glow)); }
         .highlight { color: var(--primary); font-style: italic; }
 
-        .nav-actions {
+        /* Hamburger Menu */
+        .menu-toggle {
             display: flex;
-            align-items: center;
-            gap: 24px;
+            flex-direction: column;
+            gap: 5px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 10px;
+            margin-right: 12px;
         }
 
-        .nav-links {
+        .menu-toggle span {
+            width: 24px;
+            height: 2px;
+            background: var(--text-main);
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+
+        .menu-toggle.active span:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+
+        .menu-toggle.active span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .menu-toggle.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(7px, -6px);
+        }
+
+        /* Mobile Navigation Drawer */
+        .nav-drawer {
+            position: fixed;
+            top: var(--nav-height);
+            right: -100%;
+            width: 280px;
+            max-width: 85vw;
+            height: calc(100vh - var(--nav-height));
+            background: rgba(15, 15, 22, 0.98);
+            backdrop-filter: blur(20px);
+            border-left: 1px solid var(--glass-border);
+            z-index: 999;
+            transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 24px;
+            overflow-y: auto;
+        }
+
+        .nav-drawer.open {
+            right: 0;
+        }
+
+        .nav-drawer-overlay {
+            position: fixed;
+            inset: 0;
+            top: var(--nav-height);
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 998;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .nav-drawer-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .nav-drawer-item {
             display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            margin-bottom: 8px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-height: var(--touch-target);
+        }
+
+        .nav-drawer-item:hover, .nav-drawer-item.active {
+            background: rgba(139, 92, 246, 0.15);
+            border-color: var(--primary);
+            color: var(--text-main);
+        }
+
+        .nav-drawer-item.danger:hover {
+            background: rgba(239, 68, 68, 0.15);
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
+        .nav-drawer-divider {
+            height: 1px;
+            background: var(--glass-border);
+            margin: 16px 0;
+        }
+
+        /* Desktop Navigation */
+        .nav-links {
+            display: none;
             gap: 8px;
-            list-style: none;
         }
 
         .nav-links button {
@@ -130,6 +235,7 @@
             font-size: 14px;
             font-weight: 500;
             transition: all 0.3s ease;
+            min-height: var(--touch-target);
         }
 
         .nav-links button:hover, .nav-links button.active {
@@ -138,21 +244,18 @@
             color: var(--text-main);
         }
 
-        .nav-links button.danger:hover {
-            background: rgba(239, 68, 68, 0.2);
-            border-color: var(--danger);
-            color: var(--danger);
-        }
-
         /* Профиль */
         .profile-trigger {
             position: relative;
             cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .avatar-ring {
-            width: 44px;
-            height: 44px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             padding: 2px;
             background: linear-gradient(135deg, var(--primary), transparent);
@@ -162,7 +265,7 @@
             justify-content: center;
         }
 
-        .profile-trigger:hover .avatar-ring { transform: scale(1.05); }
+        .profile-trigger:active .avatar-ring { transform: scale(0.95); }
 
         .avatar-placeholder {
             width: 100%;
@@ -175,15 +278,15 @@
             font-weight: 700;
             color: var(--text-main);
             border: 2px solid var(--bg-deep);
-            font-size: 18px;
+            font-size: 16px;
         }
 
         .profile-dropdown {
             position: absolute;
-            top: 60px;
+            top: 55px;
             right: 0;
-            width: 220px;
-            background: rgba(15, 15, 22, 0.95);
+            width: 200px;
+            background: rgba(15, 15, 22, 0.98);
             backdrop-filter: blur(20px);
             border: 1px solid var(--glass-border);
             border-radius: var(--radius-md);
@@ -195,7 +298,7 @@
             box-shadow: 0 20px 40px rgba(0,0,0,0.5);
         }
 
-        .profile-trigger:hover .profile-dropdown {
+        .profile-dropdown.show {
             opacity: 1;
             visibility: visible;
             transform: translateY(0);
@@ -212,6 +315,7 @@
             transition: all 0.2s;
             font-size: 14px;
             cursor: pointer;
+            min-height: var(--touch-target);
         }
 
         .dropdown-item:hover {
@@ -232,49 +336,46 @@
 
         /* --- Main Content --- */
         .main-stage {
-            padding-top: 120px;
-            padding-bottom: 60px;
+            padding: 24px 20px 60px;
             max-width: 1400px;
             margin: 0 auto;
-            padding-left: 32px;
-            padding-right: 32px;
         }
 
         .section { display: none; }
-        .section.active { display: block; animation: fadeInUp 0.6s ease-out forwards; }
+        .section.active { display: block; animation: fadeInUp 0.4s ease-out forwards; }
 
         /* Карточки */
         .glass-card {
             background: var(--glass-bg);
             border: 1px solid var(--glass-border);
             border-radius: var(--radius-lg);
-            padding: 32px;
-            margin-bottom: 24px;
+            padding: 24px;
+            margin-bottom: 20px;
             backdrop-filter: blur(20px);
             transition: all 0.3s ease;
         }
 
-        .glass-card:hover {
-            border-color: rgba(139, 92, 246, 0.3);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        }
-
         .card-header {
             font-family: var(--font-display);
-            font-size: 24px;
+            font-size: 20px;
             font-weight: 700;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
             padding-bottom: 16px;
             border-bottom: 1px solid var(--glass-border);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
         }
 
         /* Кнопки */
         .btn {
-            display: inline-block;
-            padding: 12px 28px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 14px 28px;
             border: none;
             border-radius: 50px;
             cursor: pointer;
@@ -283,6 +384,8 @@
             font-weight: 600;
             font-family: var(--font-ui);
             transition: all 0.3s ease;
+            min-height: var(--touch-target);
+            width: auto;
         }
 
         .btn-primary {
@@ -291,9 +394,9 @@
             box-shadow: 0 4px 15px var(--primary-glow);
         }
 
-        .btn-primary:hover {
-            transform: scale(1.05);
-            filter: brightness(1.1);
+        .btn-primary:active {
+            transform: scale(0.98);
+            filter: brightness(0.9);
         }
 
         .btn-secondary {
@@ -302,9 +405,8 @@
             color: var(--text-muted);
         }
 
-        .btn-secondary:hover {
-            border-color: var(--text-main);
-            color: var(--text-main);
+        .btn-secondary:active {
+            background: rgba(255, 255, 255, 0.1);
         }
 
         .btn-danger {
@@ -313,14 +415,21 @@
             color: var(--danger);
         }
 
-        .btn-danger:hover {
-            background: var(--danger);
-            color: white;
+        .btn-sm {
+            padding: 10px 18px;
+            font-size: 13px;
+            min-height: 40px;
         }
 
-        .btn-sm {
-            padding: 8px 16px;
-            font-size: 13px;
+        .btn-block {
+            width: 100%;
+        }
+
+        .btn-icon {
+            padding: 12px;
+            min-width: var(--touch-target);
+            min-height: var(--touch-target);
+            border-radius: 50%;
         }
 
         /* Формы */
@@ -341,21 +450,23 @@
             border-radius: var(--radius-md);
             background: rgba(255, 255, 255, 0.03);
             color: var(--text-main);
-            font-size: 14px;
+            font-size: 16px;
             font-family: var(--font-ui);
             transition: all 0.3s ease;
+            min-height: var(--touch-target);
         }
 
         .form-control:focus {
             outline: none;
             border-color: var(--primary);
             background: rgba(255, 255, 255, 0.05);
-            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
         }
 
         textarea.form-control {
-            min-height: 150px;
+            min-height: 140px;
             resize: vertical;
+            line-height: 1.6;
         }
 
         input[type="file"].form-control {
@@ -363,16 +474,72 @@
             cursor: pointer;
         }
 
-        /* Таблицы */
+        /* Mobile Card List (alternative to table) */
+        .message-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .message-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .message-card:active {
+            background: rgba(255, 255, 255, 0.06);
+            transform: scale(0.99);
+        }
+
+        .message-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .message-card-title {
+            font-weight: 600;
+            font-size: 15px;
+            color: var(--text-main);
+            flex: 1;
+        }
+
+        .message-card-meta {
+            display: flex;
+            gap: 12px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .message-card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 12px;
+            border-top: 1px solid var(--glass-border);
+            margin-top: 8px;
+        }
+
+        /* Таблицы (desktop) */
         .table-container {
             overflow-x: auto;
             border-radius: var(--radius-md);
             border: 1px solid var(--glass-border);
+            -webkit-overflow-scrolling: touch;
         }
 
         .table {
             width: 100%;
             border-collapse: collapse;
+            min-width: 600px;
         }
 
         .table th, .table td {
@@ -388,6 +555,7 @@
             font-size: 13px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            white-space: nowrap;
         }
 
         .table td {
@@ -400,7 +568,7 @@
             cursor: pointer;
         }
 
-        .table tr:hover {
+        .table tr:active {
             background: var(--card-hover);
         }
 
@@ -410,13 +578,15 @@
 
         /* Бейджи */
         .badge {
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
             padding: 6px 14px;
             border-radius: 50px;
             font-size: 12px;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            white-space: nowrap;
         }
 
         .badge-pending {
@@ -444,6 +614,9 @@
             border-radius: var(--radius-md);
             margin-bottom: 20px;
             font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
         .alert-error {
@@ -463,25 +636,25 @@
         /* Login Section */
         .login-wrapper {
             max-width: 440px;
-            margin: 80px auto;
+            margin: 40px auto;
         }
 
         .login-card {
             background: var(--glass-bg);
             border: 1px solid var(--glass-border);
             border-radius: var(--radius-lg);
-            padding: 40px;
+            padding: 32px 24px;
             backdrop-filter: blur(20px);
         }
 
         .login-header {
             text-align: center;
-            margin-bottom: 32px;
+            margin-bottom: 28px;
         }
 
         .login-header h2 {
             font-family: var(--font-display);
-            font-size: 28px;
+            font-size: 24px;
             font-weight: 700;
             margin-bottom: 8px;
         }
@@ -494,10 +667,14 @@
         /* View Message */
         .message-meta {
             color: var(--text-muted);
-            font-size: 14px;
+            font-size: 13px;
             margin-bottom: 20px;
             padding-bottom: 16px;
             border-bottom: 1px solid var(--glass-border);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
         }
 
         .message-content {
@@ -505,6 +682,7 @@
             line-height: 1.7;
             color: var(--text-main);
             margin-bottom: 24px;
+            font-size: 15px;
         }
 
         .message-image {
@@ -518,7 +696,7 @@
         .response-item {
             background: rgba(139, 92, 246, 0.1);
             border-left: 3px solid var(--primary);
-            padding: 20px;
+            padding: 16px;
             margin-top: 16px;
             border-radius: 0 var(--radius-md) var(--radius-md) 0;
         }
@@ -528,15 +706,18 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 8px;
         }
 
         .response-author {
             font-weight: 600;
             color: var(--accent);
+            font-size: 14px;
         }
 
         .response-date {
-            font-size: 12px;
+            font-size: 11px;
             color: var(--text-muted);
         }
 
@@ -544,6 +725,116 @@
             white-space: pre-wrap;
             line-height: 1.6;
             font-size: 14px;
+        }
+
+        /* Bottom Sheet for Mobile */
+        .bottom-sheet {
+            position: fixed;
+            bottom: -100%;
+            left: 0;
+            right: 0;
+            background: rgba(15, 15, 22, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+            border-top: 1px solid var(--glass-border);
+            z-index: 1001;
+            padding: 24px;
+            max-height: 80vh;
+            overflow-y: auto;
+            transition: bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .bottom-sheet.open {
+            bottom: 0;
+        }
+
+        .bottom-sheet-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .bottom-sheet-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .bottom-sheet-handle {
+            width: 40px;
+            height: 4px;
+            background: var(--glass-border);
+            border-radius: 2px;
+            margin: 0 auto 20px;
+        }
+
+        .bottom-sheet-title {
+            font-family: var(--font-display);
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        /* FAB - Floating Action Button */
+        .fab {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 4px 20px var(--primary-glow);
+            cursor: pointer;
+            z-index: 900;
+            transition: all 0.3s ease;
+        }
+
+        .fab:active {
+            transform: scale(0.9);
+        }
+
+        .fab.hidden {
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(0);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 48px 24px;
+            color: var(--text-muted);
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .empty-state-title {
+            font-family: var(--font-display);
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-main);
+        }
+
+        .empty-state-desc {
+            font-size: 14px;
+            line-height: 1.6;
         }
 
         /* Animations */
@@ -562,15 +853,55 @@
             50% { transform: translateY(-8px); }
         }
 
-        /* Mobile Responsive */
+        /* Desktop Styles */
+        @media (min-width: 769px) {
+            .menu-toggle { display: none; }
+            .nav-drawer { display: none; }
+            .nav-drawer-overlay { display: none; }
+            .nav-links { display: flex; }
+            .message-list { display: none; }
+            .table-container { display: block; }
+            .main-stage { padding: 32px; }
+            .glass-card { padding: 32px; }
+            .card-header { font-size: 24px; }
+            .login-card { padding: 40px; }
+            .fab { display: none; }
+        }
+
+        /* Mobile Styles */
         @media (max-width: 768px) {
-            .nav-content { padding: 0 20px; }
-            .nav-links { display: none; }
-            .main-stage { padding-top: 100px; padding-left: 20px; padding-right: 20px; }
-            .glass-card { padding: 24px; }
-            .card-header { font-size: 20px; flex-direction: column; gap: 12px; align-items: flex-start; }
-            .table th, .table td { padding: 12px 16px; font-size: 13px; }
-            .login-card { padding: 32px 24px; }
+            .table-container { display: none; }
+            .message-list { display: flex; }
+            .brand-text { display: none; }
+            .brand-icon { font-size: 28px; }
+            .login-wrapper { margin: 20px auto; }
+            .glass-card { padding: 20px; border-radius: var(--radius-md); }
+            .card-header { font-size: 18px; flex-direction: column; align-items: flex-start; }
+            .btn { width: 100%; justify-content: center; }
+            .btn-sm { width: auto; }
+            .response-header { flex-direction: column; align-items: flex-start; }
+
+            /* Improve touch targets */
+            .message-card { min-height: 80px; }
+            .dropdown-item { min-height: 52px; }
+            .nav-drawer-item { min-height: 56px; }
+        }
+
+        /* Small Mobile */
+        @media (max-width: 400px) {
+            :root { --nav-height: 60px; }
+            .glass-card { padding: 16px; }
+            .card-header { font-size: 16px; }
+            .message-card-title { font-size: 14px; }
+            .badge { padding: 4px 10px; font-size: 11px; }
+        }
+
+        /* Safe Area for iOS */
+        @supports (padding: max(0px)) {
+            body { padding-top: max(var(--nav-height), env(safe-area-inset-top)); }
+            .glass-nav { padding-top: env(safe-area-inset-top); }
+            .nav-drawer { padding-top: env(safe-area-inset-top); }
+            .fab { bottom: max(24px, env(safe-area-inset-bottom)); }
         }
     </style>
 </head>
@@ -578,23 +909,30 @@
     <!-- Навигация -->
     <nav class="glass-nav" id="navbar">
         <div class="nav-content">
-            <a href="#" class="brand">
-                <span class="brand-icon">💬</span>
-                <span class="brand-text">USSC <span class="highlight">Messages</span></span>
-            </a>
+            <div style="display:flex;align-items:center;">
+                <button class="menu-toggle" id="menuToggle" onclick="toggleMenu()" aria-label="Меню">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+                <a href="#" class="brand">
+                    <span class="brand-icon">💬</span>
+                    <span class="brand-text">USSC <span class="highlight">Messages</span></span>
+                </a>
+            </div>
 
-            <div class="nav-actions">
+            <div class="nav-actions" style="display:flex;align-items:center;">
                 <ul class="nav-links">
-                    <li><button onclick="showSection('dashboard')" id="nav-dashboard" class="active">Мои сообщения</button></li>
-                    <li><button onclick="showSection('create')" id="nav-create">Новое сообщение</button></li>
-                    <li id="admin-link" style="display:none;"><button onclick="showSection('admin')" id="nav-admin">Админ-панель</button></li>
+                    <li><button onclick="showSection('dashboard')" id="nav-dashboard" class="active">Сообщения</button></li>
+                    <li><button onclick="showSection('create')" id="nav-create">Новое</button></li>
+                    <li id="admin-link" style="display:none;"><button onclick="showSection('admin')" id="nav-admin">Админ</button></li>
                 </ul>
 
-                <div class="profile-trigger">
+                <div class="profile-trigger" onclick="toggleProfile()">
                     <div class="avatar-ring">
                         <span class="avatar-placeholder" id="user-avatar">U</span>
                     </div>
-                    <div class="profile-dropdown">
+                    <div class="profile-dropdown" id="profileDropdown">
                         <div class="dropdown-item" style="cursor: default;">
                             <span>👤</span> <span id="user-display">User</span>
                         </div>
@@ -608,26 +946,55 @@
         </div>
     </nav>
 
+    <!-- Mobile Navigation Drawer -->
+    <div class="nav-drawer-overlay" id="navOverlay" onclick="toggleMenu()"></div>
+    <div class="nav-drawer" id="navDrawer">
+        <nav style="display:flex;flex-direction:column;">
+            <button class="nav-drawer-item" onclick="showSection('dashboard');toggleMenu();" id="drawer-dashboard">
+                <span>📬</span> Мои сообщения
+            </button>
+            <button class="nav-drawer-item" onclick="showSection('create');toggleMenu();" id="drawer-create">
+                <span>✏️</span> Новое сообщение
+            </button>
+            <button class="nav-drawer-item" onclick="showSection('admin');toggleMenu();" id="drawer-admin" style="display:none;">
+                <span>⚙️</span> Админ-панель
+            </button>
+            <div class="nav-drawer-divider"></div>
+            <div class="nav-drawer-item" style="cursor:default;opacity:0.7;">
+                <span>👤</span> <span id="drawer-user-display">User</span>
+            </div>
+            <button class="nav-drawer-item danger" onclick="logout();toggleMenu();">
+                <span>🚪</span> Выйти
+            </button>
+        </nav>
+    </div>
+
+    <!-- FAB for Create Message -->
+    <button class="fab hidden" id="fabCreate" onclick="showSection('create')" aria-label="Новое сообщение">
+        <span>+</span>
+    </button>
+
     <div class="main-stage">
         <!-- Login Section -->
         <div id="login-section" class="section active">
             <div class="login-wrapper">
                 <div class="login-card">
                     <div class="login-header">
+                        <div style="font-size:48px;margin-bottom:12px;">💬</div>
                         <h2>Вход в систему</h2>
-                        <p>Введите свои данные для доступа к сообщениям</p>
+                        <p>Введите данные для доступа</p>
                     </div>
                     <div id="login-error" class="alert alert-error hidden"></div>
                     <form onsubmit="return login(event)">
                         <div class="form-group">
                             <label>Имя пользователя или Email</label>
-                            <input type="text" class="form-control" id="login-identifier" required placeholder="username или email">
+                            <input type="text" class="form-control" id="login-identifier" required placeholder="username или email" autocomplete="username">
                         </div>
                         <div class="form-group">
                             <label>Пароль</label>
-                            <input type="password" class="form-control" id="login-password" required placeholder="••••••••">
+                            <input type="password" class="form-control" id="login-password" required placeholder="••••••••" autocomplete="current-password">
                         </div>
-                        <button type="submit" class="btn btn-primary" style="width:100%">Войти</button>
+                        <button type="submit" class="btn btn-primary btn-block">Войти</button>
                     </form>
                 </div>
             </div>
@@ -638,8 +1005,13 @@
             <div class="glass-card">
                 <div class="card-header">
                     <span>Мои сообщения</span>
-                    <span id="unread-badge" class="badge badge-new hidden">0 новых</span>
+                    <span id="unread-badge" class="badge badge-new hidden">0</span>
                 </div>
+
+                <!-- Mobile Card View -->
+                <div class="message-list" id="messages-list"></div>
+
+                <!-- Desktop Table View -->
                 <div class="table-container">
                     <table class="table">
                         <thead>
@@ -653,20 +1025,28 @@
                         <tbody id="messages-table"></tbody>
                     </table>
                 </div>
+
+                <div id="messages-empty" class="empty-state hidden">
+                    <div class="empty-state-icon">📭</div>
+                    <div class="empty-state-title">Нет сообщений</div>
+                    <div class="empty-state-desc">Создайте первое сообщение или проверьте позже</div>
+                </div>
             </div>
         </div>
 
         <!-- View Message Section -->
         <div id="view-section" class="section">
-            <button class="btn btn-secondary btn-sm" onclick="showSection('dashboard')" style="margin-bottom:16px;">← Назад к списку</button>
+            <button class="btn btn-secondary btn-sm" onclick="showSection('dashboard')" style="margin-bottom:16px;">
+                <span style="margin-right:8px;">←</span> Назад
+            </button>
             <div class="glass-card">
                 <div class="card-header" id="view-subject"></div>
                 <div class="message-meta" id="view-meta"></div>
                 <div class="message-content" id="view-content"></div>
                 <img id="view-image" class="message-image hidden">
                 <div id="view-responses"></div>
-                <div id="respond-form" class="hidden" style="margin-top:32px;padding-top:24px;border-top:1px solid var(--glass-border);">
-                    <div class="card-header" style="font-size:20px;margin-bottom:16px;">Ответить</div>
+                <div id="respond-form" class="hidden" style="margin-top:24px;padding-top:24px;border-top:1px solid var(--glass-border);">
+                    <div class="card-header" style="font-size:18px;margin-bottom:16px;">Ответить</div>
                     <form onsubmit="return respond(event)">
                         <input type="hidden" id="respond-message-id">
                         <div class="form-group">
@@ -677,7 +1057,7 @@
                             <label>Изображение (необязательно)</label>
                             <input type="file" class="form-control" id="respond-image" accept="image/*">
                         </div>
-                        <button type="submit" class="btn btn-primary">Отправить ответ</button>
+                        <button type="submit" class="btn btn-primary btn-block">Отправить ответ</button>
                     </form>
                 </div>
             </div>
@@ -685,25 +1065,27 @@
 
         <!-- Create Message Section -->
         <div id="create-section" class="section">
-            <button class="btn btn-secondary btn-sm" onclick="showSection('dashboard')" style="margin-bottom:16px;">← Назад</button>
-            <div class="glass-card" style="max-width:700px;">
+            <button class="btn btn-secondary btn-sm" onclick="showSection('dashboard')" style="margin-bottom:16px;">
+                <span style="margin-right:8px;">←</span> Назад
+            </button>
+            <div class="glass-card">
                 <div class="card-header">Новое сообщение</div>
                 <div id="create-error" class="alert alert-error hidden"></div>
                 <div id="create-success" class="alert alert-success hidden"></div>
                 <form onsubmit="return createMessage(event)">
                     <div class="form-group">
                         <label>Тема</label>
-                        <input type="text" class="form-control" id="subject" name="subject" required maxlength="200" placeholder="Краткая тема сообщения">
+                        <input type="text" class="form-control" id="subject" name="subject" required maxlength="200" placeholder="Краткая тема">
                     </div>
                     <div class="form-group">
                         <label>Сообщение</label>
-                        <textarea class="form-control" id="content" name="content" required placeholder="Опишите ваш вопрос или предложение..."></textarea>
+                        <textarea class="form-control" id="content" name="content" required placeholder="Опишите ваш вопрос..."></textarea>
                     </div>
                     <div class="form-group">
                         <label>Изображение (необязательно)</label>
                         <input type="file" class="form-control" id="image" name="image" accept="image/*">
                     </div>
-                    <button type="submit" class="btn btn-primary">Отправить сообщение</button>
+                    <button type="submit" class="btn btn-primary btn-block">Отправить</button>
                 </form>
             </div>
         </div>
@@ -715,6 +1097,9 @@
                     <span>⏳ Ожидают ответа</span>
                     <span class="badge badge-pending" id="pending-count">0</span>
                 </div>
+
+                <div class="message-list" id="admin-pending-list"></div>
+
                 <div class="table-container">
                     <table class="table">
                         <thead>
@@ -731,6 +1116,9 @@
             </div>
             <div class="glass-card">
                 <div class="card-header">Все сообщения</div>
+
+                <div class="message-list" id="admin-all-list"></div>
+
                 <div class="table-container">
                     <table class="table">
                         <thead>
@@ -750,20 +1138,61 @@
 
     <script>
         let currentUser = {{ user | tojson if user else 'null' }};
+        let profileOpen = false;
 
         async function api(url, options = {}) {
             const res = await fetch(url, options);
             return await res.json();
         }
 
+        // Menu Toggle
+        function toggleMenu() {
+            const drawer = document.getElementById('navDrawer');
+            const overlay = document.getElementById('navOverlay');
+            const toggle = document.getElementById('menuToggle');
+            drawer.classList.toggle('open');
+            overlay.classList.toggle('active');
+            toggle.classList.toggle('active');
+            document.body.style.overflow = drawer.classList.contains('open') ? 'hidden' : '';
+        }
+
+        // Profile Toggle
+        function toggleProfile() {
+            const dropdown = document.getElementById('profileDropdown');
+            profileOpen = !profileOpen;
+            dropdown.classList.toggle('show');
+        }
+
+        // Close profile when clicking outside
+        document.addEventListener('click', function(e) {
+            const profile = document.querySelector('.profile-trigger');
+            if (profile && !profile.contains(e.target)) {
+                document.getElementById('profileDropdown').classList.remove('show');
+                profileOpen = false;
+            }
+        });
+
         function showSection(id) {
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
             document.getElementById(id + '-section').classList.add('active');
 
-            // Update nav buttons
+            // Update nav buttons (desktop)
             document.querySelectorAll('.nav-links button').forEach(b => b.classList.remove('active'));
             const navBtn = document.getElementById('nav-' + id);
             if (navBtn) navBtn.classList.add('active');
+
+            // Update drawer buttons (mobile)
+            document.querySelectorAll('.nav-drawer-item').forEach(b => b.classList.remove('active'));
+            const drawerBtn = document.getElementById('drawer-' + id);
+            if (drawerBtn) drawerBtn.classList.add('active');
+
+            // Show/hide FAB
+            const fab = document.getElementById('fabCreate');
+            if (id === 'dashboard' && currentUser) {
+                fab.classList.remove('hidden');
+            } else {
+                fab.classList.add('hidden');
+            }
 
             if (id === 'dashboard') loadMessages();
             if (id === 'admin') loadAdmin();
@@ -780,21 +1209,38 @@
             const password = document.getElementById('login-password').value;
             const err = document.getElementById('login-error');
             err.classList.add('hidden');
+
+            const btn = e.target.querySelector('button[type="submit"]');
+            btn.disabled = true;
+            btn.textContent = 'Вход...';
+
             const data = await api('/api/login', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({identifier, password})
             });
+
+            btn.disabled = false;
+            btn.textContent = 'Войти';
+
             if (data.success) {
                 currentUser = data.user;
-                document.getElementById('navbar').style.display = 'flex';
-                document.getElementById('user-display').textContent = currentUser.display_name;
-                document.getElementById('user-avatar').textContent = currentUser.display_name[0].toUpperCase();
-                if (currentUser.is_admin) document.getElementById('admin-link').style.display = 'block';
+                initAuth();
                 showSection('dashboard');
                 loadUnreadCount();
             } else {
                 showError(err, data.error);
+            }
+        }
+
+        function initAuth() {
+            document.getElementById('navbar').style.display = 'block';
+            document.getElementById('user-display').textContent = currentUser.display_name;
+            document.getElementById('drawer-user-display').textContent = currentUser.display_name;
+            document.getElementById('user-avatar').textContent = currentUser.display_name[0].toUpperCase();
+            if (currentUser.is_admin) {
+                document.getElementById('admin-link').style.display = 'block';
+                document.getElementById('drawer-admin').style.display = 'flex';
             }
         }
 
@@ -806,25 +1252,75 @@
             showSection('login');
         }
 
+        function renderMessageCard(m) {
+            return `
+                <div class="message-card" onclick="viewMessage(${m.id})">
+                    <div class="message-card-header">
+                        <div class="message-card-title">${escapeHtml(m.subject)}</div>
+                        <span class="badge ${m.is_responded ? 'badge-answered' : 'badge-pending'}">
+                            ${m.is_responded ? '✓' : '⏳'}
+                        </span>
+                    </div>
+                    <div class="message-card-meta">
+                        <span>👤 ${escapeHtml(m.username)}</span>
+                        <span>📅 ${formatDate(m.created_at)}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderAdminPendingCard(m) {
+            return `
+                <div class="message-card" onclick="viewMessage(${m.id})">
+                    <div class="message-card-header">
+                        <div class="message-card-title">${escapeHtml(m.subject)}</div>
+                        <span class="badge badge-pending">Ответить</span>
+                    </div>
+                    <div class="message-card-meta">
+                        <span>👤 ${escapeHtml(m.username)}</span>
+                        <span>📅 ${formatDate(m.created_at)}</span>
+                    </div>
+                    <div class="message-card-footer">
+                        <button class="btn btn-primary btn-sm" onclick="event.stopPropagation();viewMessage(${m.id})">
+                            Ответить
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
         async function loadMessages() {
             const data = await api('/api/messages');
             const tbody = document.getElementById('messages-table');
+            const list = document.getElementById('messages-list');
+            const empty = document.getElementById('messages-empty');
+
             tbody.innerHTML = '';
+            list.innerHTML = '';
+
             if (!data.success || !data.messages.length) {
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:40px;">Нет сообщений</td></tr>';
+                empty.classList.remove('hidden');
                 return;
             }
+
+            empty.classList.add('hidden');
+
             data.messages.forEach(m => {
+                // Desktop table
                 const tr = document.createElement('tr');
                 tr.onclick = () => viewMessage(m.id);
                 tr.innerHTML = `
-                    <td style="font-weight:500;">${m.subject}</td>
-                    <td>${m.username}</td>
-                    <td>${new Date(m.created_at).toLocaleString('ru-RU')}</td>
+                    <td style="font-weight:500;">${escapeHtml(m.subject)}</td>
+                    <td>${escapeHtml(m.username)}</td>
+                    <td>${formatDate(m.created_at)}</td>
                     <td><span class="badge ${m.is_responded ? 'badge-answered' : 'badge-pending'}">${m.is_responded ? 'Отвечено' : 'Ожидает'}</span></td>
                 `;
                 tbody.appendChild(tr);
+
+                // Mobile cards
+                list.innerHTML += renderMessageCard(m);
             });
+
             loadUnreadCount();
         }
 
@@ -832,7 +1328,7 @@
             const data = await api('/api/messages/count');
             const badge = document.getElementById('unread-badge');
             if (data.count > 0) {
-                badge.textContent = data.count + ' новых';
+                badge.textContent = data.count;
                 badge.classList.remove('hidden');
             } else {
                 badge.classList.add('hidden');
@@ -842,10 +1338,16 @@
         async function viewMessage(id) {
             const data = await api('/api/messages/' + id);
             if (!data.success) return alert(data.error);
+
             const m = data.message;
             document.getElementById('view-subject').textContent = m.subject;
-            document.getElementById('view-meta').textContent = `От: ${m.username} | ${new Date(m.created_at).toLocaleString('ru-RU')}`;
+            document.getElementById('view-meta').innerHTML = `
+                <span>👤 ${escapeHtml(m.username)}</span>
+                <span>•</span>
+                <span>${formatDate(m.created_at)}</span>
+            `;
             document.getElementById('view-content').textContent = m.content;
+
             const img = document.getElementById('view-image');
             if (m.image_path) {
                 img.src = m.image_path;
@@ -853,6 +1355,7 @@
             } else {
                 img.classList.add('hidden');
             }
+
             const respDiv = document.getElementById('view-responses');
             respDiv.innerHTML = '';
             if (data.responses && data.responses.length) {
@@ -860,15 +1363,16 @@
                     respDiv.innerHTML += `
                         <div class="response-item">
                             <div class="response-header">
-                                <span class="response-author">${r.admin_username}</span>
-                                <span class="response-date">${new Date(r.created_at).toLocaleString('ru-RU')}</span>
+                                <span class="response-author">👤 ${escapeHtml(r.admin_username)}</span>
+                                <span class="response-date">${formatDate(r.created_at)}</span>
                             </div>
-                            <div class="response-content">${r.content}</div>
+                            <div class="response-content">${escapeHtml(r.content)}</div>
                             ${r.image_path ? `<img src="${r.image_path}" class="message-image">` : ''}
                         </div>
                     `;
                 });
             }
+
             const respondForm = document.getElementById('respond-form');
             if (currentUser.is_admin && !m.is_responded) {
                 document.getElementById('respond-message-id').value = id;
@@ -876,7 +1380,9 @@
             } else {
                 respondForm.classList.add('hidden');
             }
+
             showSection('view');
+            window.scrollTo(0, 0);
         }
 
         async function createMessage(e) {
@@ -887,9 +1393,18 @@
             const suc = document.getElementById('create-success');
             err.classList.add('hidden');
             suc.classList.add('hidden');
+
+            const btn = form.querySelector('button[type="submit"]');
+            btn.disabled = true;
+            btn.textContent = 'Отправка...';
+
             const data = await api('/api/messages', {method: 'POST', body: fd});
+
+            btn.disabled = false;
+            btn.textContent = 'Отправить';
+
             if (data.success) {
-                suc.textContent = 'Сообщение успешно отправлено!';
+                suc.textContent = 'Сообщение отправлено!';
                 suc.classList.remove('hidden');
                 form.reset();
                 setTimeout(() => showSection('dashboard'), 1500);
@@ -903,7 +1418,16 @@
             const id = document.getElementById('respond-message-id').value;
             const form = e.target;
             const fd = new FormData(form);
+
+            const btn = form.querySelector('button[type="submit"]');
+            btn.disabled = true;
+            btn.textContent = 'Отправка...';
+
             const data = await api('/api/messages/' + id + '/respond', {method: 'POST', body: fd});
+
+            btn.disabled = false;
+            btn.textContent = 'Отправить ответ';
+
             if (data.success) {
                 alert('Ответ отправлен!');
                 viewMessage(id);
@@ -915,55 +1439,96 @@
         async function loadAdmin() {
             const pending = await api('/api/messages/pending');
             const all = await api('/api/messages');
+
             const pendingTbody = document.getElementById('admin-pending-table');
+            const pendingList = document.getElementById('admin-pending-list');
             const allTbody = document.getElementById('admin-all-table');
+            const allList = document.getElementById('admin-all-list');
+
             pendingTbody.innerHTML = '';
+            pendingList.innerHTML = '';
             allTbody.innerHTML = '';
+            allList.innerHTML = '';
 
             if (pending.success && pending.messages.length) {
                 document.getElementById('pending-count').textContent = pending.messages.length;
                 pending.messages.forEach(m => {
+                    // Desktop
                     pendingTbody.innerHTML += `
                         <tr onclick="viewMessage(${m.id})" style="cursor:pointer">
-                            <td style="font-weight:500;">${m.subject}</td>
-                            <td>${m.username}</td>
-                            <td>${new Date(m.created_at).toLocaleString('ru-RU')}</td>
+                            <td style="font-weight:500;">${escapeHtml(m.subject)}</td>
+                            <td>${escapeHtml(m.username)}</td>
+                            <td>${formatDate(m.created_at)}</td>
                             <td>
                                 <button class="btn btn-primary btn-sm" onclick="event.stopPropagation();viewMessage(${m.id})">Ответить</button>
                             </td>
                         </tr>
                     `;
+                    // Mobile
+                    pendingList.innerHTML += renderAdminPendingCard(m);
                 });
             } else {
                 document.getElementById('pending-count').textContent = '0';
-                pendingTbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:40px;">Нет ожидающих ответов</td></tr>';
+                pendingTbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:40px;">Нет ожидающих</td></tr>';
+                pendingList.innerHTML = '<div class="empty-state"><div class="empty-state-icon">✓</div><div class="empty-state-title">Все отвечено</div><div class="empty-state-desc">Нет сообщений, требующих ответа</div></div>';
             }
 
             if (all.success && all.messages.length) {
                 all.messages.forEach(m => {
+                    // Desktop
                     allTbody.innerHTML += `
                         <tr onclick="viewMessage(${m.id})" style="cursor:pointer">
-                            <td style="font-weight:500;">${m.subject}</td>
-                            <td>${m.username}</td>
-                            <td>${new Date(m.created_at).toLocaleString('ru-RU')}</td>
+                            <td style="font-weight:500;">${escapeHtml(m.subject)}</td>
+                            <td>${escapeHtml(m.username)}</td>
+                            <td>${formatDate(m.created_at)}</td>
                             <td><span class="badge ${m.is_responded ? 'badge-answered' : 'badge-pending'}">${m.is_responded ? 'Отвечено' : 'Ожидает'}</span></td>
                         </tr>
                     `;
+                    // Mobile
+                    allList.innerHTML += renderMessageCard(m);
                 });
             }
         }
 
+        // Utility functions
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diff = now - date;
+
+            // Less than 1 minute
+            if (diff < 60000) return 'Только что';
+            // Less than 1 hour
+            if (diff < 3600000) return Math.floor(diff / 60000) + ' мин назад';
+            // Less than 24 hours
+            if (diff < 86400000) return Math.floor(diff / 3600000) + ' ч назад';
+            // Less than 7 days
+            if (diff < 604800000) return Math.floor(diff / 86400000) + ' дн назад';
+
+            return date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
+        }
+
         // Init
         if (currentUser) {
-            document.getElementById('navbar').style.display = 'flex';
-            document.getElementById('user-display').textContent = currentUser.display_name;
-            document.getElementById('user-avatar').textContent = currentUser.display_name[0].toUpperCase();
-            if (currentUser.is_admin) document.getElementById('admin-link').style.display = 'block';
+            initAuth();
             showSection('dashboard');
             loadUnreadCount();
         } else {
             showSection('login');
         }
+
+        // Handle back button on mobile
+        window.addEventListener('popstate', function() {
+            if (document.getElementById('view-section').classList.contains('active')) {
+                showSection('dashboard');
+            }
+        });
     </script>
 </body>
 </html>
