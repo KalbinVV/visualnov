@@ -1224,7 +1224,7 @@
             btn.disabled = true;
             btn.textContent = 'Вход...';
 
-            const data = await api('/api/login', {
+            const data = await api('/support/api/login', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({identifier, password})
@@ -1256,7 +1256,7 @@
 
         async function logout() {
             if (!confirm('Выйти из аккаунта?')) return;
-            await api('/api/logout', {method: 'POST'});
+            await api('/support/api/logout', {method: 'POST'});
             currentUser = null;
             document.getElementById('navbar').style.display = 'none';
             showSection('login');
@@ -1300,7 +1300,7 @@
         }
 
         async function loadMessages() {
-            const data = await api('/api/messages');
+            const data = await api('/support/api/messages');
             const tbody = document.getElementById('messages-table');
             const list = document.getElementById('messages-list');
             const empty = document.getElementById('messages-empty');
@@ -1335,7 +1335,7 @@
         }
 
         async function loadUnreadCount() {
-            const data = await api('/api/messages/count');
+            const data = await api('/support/api/messages/count');
             const badge = document.getElementById('unread-badge');
             if (data.count > 0) {
                 badge.textContent = data.count;
@@ -1346,7 +1346,7 @@
         }
 
         async function viewMessage(id) {
-            const data = await api('/api/messages/' + id);
+            const data = await api('/support/api/messages/' + id);
             if (!data.success) return alert(data.error);
 
             const m = data.message;
@@ -1408,7 +1408,7 @@
             btn.disabled = true;
             btn.textContent = 'Отправка...';
 
-            const data = await api('/api/messages', {method: 'POST', body: fd});
+            const data = await api('/support/api/messages', {method: 'POST', body: fd});
 
             btn.disabled = false;
             btn.textContent = 'Отправить';
@@ -1433,7 +1433,7 @@
             btn.disabled = true;
             btn.textContent = 'Отправка...';
 
-            const data = await api('/api/messages/' + id + '/respond', {method: 'POST', body: fd});
+            const data = await api('/support/api/messages/' + id + '/respond', {method: 'POST', body: fd});
 
             btn.disabled = false;
             btn.textContent = 'Отправить ответ';
@@ -1447,8 +1447,8 @@
         }
 
         async function loadAdmin() {
-            const pending = await api('/api/messages/pending');
-            const all = await api('/api/messages');
+            const pending = await api('/support/api/messages/pending');
+            const all = await api('/support/api/messages');
 
             const pendingTbody = document.getElementById('admin-pending-table');
             const pendingList = document.getElementById('admin-pending-list');
