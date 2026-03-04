@@ -278,6 +278,7 @@
         async function createMessage(e) {
             e.preventDefault();
             const form = e.target;
+            console.log(form);
             const fd = new FormData(form);
             const err = document.getElementById('create-error');
             const suc = document.getElementById('create-success');

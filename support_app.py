@@ -33,10 +33,8 @@ app.config["MAX_CONTENT_LENGTH"] = MAX_FILE_SIZE
 
 UPLOAD_FOLDER.mkdir(parents=True, exist_ok=True)
 
-# Инициализация БД сообщений
 messages_db = MessagesDatabase(MESSAGES_DB_URL)
 
-# Подключение к PostgreSQL (только чтение)
 from sqlalchemy import create_engine, select, Table, MetaData, text
 from sqlalchemy.pool import NullPool
 
@@ -46,11 +44,6 @@ postgres_engine = create_engine(
     poolclass=NullPool,
     connect_args={"sslmode": "prefer"}
 )
-
-
-# =============================================================================
-# ФУНКЦИИ
-# =============================================================================
 
 def allowed_file(filename: str) -> bool:
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -120,10 +113,6 @@ def get_user_from_postgres(identifier: str, password: str = None):
         print(f"Ошибка подключения к PostgreSQL: {e}")
         return None
 
-
-# =============================================================================
-# МАРШРУТЫ
-# =============================================================================
 
 @app.route("/")
 def index():
