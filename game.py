@@ -232,7 +232,8 @@ class GameService:
             choices_stats = []
 
             for choice in choices:
-                quantity_of_players = s.query(ChoiceHistory).filter_by(choice_id=choice.id).count() - 1
+                quantity_of_players = s.query(ChoiceHistory).filter_by(choice_id=choice.id,
+                                                                       is_active=True).count() - 1
 
                 percent = floor(quantity_of_players / total_players_count * 100) if quantity_of_players > 0 else 0
 
