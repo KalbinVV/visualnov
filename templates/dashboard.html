@@ -39,6 +39,9 @@
             <a href="{{ url_for('profile_page') }}" class="dropdown-item">
               <span>👤</span> Профиль
             </a>
+            <a href="https://www.support.usscromance.marchd.ru" class="dropdown-item">
+              <span>🛠️</span> Помощь
+            </a>
             {% if user.is_admin %}
             <a href="{{ url_for('admin_page') }}" class="dropdown-item">
               <span>⚙️</span> Админка
