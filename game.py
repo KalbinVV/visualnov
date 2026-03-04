@@ -6,7 +6,7 @@ from typing import Optional, Dict, Any, List, Type
 from flask import session
 from sqlalchemy.orm import Session
 
-from database import Database, Story, Scene, Chapter, User, Choice, ChoiceHistory
+from database import Database, Story, Scene, Chapter, User, Choice, ChoiceHistory, GameSave
 from story import StoryService
 
 
@@ -271,3 +271,10 @@ class GameService:
                 players_legends_choices['players'].append({'user': {'name': user.display_name, 'id': user.id}, 'choices_stats': choices_stats})
 
             return players_legends_choices
+
+
+    def get_count_of_played_games(self, user_id: int):
+        with Session(self.db.engine) as s:
+            user = s.get(User, user_id)
+
+            return s.query(GameSave).filter_by(user_id=user.id).count()
