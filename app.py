@@ -1591,78 +1591,24 @@ def admin_music_editor():
                            user=db.get_user_by_id(session['user_id'])), 200
 
 
-@app.route('/support')
-@login_required
-def support_page():
-    user = db.get_user_by_id(session['user_id'])
-    if not user:
-        session.clear()
-        return redirect(url_for('login_page'))
-    return render_template('support.html', user=user)
-
-
-@app.route('/api/support/conversation', methods=['GET'])
-@api_login_required
-def api_get_conversation():
-    try:
-        user = db.get_user_by_id(session['user_id'])
-        conversation = support_service.get_conversation(user.id)
-
-        if not conversation:
-            return jsonify({'success': True, 'conversation': {'messages': []}}), 200
-
-        return jsonify({'success': True, 'conversation': conversation}), 200
-    except Exception as e:
-        return jsonify({'error': f'Ошибка: {str(e)}'}), 500
-
-
-@app.route('/api/support/message', methods=['POST'])
-@api_login_required
-def api_send_message():
-    try:
-        message_text = request.form.get('message', '').strip()
-        user = db.get_user_by_id(session['user_id'])
-
-        photo_path = None
-        if 'photo' in request.files:
-            file = request.files['photo']
-            if file.filename != '':
-                os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-                photo_path = os.path.join(app.config['UPLOAD_FOLDER'],
-                                          f"support_{session['user_id']}_{uuid.uuid4().hex[:8]}.jpg")
-                file.save(photo_path)
-
-        if not message_text and not photo_path:
-            return jsonify({'error': 'Введите сообщение или прикрепите файл'}), 400
-
-        if user.id not in support_service.conversations:
-            support_service.start_conversation(
-                user_id=user.id,
-                username=user.username,
-                message_text=message_text,
-                photo_path=photo_path
-            )
-        else:
-            support_service.add_message(
-                user_id=user.id,
-                message_text=message_text,
-                photo_path=photo_path
-            )
-
-        if photo_path and os.path.exists(photo_path):
-            os.remove(photo_path)
-
-        return jsonify({'success': True}), 200
-    except Exception as e:
-        app.logger.error(f"Send message error: {e}")
-        return jsonify({'error': f'Ошибка: {str(e)}'}), 500
-
-
 @app.route('/welcome')
 @login_required
 def welcome_page():
     return render_template('welcome2.html',
                            user=db.get_user_by_id(session['user_id'])), 200
+
+
+
+@app.route('/api/get_players_legends_choices/<story_id>')
+@admin_required
+def get_players_legends_choices(story_id: int):
+    return game_service.get_players_legends_choices(story_id)
+
+
+@app.route('/stats/<story_id>')
+@admin_required
+def get_story_stats(story_id: int):
+    return render_template('admin/players_choices.html', story_id=story_id)
 
 
 @app.errorhandler(404)
@@ -1686,14 +1632,5 @@ if __name__ == '__main__':
     print(f"✓ Режим отладки: {app.debug}")
     print("=" * 60)
 
-    '''
-    try:
-        support_service.start()
-        print("✓ SupportService запущен (Telegram-бот в фоне)")
-    except Exception as e:
-        print(f"⚠ SupportService не запущен: {e}")
-
-    print("=" * 60)
-    '''
 
     app.run(debug=True, host='0.0.0.0', port=port)
