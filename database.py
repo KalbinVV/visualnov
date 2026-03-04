@@ -509,15 +509,15 @@ class Database:
             if not saved_game:
                 saved_game = GameSave(user_id=user_id, story_id=story_id)
 
-                saved_game.teasing_level += teasing_change
-                saved_game.friendship_level += friendship_change
-                saved_game.passion_level += passion_change
-
                 s.add(saved_game)
                 s.commit()
 
             saved_game.scene_id = scene_id
             saved_game.chapter_id = chapter_id
+
+            saved_game.teasing_level += teasing_change
+            saved_game.friendship_level += friendship_change
+            saved_game.passion_level += passion_change
 
             s.commit()
 
