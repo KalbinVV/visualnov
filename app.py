@@ -537,7 +537,8 @@ def profile_page():
             team_info=user.team,
             is_team_leader=user.is_leader,
             stats=stats,
-            achievements=achievements
+            achievements=achievements,
+            count_of_played_games=game_service.get_count_of_played_games(user.id)
         )
 
 
