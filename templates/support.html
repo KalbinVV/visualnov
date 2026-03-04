@@ -1,379 +1,344 @@
-{% extends "base.html" %}
-{% block title %}Поддержка — USSC Romance{% endblock %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Сообщения — Любовный симулятор</title>
+    <style>
+        :root {
+            --primary: #8b5cf6; --primary-dark: #7c3aed; --background: #0f0f1a;
+            --surface: #1a1a2e; --surface-light: #252542; --text: #f0f0f5;
+            --text-muted: #a0a0b0; --success: #10b981; --warning: #f59e0b;
+            --danger: #ef4444; --border: #3a3a5a;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--background); color: var(--text); min-height: 100vh; }
+        .navbar { background: rgba(26,26,46,0.95); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
+        .navbar-brand { font-size: 1.5rem; font-weight: bold; color: var(--primary); text-decoration: none; }
+        .navbar-nav { display: flex; gap: 1rem; list-style: none; }
+        .navbar-nav a, .navbar-nav button { color: var(--text); background: none; border: none; cursor: pointer; padding: 0.5rem 1rem; border-radius: 8px; font-size: 1rem; }
+        .navbar-nav a:hover, .navbar-nav button:hover { background: var(--surface-light); color: var(--primary); }
+        .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+        .section { display: none; }
+        .section.active { display: block; }
+        .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem; }
+        .card-header { font-size: 1.25rem; font-weight: bold; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); }
+        .btn { display: inline-block; padding: 0.75rem 1.5rem; border: none; border-radius: 8px; cursor: pointer; text-decoration: none; font-size: 1rem; transition: 0.3s; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-secondary { background: var(--surface-light); color: var(--text); }
+        .btn-danger { background: var(--danger); color: white; }
+        .form-group { margin-bottom: 1rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; color: var(--text-muted); }
+        .form-control { width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 8px; background: var(--background); color: var(--text); font-size: 1rem; }
+        .form-control:focus { outline: none; border-color: var(--primary); }
+        textarea.form-control { min-height: 150px; resize: vertical; }
+        .table { width: 100%; border-collapse: collapse; }
+        .table th, .table td { padding: 1rem; text-align: left; border-bottom: 1px solid var(--border); }
+        .table th { color: var(--text-muted); }
+        .table tr:hover { background: var(--surface-light); cursor: pointer; }
+        .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.875rem; }
+        .badge-pending { background: var(--warning); color: #000; }
+        .badge-answered { background: var(--success); color: #fff; }
+        .message-image { max-width: 100%; max-height: 300px; border-radius: 8px; margin-top: 1rem; }
+        .response { background: var(--surface-light); border-left: 3px solid var(--primary); padding: 1rem; margin-top: 1rem; border-radius: 0 8px 8px 0; }
+        .alert { padding: 1rem; border-radius: 8px; margin-bottom: 1rem; }
+        .alert-error { background: rgba(239,68,68,0.2); border: 1px solid var(--danger); }
+        .alert-success { background: rgba(16,185,129,0.2); border: 1px solid var(--success); }
+        .hidden { display: none !important; }
+        .login-container { max-width: 400px; margin: 4rem auto; }
+        @media (max-width: 768px) { .navbar { flex-direction: column; gap: 1rem; } .container { padding: 1rem; } }
+    </style>
+</head>
+<body>
+    <nav class="navbar" id="navbar" style="display:none;">
+        <a href="#" class="navbar-brand">💬 Сообщения</a>
+        <ul class="navbar-nav">
+            <li><button onclick="showSection('dashboard')">Мои сообщения</button></li>
+            <li><button onclick="showSection('create')">Новое сообщение</button></li>
+            <li id="admin-link" style="display:none;"><button onclick="showSection('admin')">Админ-панель</button></li>
+            <li><button onclick="logout()">Выход (<span id="user-display"></span>)</button></li>
+        </ul>
+    </nav>
 
-{% block content %}
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <div class="container">
+        <!-- Login Section -->
+        <div id="login-section" class="section active">
+            <div class="card login-container">
+                <div class="card-header">Вход в систему</div>
+                <div id="login-error" class="alert alert-error hidden"></div>
+                <form onsubmit="return login(event)">
+                    <div class="form-group">
+                        <label>Имя пользователя или Email</label>
+                        <input type="text" class="form-control" id="login-identifier" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Пароль</label>
+                        <input type="password" class="form-control" id="login-password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width:100%">Войти</button>
+                </form>
+            </div>
+        </div>
 
-<style>
-  :root {
-    --bg-deep: #050508; --bg-surface: #0f0f16; --primary: #8b5cf6;
-    --accent: #d8b4fe; --text-main: #fff; --text-muted: #94a3b8;
-    --glass-bg: rgba(20,20,30,0.6); --glass-border: rgba(255,255,255,0.08);
-    --radius-lg: 24px; --radius-md: 16px;
-  }
-  [data-theme="orange"] { --primary: #f97316; --accent: #fdba74; }
-  [data-theme="dark-green"] { --primary: #10b981; --accent: #6ee7b7; }
+        <!-- Dashboard Section -->
+        <div id="dashboard-section" class="section">
+            <div class="card">
+                <div class="card-header">Мои сообщения <span id="unread-badge" class="badge badge-pending hidden">0 новых</span></div>
+                <table class="table">
+                    <thead><tr><th>Тема</th><th>От</th><th>Дата</th><th>Статус</th></tr></thead>
+                    <tbody id="messages-table"></tbody>
+                </table>
+            </div>
+        </div>
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    font-family: 'Inter', sans-serif; background: var(--bg-deep);
-    color: var(--text-main); min-height: 100vh; padding-top: 80px;
-    padding-bottom: 100px;
-  }
+        <!-- View Message Section -->
+        <div id="view-section" class="section">
+            <button class="btn btn-secondary" onclick="showSection('dashboard')">← Назад</button>
+            <div class="card" style="margin-top:1rem;">
+                <div class="card-header" id="view-subject"></div>
+                <p style="color:var(--text-muted)" id="view-meta"></p>
+                <div id="view-content" style="white-space:pre-wrap;margin:1rem 0;"></div>
+                <img id="view-image" class="message-image hidden">
+                <div id="view-responses"></div>
+                <div id="respond-form" class="hidden" style="margin-top:1rem;">
+                    <div class="card-header">Ответить</div>
+                    <form onsubmit="return respond(event)">
+                        <input type="hidden" id="respond-message-id">
+                        <div class="form-group">
+                            <label>Ваш ответ</label>
+                            <textarea class="form-control" id="respond-content" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Изображение (необязательно)</label>
+                            <input type="file" class="form-control" id="respond-image" accept="image/*">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Отправить ответ</button>
+                    </form>
+                </div>
+            </div>
+        </div>
 
-  .support-container {
-    max-width: 800px; margin: 0 auto; padding: 24px;
-  }
+        <!-- Create Message Section -->
+        <div id="create-section" class="section">
+            <button class="btn btn-secondary" onclick="showSection('dashboard')">← Назад</button>
+            <div class="card" style="margin-top:1rem;max-width:600px;">
+                <div class="card-header">Новое сообщение</div>
+                <div id="create-error" class="alert alert-error hidden"></div>
+                <div id="create-success" class="alert alert-success hidden"></div>
+                <form onsubmit="return createMessage(event)">
+                    <div class="form-group">
+                        <label>Тема</label>
+                        <input type="text" class="form-control" id="create-subject" required maxlength="200">
+                    </div>
+                    <div class="form-group">
+                        <label>Сообщение</label>
+                        <textarea class="form-control" id="create-content" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Изображение (необязательно)</label>
+                        <input type="file" class="form-control" id="create-image" accept="image/*">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Отправить</button>
+                </form>
+            </div>
+        </div>
 
-  .support-header {
-    margin-bottom: 24px;
-    padding: 20px;
-    background: var(--glass-bg);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius-md);
-  }
-
-  .support-header h1 {
-    font-family: 'Playfair Display', serif;
-    font-size: 28px;
-    margin-bottom: 8px;
-  }
-
-  .support-header p {
-    font-size: 14px;
-    color: var(--text-muted);
-  }
-
-  .chat-container {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    min-height: 400px;
-    max-height: 60vh;
-    overflow-y: auto;
-    padding: 20px;
-    background: var(--glass-bg);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius-md);
-    margin-bottom: 20px;
-  }
-
-  .message {
-    padding: 14px 18px;
-    border-radius: 18px;
-    max-width: 85%;
-    line-height: 1.5;
-    animation: fadeIn 0.3s ease;
-  }
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: none; }
-  }
-
-  .message.admin {
-    align-self: flex-start;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid var(--glass-border);
-    border-bottom-left-radius: 4px;
-  }
-
-  .message.user {
-    align-self: flex-end;
-    background: var(--primary);
-    color: white;
-    border-bottom-right-radius: 4px;
-  }
-
-  .message img {
-    max-width: 100%;
-    border-radius: 12px;
-    margin-top: 8px;
-    border: 1px solid var(--glass-border);
-  }
-
-  .message-time {
-    font-size: 11px;
-    opacity: 0.6;
-    margin-top: 6px;
-  }
-
-  .empty-chat {
-    text-align: center;
-    padding: 40px;
-    color: var(--text-muted);
-  }
-
-  .input-area {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: var(--bg-surface);
-    padding: 16px;
-    border-top: 1px solid var(--glass-border);
-    display: flex;
-    gap: 12px;
-    align-items: flex-end;
-    justify-content: center;
-  }
-
-  .input-wrapper {
-    max-width: 800px;
-    width: 100%;
-    display: flex;
-    gap: 12px;
-    align-items: flex-end;
-  }
-
-  .btn-send, .btn-attach {
-    background: var(--primary);
-    border: none;
-    color: white;
-    padding: 14px 20px;
-    border-radius: 50px;
-    cursor: pointer;
-    font-weight: 500;
-    transition: all 0.2s;
-    flex-shrink: 0;
-  }
-  .btn-send:hover, .btn-attach:hover {
-    filter: brightness(1.1);
-  }
-  .btn-send:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-
-  #fileInput {
-    display: none;
-  }
-
-  #messageInput {
-    flex: 1;
-    padding: 14px 18px;
-    border-radius: 24px;
-    border: 1px solid var(--glass-border);
-    background: var(--glass-bg);
-    color: var(--text-main);
-    font-size: 14px;
-    resize: none;
-    max-height: 120px;
-    font-family: 'Inter', sans-serif;
-  }
-  #messageInput:focus {
-    outline: none;
-    border-color: var(--primary);
-  }
-  #messageInput::placeholder {
-    color: var(--text-muted);
-  }
-
-  .preview-container {
-    position: fixed;
-    bottom: 80px;
-    left: 50%;
-    transform: translateX(-50%);
-    max-width: 800px;
-    width: 90%;
-    z-index: 100;
-  }
-
-  .preview-container img {
-    width: 100%;
-    border-radius: 16px;
-    border: 1px solid var(--glass-border);
-  }
-
-  .preview-close {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    background: rgba(0,0,0,0.6);
-    border: none;
-    color: white;
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    cursor: pointer;
-    font-size: 18px;
-  }
-
-  .hidden {
-    display: none !important;
-  }
-
-  .status-indicator {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 12px;
-    margin-top: 8px;
-  }
-  .status-waiting {
-    background: rgba(249,115,22,0.2);
-    color: #fdba74;
-  }
-  .status-replied {
-    background: rgba(16,185,129,0.2);
-    color: #6ee7b7;
-  }
-
-  @media (max-width: 768px) {
-    .support-container { padding: 16px; }
-    .message { max-width: 90%; }
-    .input-wrapper { padding: 0 8px; }
-  }
-</style>
-
-<div class="support-container">
-  <div class="support-header">
-    <h1>💬 Поддержка</h1>
-    <p>Напишите нам — ответим в ближайшее время</p>
-    <div id="statusIndicator" class="status-indicator status-waiting hidden">
-      <span>⏳</span> Ожидание ответа
+        <!-- Admin Section -->
+        <div id="admin-section" class="section">
+            <div class="card">
+                <div class="card-header">Админ-панель — Ожидают ответа</div>
+                <table class="table">
+                    <thead><tr><th>Тема</th><th>От</th><th>Дата</th><th>Действия</th></tr></thead>
+                    <tbody id="admin-pending-table"></tbody>
+                </table>
+            </div>
+            <div class="card">
+                <div class="card-header">Все сообщения</div>
+                <table class="table">
+                    <thead><tr><th>Тема</th><th>От</th><th>Дата</th><th>Статус</th></tr></thead>
+                    <tbody id="admin-all-table"></tbody>
+                </table>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <div class="chat-container" id="chatContainer">
-    <div class="empty-chat" id="emptyChat">
-      <p>Здесь появится история переписки</p>
-      <p style="margin-top: 10px; font-size: 13px;">Отправьте первое сообщение</p>
-    </div>
-  </div>
-</div>
+    <script>
+        let currentUser = {{ user | tojson if user else 'null' }};
 
-<div class="input-area">
-  <div class="input-wrapper">
-    <button class="btn-attach" onclick="document.getElementById('fileInput').click()">📎</button>
-    <input type="file" id="fileInput" accept="image/*" onchange="handleFileSelect(event)">
+        async function api(url, options = {}) {
+            const res = await fetch(url, options);
+            return await res.json();
+        }
 
-    <textarea id="messageInput" placeholder="Введите сообщение..." rows="1"></textarea>
+        function showSection(id) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById(id + '-section').classList.add('active');
+            if (id === 'dashboard') loadMessages();
+            if (id === 'admin') loadAdmin();
+        }
 
-    <button class="btn-send" id="sendBtn" onclick="sendMessage()">➤</button>
-  </div>
-</div>
+        function showError(el, msg) {
+            el.textContent = msg;
+            el.classList.remove('hidden');
+        }
 
-<div class="preview-container hidden" id="previewContainer">
-  <button class="preview-close" onclick="clearPreview()">✕</button>
-  <img id="previewImage" src="" alt="Preview">
-</div>
+        async function login(e) {
+            e.preventDefault();
+            const identifier = document.getElementById('login-identifier').value;
+            const password = document.getElementById('login-password').value;
+            const err = document.getElementById('login-error');
+            err.classList.add('hidden');
+            const data = await api('/api/login', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({identifier, password})
+            });
+            if (data.success) {
+                currentUser = data.user;
+                document.getElementById('navbar').style.display = 'flex';
+                document.getElementById('user-display').textContent = currentUser.display_name;
+                if (currentUser.is_admin) document.getElementById('admin-link').style.display = 'block';
+                showSection('dashboard');
+                loadUnreadCount();
+            } else {
+                showError(err, data.error);
+            }
+        }
 
-<script>
-let pollInterval = null;
-let hasConversation = false;
+        async function logout() {
+            await api('/api/logout', {method: 'POST'});
+            currentUser = null;
+            document.getElementById('navbar').style.display = 'none';
+            showSection('login');
+        }
 
-async function loadConversation() {
-  try {
-    const res = await fetch('/api/support/conversation');
-    const data = await res.json();
+        async function loadMessages() {
+            const data = await api('/api/messages');
+            const tbody = document.getElementById('messages-table');
+            tbody.innerHTML = '';
+            if (!data.success || !data.messages.length) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-muted)">Нет сообщений</td></tr>';
+                return;
+            }
+            data.messages.forEach(m => {
+                const tr = document.createElement('tr');
+                tr.onclick = () => viewMessage(m.id);
+                tr.innerHTML = `
+                    <td>${m.subject}</td>
+                    <td>${m.username}</td>
+                    <td>${new Date(m.created_at).toLocaleString()}</td>
+                    <td><span class="badge ${m.is_responded ? 'badge-answered' : 'badge-pending'}">${m.is_responded ? 'Отвечено' : 'Ожидает'}</span></td>
+                `;
+                tbody.appendChild(tr);
+            });
+            loadUnreadCount();
+        }
 
-    if (data.success && data.conversation.messages.length > 0) {
-      hasConversation = true;
-      renderMessages(data.conversation.messages);
-      updateStatus(data.conversation.has_reply);
-      document.getElementById('emptyChat').classList.add('hidden');
-    }
-  } catch (e) {
-    console.error('Load error:', e);
-  }
-}
+        async function loadUnreadCount() {
+            const data = await api('/api/messages/count');
+            const badge = document.getElementById('unread-badge');
+            if (data.count > 0) {
+                badge.textContent = data.count + ' новых';
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
 
-function renderMessages(messages) {
-  const chat = document.getElementById('chatContainer');
-  chat.innerHTML = '';
+        async function viewMessage(id) {
+            const data = await api('/api/messages/' + id);
+            if (!data.success) return alert(data.error);
+            const m = data.message;
+            document.getElementById('view-subject').textContent = m.subject;
+            document.getElementById('view-meta').textContent = `От: ${m.username} | ${new Date(m.created_at).toLocaleString()}`;
+            document.getElementById('view-content').textContent = m.content;
+            const img = document.getElementById('view-image');
+            if (m.image_path) {
+                img.src = m.image_path;
+                img.classList.remove('hidden');
+            } else {
+                img.classList.add('hidden');
+            }
+            const respDiv = document.getElementById('view-responses');
+            respDiv.innerHTML = '';
+            data.responses.forEach(r => {
+                respDiv.innerHTML += `<div class="response response-admin"><strong>${r.admin_username}</strong> <small style="color:var(--text-muted)">(${new Date(r.created_at).toLocaleString()})</small><p style="white-space:pre-wrap;margin-top:0.5rem">${r.content}</p>${r.image_path ? `<img src="${r.image_path}" class="message-image">` : ''}</div>`;
+            });
+            const respondForm = document.getElementById('respond-form');
+            if (currentUser.is_admin && !m.is_responded) {
+                document.getElementById('respond-message-id').value = id;
+                respondForm.classList.remove('hidden');
+            } else {
+                respondForm.classList.add('hidden');
+            }
+            showSection('view');
+        }
 
-  messages.forEach(msg => {
-    const div = document.createElement('div');
-    div.className = `message ${msg.from}`;
-    let html = '';
-    if (msg.text) html += `<div>${msg.text}</div>`;
-    if (msg.photo) html += `<img src="${msg.photo}" alt="Photo">`;
-    html += `<div class="message-time">${msg.timestamp.slice(0, 16)}</div>`;
-    div.innerHTML = html;
-    chat.appendChild(div);
-  });
+        async function createMessage(e) {
+            e.preventDefault();
+            const form = e.target;
+            const fd = new FormData(form);
+            const err = document.getElementById('create-error');
+            const suc = document.getElementById('create-success');
+            err.classList.add('hidden');
+            suc.classList.add('hidden');
+            const data = await api('/api/messages', {method: 'POST', body: fd});
+            if (data.success) {
+                suc.textContent = 'Сообщение отправлено!';
+                suc.classList.remove('hidden');
+                form.reset();
+                setTimeout(() => showSection('dashboard'), 1500);
+            } else {
+                showError(err, data.error);
+            }
+        }
 
-  chat.scrollTop = chat.scrollHeight;
-}
+        async function respond(e) {
+            e.preventDefault();
+            const id = document.getElementById('respond-message-id').value;
+            const form = e.target;
+            const fd = new FormData(form);
+            const data = await api('/api/messages/' + id + '/respond', {method: 'POST', body: fd});
+            if (data.success) {
+                alert('Ответ отправлен!');
+                viewMessage(id);
+            } else {
+                alert(data.error || 'Ошибка');
+            }
+        }
 
-function updateStatus(hasReply) {
-  const indicator = document.getElementById('statusIndicator');
-  if (hasReply) {
-    indicator.className = 'status-indicator status-replied';
-    indicator.innerHTML = '<span>✓</span> Есть ответ';
-  } else {
-    indicator.className = 'status-indicator status-waiting';
-    indicator.innerHTML = '<span>⏳</span> Ожидание ответа';
-  }
-  indicator.classList.remove('hidden');
-}
+        async function loadAdmin() {
+            const pending = await api('/api/messages/pending');
+            const all = await api('/api/messages');
+            const pendingTbody = document.getElementById('admin-pending-table');
+            const allTbody = document.getElementById('admin-all-table');
+            pendingTbody.innerHTML = '';
+            allTbody.innerHTML = '';
+            if (pending.success && pending.messages.length) {
+                pending.messages.forEach(m => {
+                    pendingTbody.innerHTML += `<tr onclick="viewMessage(${m.id})" style="cursor:pointer"><td>${m.subject}</td><td>${m.username}</td><td>${new Date(m.created_at).toLocaleString()}</td><td><button class="btn btn-primary" style="padding:0.5rem 1rem" onclick="event.stopPropagation();viewMessage(${m.id})">Ответить</button></td></tr>`;
+                });
+            } else {
+                pendingTbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-muted)">Нет ожидающих</td></tr>';
+            }
+            if (all.success && all.messages.length) {
+                all.messages.forEach(m => {
+                    allTbody.innerHTML += `<tr onclick="viewMessage(${m.id})" style="cursor:pointer"><td>${m.subject}</td><td>${m.username}</td><td>${new Date(m.created_at).toLocaleString()}</td><td><span class="badge ${m.is_responded ? 'badge-answered' : 'badge-pending'}">${m.is_responded ? 'Отвечено' : 'Ожидает'}</span></td></tr>`;
+                });
+            }
+        }
 
-function handleFileSelect(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-
-  const reader = new FileReader();
-  reader.onload = (ev) => {
-    document.getElementById('previewImage').src = ev.target.result;
-    document.getElementById('previewContainer').classList.remove('hidden');
-  };
-  reader.readAsDataURL(file);
-}
-
-function clearPreview() {
-  document.getElementById('previewContainer').classList.add('hidden');
-  document.getElementById('fileInput').value = '';
-  document.getElementById('previewImage').src = '';
-}
-
-async function sendMessage() {
-  const messageText = document.getElementById('messageInput').value.trim();
-  const file = document.getElementById('fileInput').files[0];
-
-  if (!messageText && !file) return;
-
-  const formData = new FormData();
-  formData.append('message', messageText);
-  if (file) formData.append('photo', file);
-
-  const sendBtn = document.getElementById('sendBtn');
-  sendBtn.disabled = true;
-
-  try {
-    const res = await fetch('/api/support/message', {
-      method: 'POST',
-      body: formData
-    });
-    const data = await res.json();
-
-    if (data.success) {
-      document.getElementById('messageInput').value = '';
-      clearPreview();
-      loadConversation();
-    } else {
-      alert('Ошибка: ' + (data.error || 'Неизвестная ошибка'));
-    }
-  } catch (err) {
-    console.error(err);
-    alert('Ошибка сети');
-  } finally {
-    sendBtn.disabled = false;
-  }
-}
-
-pollInterval = setInterval(loadConversation, 5000);
-loadConversation();
-
-document.getElementById('messageInput').addEventListener('input', function() {
-  this.style.height = 'auto';
-  this.style.height = Math.min(this.scrollHeight, 100) + 'px';
-});
-
-window.addEventListener('beforeunload', () => {
-  if (pollInterval) clearInterval(pollInterval);
-});
-</script>
-{% endblock %}
+        // Init
+        if (currentUser) {
+            document.getElementById('navbar').style.display = 'flex';
+            document.getElementById('user-display').textContent = currentUser.display_name;
+            if (currentUser.is_admin) document.getElementById('admin-link').style.display = 'block';
+            showSection('dashboard');
+            loadUnreadCount();
+        } else {
+            showSection('login');
+        }
+    </script>
+</body>
+</html>
