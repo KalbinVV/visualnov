@@ -12,7 +12,7 @@ from datetime import timedelta
 class Config:
     """Базовая конфигурация"""
 
-    IS_DEMO = True
+    IS_DEMO = False
 
     # Секретный ключ
     SECRET_KEY = os.environ.get('SECRET_KEY', secrets.token_hex(32))
