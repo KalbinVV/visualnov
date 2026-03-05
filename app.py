@@ -467,23 +467,25 @@ def register_page():
 @app.route('/dashboard')
 @login_required
 def dashboard():
-    user = db.get_user_by_id(session['user_id'])
+    with Session(db.engine) as s:
+        user = s.get(User, session['user_id'])
 
-    if not user:
-        session.clear()
-        return redirect(url_for('login_page'))
+        if not user:
+            session.clear()
+            return redirect(url_for('login_page'))
 
-    if app.config.get('IS_DEMO'):
-        if not user.is_admin:
-            return redirect('/welcome')
+        if app.config.get('IS_DEMO'):
+            if not user.is_admin:
+                return redirect('/welcome')
 
-    games = game_service.get_available_games(session['user_id'])
+        games = game_service.get_available_games(session['user_id'])
 
-    return render_template(
-        'dashboard.html',
-        user=user,
-        games=games
-    )
+        return render_template(
+            'dashboard.html',
+            user=user,
+            games=games,
+            team_name=user.team.name
+        )
 
 
 @app.route('/game/<story_id>')
