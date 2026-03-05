@@ -341,7 +341,7 @@ def api_make_choice(story_id: int):
                         'dialogue': next_scene.dialogue_text.replace('{name}', user.display_name),
                         'choices': [{'data': Choice.as_dict(choice),
                                      'is_available': game_service.is_choice_available(user.id, choice_id)[0]}
-                                    for choice in next_scene.choices] if next_scene.scene_type != "input" else [],
+                                    for choice in next_scene.choices if game_service.is_choice_visible_for_user(user.id, choice.id)] if next_scene.scene_type != "input" else [],
                         'current_user_diamonds': user.diamonds,
                         'scene_type': next_scene.scene_type,
                         'scene_effect': next_scene.scene_effect
