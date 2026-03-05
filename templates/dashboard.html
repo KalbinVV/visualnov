@@ -1101,10 +1101,25 @@
     .timer-footer { flex-direction: column; align-items: center; }
   }
 </style>
-
 <script>
-const TIMER_END_DATE = '2026-03-6T10:00:00';
-const timerEndDate = new Date(TIMER_END_DATE).getTime();
+const TIMER_END_DATE = '2026-03-06T10:00:00';
+
+// Парсим дату с обработкой ошибок
+function parseTimerDate(dateString) {
+  const date = new Date(dateString);
+  const timestamp = date.getTime();
+
+  // Проверяем валидность даты
+  if (isNaN(timestamp)) {
+    console.error('Неверный формат даты таймера:', dateString);
+    // Возвращаем дату + 7 дней от текущей как fallback
+    return new Date().getTime() + (7 * 24 * 60 * 60 * 1000);
+  }
+
+  return timestamp;
+}
+
+const timerEndDate = parseTimerDate(TIMER_END_DATE);
 
 function updateTimer() {
   const now = new Date().getTime();
@@ -1125,10 +1140,16 @@ function updateTimer() {
     seconds = Math.floor((distance % (1000 * 60)) / 1000);
   }
 
-  document.getElementById('daysValue').textContent = String(days).padStart(2, '0');
-  document.getElementById('hoursValue').textContent = String(hours).padStart(2, '0');
-  document.getElementById('minutesValue').textContent = String(minutes).padStart(2, '0');
-  document.getElementById('secondsValue').textContent = String(seconds).padStart(2, '0');
+  // Обновляем элементы только если они существуют
+  const daysEl = document.getElementById('daysValue');
+  const hoursEl = document.getElementById('hoursValue');
+  const minutesEl = document.getElementById('minutesValue');
+  const secondsEl = document.getElementById('secondsValue');
+
+  if (daysEl) daysEl.textContent = String(days).padStart(2, '0');
+  if (hoursEl) hoursEl.textContent = String(hours).padStart(2, '0');
+  if (minutesEl) minutesEl.textContent = String(minutes).padStart(2, '0');
+  if (secondsEl) secondsEl.textContent = String(seconds).padStart(2, '0');
 }
 
 // Обновляем таймер каждую секунду
