@@ -1148,7 +1148,11 @@ def upload_image():
 @admin_required
 def generate_diamond_code(amount: int, value: int) -> str:
     with Session(db.engine) as s:
-        diamond_code = db.generate_diamond_code(amount, value)
+        diamond_code = DiamondCode(amount=amount,
+                                   value=value)
+
+        s.add(diamond_code)
+        s.commit()
 
         return str(diamond_code.code)
 
