@@ -84,6 +84,56 @@
       <div class="hero-decoration"></div>
     </section>
 
+    <!-- Таймер События -->
+    <section class="timer-section fade-in-up" style="animation-delay: 0.2s;">
+      <div class="timer-container glass-panel">
+        <div class="timer-header">
+          <div class="timer-icon">⏳</div>
+          <div class="timer-title-wrapper">
+            <h3 class="timer-title">До конца события</h3>
+            <p class="timer-description">Успейте пройти историю до окончания таймера и получить эксклюзивные награды</p>
+          </div>
+        </div>
+
+        <div class="countdown-wrapper">
+          <div class="countdown-item">
+            <div class="countdown-value" id="daysValue">00</div>
+            <div class="countdown-label">дней</div>
+            <div class="countdown-progress"></div>
+          </div>
+          <div class="countdown-separator">:</div>
+          <div class="countdown-item">
+            <div class="countdown-value" id="hoursValue">00</div>
+            <div class="countdown-label">часов</div>
+            <div class="countdown-progress"></div>
+          </div>
+          <div class="countdown-separator">:</div>
+          <div class="countdown-item">
+            <div class="countdown-value" id="minutesValue">00</div>
+            <div class="countdown-label">минут</div>
+            <div class="countdown-progress"></div>
+          </div>
+          <div class="countdown-separator">:</div>
+          <div class="countdown-item">
+            <div class="countdown-value" id="secondsValue">00</div>
+            <div class="countdown-label">секунд</div>
+            <div class="countdown-progress"></div>
+          </div>
+        </div>
+
+        <div class="timer-footer">
+          <div class="timer-status">
+            <div class="status-dot"></div>
+            <span class="status-text">Событие активно</span>
+          </div>
+          <div class="timer-reward">
+            <span class="reward-icon">🎁</span>
+            <span class="reward-text">+500 алмазов + уникальный образ</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- Сетка игр -->
     <section class="games-section">
       <div class="section-header">
@@ -269,7 +319,7 @@
   }
   .currency-pill:hover .currency-glow { opacity: 1; transform: scale(1); }
 
-  /* --- Team Pill (Новое) --- */
+  /* --- Team Pill --- */
   .team-pill {
     position: relative;
     background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(139, 92, 246, 0.05));
@@ -446,7 +496,7 @@
     line-height: 1.6;
   }
 
-  /* Hero Team Badge (Новое) */
+  /* Hero Team Badge */
   .hero-team-badge {
     display: inline-flex;
     align-items: center;
@@ -477,6 +527,216 @@
     z-index: 1;
     pointer-events: none;
   }
+
+  /* --- Timer Section --- */
+  .timer-section {
+    margin-bottom: 60px;
+  }
+
+  .timer-container {
+    position: relative;
+    padding: 40px;
+    border-radius: var(--radius-lg);
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(20px);
+    overflow: hidden;
+    animation: fadeInUp 0.8s ease-out forwards;
+    opacity: 0;
+  }
+
+  .timer-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--primary), transparent);
+    animation: shimmer 3s infinite;
+  }
+
+  @keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+
+  .timer-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  .timer-icon {
+    font-size: 32px;
+    filter: drop-shadow(0 0 15px var(--primary-glow));
+    animation: float 3s ease-in-out infinite;
+  }
+
+  .timer-title-wrapper {
+    flex: 1;
+  }
+
+  .timer-title {
+    font-family: var(--font-display);
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 8px;
+  }
+
+  .timer-description {
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.5;
+    max-width: 600px;
+  }
+
+  .countdown-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+  }
+
+  .countdown-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+  }
+
+  .countdown-value {
+    font-family: var(--font-display);
+    font-size: 48px;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    line-height: 1;
+    padding: 20px 24px;
+    background-color: rgba(255, 255, 255, 0.03);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--glass-border);
+    min-width: 100px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .countdown-value::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, transparent 60%);
+    animation: rotate 10s linear infinite;
+    pointer-events: none;
+  }
+
+  .countdown-label {
+    font-size: 12px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 12px;
+    font-weight: 500;
+  }
+
+  .countdown-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: rgba(139, 92, 246, 0.2);
+    border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+    overflow: hidden;
+  }
+
+  .countdown-progress::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary), var(--accent));
+    border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+    animation: progressPulse 2s ease-in-out infinite;
+  }
+
+  @keyframes progressPulse {
+    0%, 100% { width: 30%; opacity: 0.5; }
+    50% { width: 70%; opacity: 1; }
+  }
+
+  .countdown-separator {
+    font-family: var(--font-display);
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--primary);
+    margin-top: -20px;
+    animation: blink 1s ease-in-out infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  .timer-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 24px;
+    border-top: 1px solid var(--glass-border);
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .timer-status {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #10b981;
+    box-shadow: 0 0 10px #10b981, 0 0 20px #10b981;
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.2); opacity: 0.7; }
+  }
+
+  .status-text {
+    font-size: 14px;
+    color: #10b981;
+    font-weight: 600;
+  }
+
+  .timer-reward {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, rgba(249, 115, 22, 0.15), rgba(249, 115, 22, 0.05));
+    border: 1px solid rgba(249, 115, 22, 0.3);
+    border-radius: 50px;
+  }
+
+  .reward-icon { font-size: 18px; }
+  .reward-text { font-size: 13px; color: #fdba74; font-weight: 600; }
 
   /* Games Section */
   .section-header {
@@ -842,10 +1102,50 @@
     .nav-actions { gap: 12px; }
     .team-pill { display: none; }
     .hero-team-badge { width: 100%; justify-content: center; }
+
+    .timer-container { padding: 24px; }
+    .timer-header { flex-direction: column; text-align: center; align-items: center; }
+    .timer-description { text-align: center; }
+    .countdown-value { font-size: 32px; padding: 16px 20px; min-width: 70px; }
+    .countdown-separator { font-size: 24px; margin-top: 0; }
+    .countdown-label { font-size: 10px; }
+    .timer-footer { flex-direction: column; align-items: center; }
   }
 </style>
 
 <script>
+const TIMER_END_DATE = '2026-03-6T10:00:00';
+const timerEndDate = new Date(TIMER_END_DATE).getTime();
+
+function updateTimer() {
+  const now = new Date().getTime();
+  const distance = timerEndDate - now;
+
+  // Вычисляем значения (если время вышло, показываем 00)
+  let days, hours, minutes, seconds;
+
+  if (distance < 0) {
+    days = 0;
+    hours = 0;
+    minutes = 0;
+    seconds = 0;
+  } else {
+    days = Math.floor(distance / (1000 * 60 * 60 * 24));
+    hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+    seconds = Math.floor((distance % (1000 * 60)) / 1000);
+  }
+
+  document.getElementById('daysValue').textContent = String(days).padStart(2, '0');
+  document.getElementById('hoursValue').textContent = String(hours).padStart(2, '0');
+  document.getElementById('minutesValue').textContent = String(minutes).padStart(2, '0');
+  document.getElementById('secondsValue').textContent = String(seconds).padStart(2, '0');
+}
+
+// Обновляем таймер каждую секунду
+setInterval(updateTimer, 1000);
+updateTimer(); // Первый запуск сразу
+
 document.addEventListener('DOMContentLoaded', function() {
   loadGames();
 });
