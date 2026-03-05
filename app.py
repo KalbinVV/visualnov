@@ -484,7 +484,7 @@ def dashboard():
             'dashboard.html',
             user=user,
             games=games,
-            team_name=user.team.name
+            team_name=user.team.name if user.team else 'Нет команды'
         )
 
 
