@@ -1088,6 +1088,8 @@
 
     const sprite = els.sprite;
 
+    let applyEffect = () => {};
+
     if (sceneData.character_image) {
       sprite.src = sceneData.character_image;
       sprite.style.display = 'block';
@@ -1097,7 +1099,7 @@
 
         sprite.classList.remove('show', 'hide', 'blackout');
 
-        const applyEffect = () => {
+        applyEffect = () => {
           setTimeout(() => {
             if (sceneData.scene_effect == 'character_appears') {
               sprite.classList.add('show');
@@ -1110,8 +1112,6 @@
             }
           }, 50);
         };
-      } else {
-        const applyEffect = () => {};
       }
 
       if (sprite.complete) {
