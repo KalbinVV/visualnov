@@ -437,7 +437,8 @@ def to_next_scene(story_id: int):
                             if game_service.is_choice_visible_for_user(user.id, choice.id)] if scene.scene_type != 'input' else [],
                 'current_user_diamonds': user.diamonds,
                 'scene_type': scene.scene_type,
-                'scene_effect': scene.scene_effect
+                'scene_effect': scene.scene_effect,
+                'scene_id': scene.id
             }
         }), 200
 
