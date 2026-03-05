@@ -751,7 +751,7 @@
   let gameInfo = {{ game_info|tojson }};
   let sceneData = {{ scene_data|tojson }};
   let storyId = {{ story_id }};
-  let tmpData = {'character_image': null};
+  let tmpData = {'character_image': null, 'current_scene_effect': null};
 
   const els = {
     loading: document.getElementById('loadingScreen'),
@@ -1092,21 +1092,27 @@
       sprite.src = sceneData.character_image;
       sprite.style.display = 'block';
 
-      sprite.classList.remove('show', 'hide', 'blackout');
+      if (tmpData.current_scene_effect != sceneData.scene_effect) {
+        tmpData.current_scene_effect = sceneData.scene_effect;
 
-      const applyEffect = () => {
-        setTimeout(() => {
-          if (sceneData.scene_effect == 'character_appears') {
-            sprite.classList.add('show');
-          } else if (sceneData.scene_effect == 'character_disappears') {
-            sprite.classList.add('hide');
-          } else if (sceneData.scene_effect == 'blackout') {
-            sprite.classList.add('show', 'blackout');
-          } else {
-            sprite.classList.add('show');
-          }
-        }, 50);
-      };
+        sprite.classList.remove('show', 'hide', 'blackout');
+
+        const applyEffect = () => {
+          setTimeout(() => {
+            if (sceneData.scene_effect == 'character_appears') {
+              sprite.classList.add('show');
+            } else if (sceneData.scene_effect == 'character_disappears') {
+              sprite.classList.add('hide');
+            } else if (sceneData.scene_effect == 'blackout') {
+              sprite.classList.add('show', 'blackout');
+            } else {
+              sprite.classList.add('show');
+            }
+          }, 50);
+        };
+      } else {
+        const applyEffect = () => {};
+      }
 
       if (sprite.complete) {
         applyEffect();
