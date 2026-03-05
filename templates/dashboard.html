@@ -26,6 +26,15 @@
           <div class="currency-glow"></div>
         </div>
 
+        <!-- Бейдж команды -->
+        {% if team_name %}
+        <div class="team-pill" title="Ваша команда">
+          <div class="team-icon">🛡️</div>
+          <span class="team-name">{{ team_name }}</span>
+          <div class="team-glow"></div>
+        </div>
+        {% endif %}
+
         <!-- Профиль -->
         <div class="profile-trigger">
           <div class="avatar-ring">
@@ -65,6 +74,12 @@
       <div class="hero-content">
         <h1 class="hero-title">Добро пожаловать, <br><span class="text-gradient">{{ user.display_name }}</span></h1>
         <p class="hero-subtitle">Твоя следующая история любви начинается здесь. Выбери судьбу.</p>
+        {% if team_name %}
+        <div class="hero-team-badge">
+          <span class="hero-team-icon">🛡️</span>
+          <span class="hero-team-text">Команда: <strong>{{ team_name }}</strong></span>
+        </div>
+        {% endif %}
       </div>
       <div class="hero-decoration"></div>
     </section>
@@ -254,6 +269,53 @@
   }
   .currency-pill:hover .currency-glow { opacity: 1; transform: scale(1); }
 
+  /* --- Team Pill (Новое) --- */
+  .team-pill {
+    position: relative;
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(139, 92, 246, 0.05));
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    padding: 8px 14px;
+    border-radius: 50px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: default;
+    transition: all 0.3s ease;
+    overflow: hidden;
+    animation: teamPulse 3s ease-in-out infinite;
+  }
+
+  .team-pill:hover {
+    border-color: var(--primary);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(139, 92, 246, 0.25);
+  }
+
+  .team-icon { font-size: 16px; }
+  .team-name { font-weight: 600; font-size: 13px; color: var(--accent); letter-spacing: 0.3px; }
+
+  .team-glow {
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, transparent 60%);
+    opacity: 0.5;
+    animation: rotate 8s linear infinite;
+    pointer-events: none;
+  }
+
+  @keyframes teamPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.2); }
+    50% { box-shadow: 0 0 0 8px rgba(139, 92, 246, 0); }
+  }
+
+  @keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
   /* Профиль */
   .profile-trigger {
     position: relative;
@@ -383,6 +445,25 @@
     color: var(--text-muted);
     line-height: 1.6;
   }
+
+  /* Hero Team Badge (Новое) */
+  .hero-team-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 24px;
+    padding: 12px 20px;
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(139, 92, 246, 0.05));
+    border: 1px solid rgba(139, 92, 246, 0.25);
+    border-radius: 50px;
+    backdrop-filter: blur(10px);
+    animation: fadeInUp 0.8s ease-out 0.3s forwards;
+    opacity: 0;
+  }
+
+  .hero-team-icon { font-size: 20px; filter: drop-shadow(0 0 8px var(--primary-glow)); }
+  .hero-team-text { font-size: 14px; color: var(--text-muted); }
+  .hero-team-text strong { color: var(--accent); font-weight: 600; }
 
   .hero-decoration {
     position: absolute;
@@ -758,6 +839,9 @@
     .section-header { flex-direction: column; align-items: flex-start; }
     .filter-tags { width: 100%; overflow-x: auto; padding-bottom: 10px; }
     .tag { white-space: nowrap; }
+    .nav-actions { gap: 12px; }
+    .team-pill { display: none; }
+    .hero-team-badge { width: 100%; justify-content: center; }
   }
 </style>
 
